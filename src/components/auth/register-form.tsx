@@ -24,6 +24,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 
 const registerSchema = z.object({
   memberId: z.string().min(1, { message: "Member ID is required." }),
@@ -188,9 +189,58 @@ export function RegisterForm() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Department</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., CSE" {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a department" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Professional</SelectLabel>
+                                    <SelectItem value="Computer Science and Engineering">Computer Science and Engineering</SelectItem>
+                                    <SelectItem value="Bachelor of Business Administration">Bachelor of Business Administration</SelectItem>
+                                    <SelectItem value="Theater and Media Studies">Theater and Media Studies</SelectItem>
+                                    <SelectItem value="Tourism and Hospitality Management">Tourism and Hospitality Management</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>Science</SelectLabel>
+                                    <SelectItem value="Biochemistry and Molecular Biology">Biochemistry and Molecular Biology</SelectItem>
+                                    <SelectItem value="Physics">Physics</SelectItem>
+                                    <SelectItem value="Chemistry">Chemistry</SelectItem>
+                                    <SelectItem value="Botany">Botany</SelectItem>
+                                    <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                    <SelectItem value="Geography & Env.">Geography & Env.</SelectItem>
+                                    <SelectItem value="Home Economics">Home Economics</SelectItem>
+                                    <SelectItem value="Psychology">Psychology</SelectItem>
+                                    <SelectItem value="Zoology">Zoology</SelectItem>
+                                    <SelectItem value="Statistics">Statistics</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>Social Science</SelectLabel>
+                                    <SelectItem value="Economics">Economics</SelectItem>
+                                    <SelectItem value="Political Science">Political Science</SelectItem>
+                                    <SelectItem value="Sociology">Sociology</SelectItem>
+                                    <SelectItem value="Social Work">Social Work</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>Arts</SelectLabel>
+                                    <SelectItem value="Bangla">Bangla</SelectItem>
+                                    <SelectItem value="English">English</SelectItem>
+                                    <SelectItem value="History">History</SelectItem>
+                                    <SelectItem value="Islamic History">Islamic History</SelectItem>
+                                    <SelectItem value="Islamic Studies">Islamic Studies</SelectItem>
+                                    <SelectItem value="Philosophy">Philosophy</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>Business Studies</SelectLabel>
+                                    <SelectItem value="Accounting">Accounting</SelectItem>
+                                    <SelectItem value="Finance And Banking">Finance And Banking</SelectItem>
+                                    <SelectItem value="Management">Management</SelectItem>
+                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         <FormMessage />
                     </FormItem>
                 )}
