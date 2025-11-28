@@ -1,0 +1,223 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the TCPC Connect system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique member identifier for the user entity."
+        },
+        "uid": {
+          "type": "string",
+          "description": "Firebase Authentication unique user ID."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "department": {
+          "type": "string",
+          "description": "The user's department (e.g., CSE, EEE)."
+        },
+        "batch": {
+          "type": "string",
+          "description": "The user's session (e.g., 2021-2022)."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL of the user's profile photo.",
+          "format": "uri"
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role in the system (Admin, Executive Member, General Member)."
+        },
+        "eventParticipationScore": {
+          "type": "number",
+          "description": "A score representing the user's participation in events."
+        }
+      },
+      "required": [
+        "id",
+        "uid",
+        "name",
+        "email",
+        "department",
+        "batch",
+        "role"
+      ]
+    },
+    "AttendanceSession": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AttendanceSession",
+      "type": "object",
+      "description": "Represents an attendance session for a meeting, event, or workshop.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the attendance session."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the attendance session."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the attendance session."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the attendance session.",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "description": "The time of the attendance session."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of attendance session (General Meeting, AGM, Event, Workshop)."
+        },
+        "attendanceCode": {
+          "type": "string",
+          "description": "The unique attendance code for the session."
+        },
+        "qrCodeURL": {
+          "type": "string",
+          "description": "URL of the QR code image for the session.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "date",
+        "time",
+        "type",
+        "attendanceCode"
+      ]
+    },
+    "AttendanceRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AttendanceRecord",
+      "type": "object",
+      "description": "Represents a single attendance record for a user in a session.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the attendance record."
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Reference to AttendanceSession. (Relationship: AttendanceSession 1:N AttendanceRecord)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N AttendanceRecord)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the attendance was recorded.",
+          "format": "date-time"
+        },
+        "geolocation": {
+          "type": "string",
+          "description": "The geolocation of the user when they recorded attendance. Store as JSON string."
+        }
+      },
+      "required": [
+        "id",
+        "sessionId",
+        "userId",
+        "timestamp"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Only the user themselves can read/write their own profile. Includes standard user profile information (name, email, department, batch, photoURL).",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "roles_admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Documents in this collection indicate admin status. The existence of a document for a user ID grants admin privileges.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the admin user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/attendanceSessions/{sessionId}",
+        "definition": {
+          "entityName": "AttendanceSession",
+          "schema": {
+            "$ref": "#/backend/entities/AttendanceSession"
+          },
+          "description": "Stores attendance session details.  Accessible to all users for viewing, but only admins can create, update, or delete sessions.",
+          "params": [
+            {
+              "name": "sessionId",
+              "description": "The unique identifier of the attendance session."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/attendanceSessions/{sessionId}/attendanceRecords/{recordId}",
+        "definition": {
+          "entityName": "AttendanceRecord",
+          "schema": {
+            "$ref": "#/backend/entities/AttendanceRecord"
+          },
+          "description": "Stores attendance records for a specific session. Includes denormalized 'userId' for authorization independence. This allows verifying the user exists (via `request.auth.uid`) without needing to read the user's profile document. Includes timestamp and geolocation for attendance tracking.",
+          "params": [
+            {
+              "name": "sessionId",
+              "description": "The unique identifier of the attendance session."
+            },
+            {
+              "name": "recordId",
+              "description": "The unique identifier of the attendance record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed to support the TCPC Connect Attendance Management System. It prioritizes authorization independence, clarity, and scalability.  Users are stored in a top-level `users` collection.  Admins are managed via a dedicated `roles_admin` collection. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session. \n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. The `AttendanceRecord` documents within the `attendanceSessions/{sessionId}/attendanceRecords/{recordId}` subcollection denormalize the `userId` from the `User` document. This enables security rules to validate the existence of a user without needing to read the `User` document itself.  Since only authenticated users can record attendance, the existence of a user id on the `request.auth.uid` is enough to confirm the user has permission to create attendance records.\n\nThe structure supports the required QAPs. Private data (user profiles) are stored under `/users/{userId}`, ensuring path-based ownership and read/write access only to the owning user. Admin access is controlled via the `roles_admin` collection, allowing secure listing of users for admins.  Attendance sessions are public read, write only by admins, achieved by separate collections with distinct security rules.\n"
+  }
+}

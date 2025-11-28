@@ -20,9 +20,11 @@ import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 const registerSchema = z.object({
-  studentId: z.string().min(1, { message: "Member ID is required." }),
+  memberId: z.string().min(1, { message: "Member ID is required." }),
   name: z.string().min(1, { message: "Name is required." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -41,7 +43,7 @@ export function RegisterForm() {
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-        studentId: '',
+        memberId: '',
         name: '',
         email: '',
         password: '',
@@ -58,18 +60,29 @@ export function RegisterForm() {
       await updateProfile(user, {
         displayName: data.name,
       });
-
-      await setDoc(doc(firestore, 'users', user.uid), {
-        id: data.studentId, // Using the user-provided student ID
-        uid: user.uid, // Keeping Firebase Auth UID
+      
+      const userDocRef = doc(firestore, 'users', user.uid);
+      const userData = {
+        id: data.memberId,
+        uid: user.uid,
         name: data.name,
         email: data.email,
         department: data.department,
-        batch: data.session, // 'batch' field in Firestore now gets 'session' from form
-        role: 'General Member', // All new sign-ups are General Members
+        batch: data.session,
+        role: 'General Member',
         photoURL: '',
         eventParticipationScore: 0
-      });
+      };
+
+      setDoc(userDocRef, userData)
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'create',
+                requestResourceData: userData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
 
       toast({
         title: "Account created!",
@@ -102,7 +115,7 @@ export function RegisterForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
              <FormField
                 control={form.control}
-                name="studentId"
+                name="memberId"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Member ID</FormLabel>
