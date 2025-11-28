@@ -251,9 +251,20 @@ export function RegisterForm() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Session</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., 2021-2022" {...field} />
-                        </FormControl>
+                         <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a session" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="2020-2021">2020-2021</SelectItem>
+                                <SelectItem value="2021-2022">2021-2022</SelectItem>
+                                <SelectItem value="2022-2023">2022-2023</SelectItem>
+                                <SelectItem value="2023-2024">2023-2024</SelectItem>
+                                <SelectItem value="2024-2025">2024-2025</SelectItem>
+                            </SelectContent>
+                        </Select>
                         <FormMessage />
                     </FormItem>
                 )}
