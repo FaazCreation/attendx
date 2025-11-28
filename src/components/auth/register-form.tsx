@@ -74,14 +74,15 @@ export function RegisterForm() {
         eventParticipationScore: 0
       };
 
+      // This is the updated, non-blocking call with proper error handling
       setDoc(userDocRef, userData)
-        .catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-                path: userDocRef.path,
-                operation: 'create',
-                requestResourceData: userData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
+        .catch((serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'create',
+            requestResourceData: userData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
         });
 
       toast({
