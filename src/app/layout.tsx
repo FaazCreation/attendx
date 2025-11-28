@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'TCPC Connect',
+  title: 'AttendX',
   description: 'Tejgaon College Photography Club Attendance Management System',
 };
 

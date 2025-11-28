@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { TCPCIcon } from '@/components/icons';
+import { AttendXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -112,10 +112,10 @@ export function RegisterForm() {
   return (
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
-        <TCPCIcon className="mx-auto h-12 w-12 text-primary" />
+        <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
         <CardTitle className="text-2xl font-bold font-headline">Create an Account</CardTitle>
         <CardDescription>
-          Join TCPC Connect to manage your attendance
+          Join AttendX to manage your attendance
         </CardDescription>
       </CardHeader>
       <CardContent>

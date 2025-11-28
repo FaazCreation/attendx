@@ -17,7 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { TCPCIcon } from "@/components/icons";
+import { AttendXIcon } from "@/components/icons";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,9 +32,9 @@ export default function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader className="h-16 group-data-[collapsible=icon]:justify-center">
-        <TCPCIcon className="size-8 shrink-0 text-sidebar-primary" />
+        <AttendXIcon className="size-8 shrink-0 text-sidebar-primary" />
         <span className="text-lg font-semibold text-sidebar-primary duration-200 group-data-[collapsible=icon]:opacity-0 font-headline">
-          TCPC Connect
+          AttendX
         </span>
       </SidebarHeader>
       <SidebarContent>

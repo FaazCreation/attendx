@@ -4,7 +4,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user of the TCPC Connect system.",
+      "description": "Represents a user of the AttendX system.",
       "properties": {
         "id": {
           "type": "string",
@@ -218,6 +218,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the TCPC Connect Attendance Management System. It prioritizes authorization independence, clarity, and scalability.  Users are stored in a top-level `users` collection.  Admins are managed via a dedicated `roles_admin` collection. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session. \n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. The `AttendanceRecord` documents within the `attendanceSessions/{sessionId}/attendanceRecords/{recordId}` subcollection denormalize the `userId` from the `User` document. This enables security rules to validate the existence of a user without needing to read the `User` document itself.  Since only authenticated users can record attendance, the existence of a user id on the `request.auth.uid` is enough to confirm the user has permission to create attendance records.\n\nThe structure supports the required QAPs. Private data (user profiles) are stored under `/users/{userId}`, ensuring path-based ownership and read/write access only to the owning user. Admin access is controlled via the `roles_admin` collection, allowing secure listing of users for admins.  Attendance sessions are public read, write only by admins, achieved by separate collections with distinct security rules.\n"
+    "reasoning": "This Firestore structure is designed to support the AttendX Attendance Management System. It prioritizes authorization independence, clarity, and scalability.  Users are stored in a top-level `users` collection.  Admins are managed via a dedicated `roles_admin` collection. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session. \n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. The `AttendanceRecord` documents within the `attendanceSessions/{sessionId}/attendanceRecords/{recordId}` subcollection denormalize the `userId` from the `User` document. This enables security rules to validate the existence of a user without needing to read the `User` document itself.  Since only authenticated users can record attendance, the existence of a user id on the `request.auth.uid` is enough to confirm the user has permission to create attendance records.\n\nThe structure supports the required QAPs. Private data (user profiles) are stored under `/users/{userId}`, ensuring path-based ownership and read/write access only to the owning user. Admin access is controlled via the `roles_admin` collection, allowing secure listing of users for admins.  Attendance sessions are public read, write only by admins, achieved by separate collections with distinct security rules.\n"
   }
 }
