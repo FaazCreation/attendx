@@ -12,12 +12,9 @@ export function AttendXIcon(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-      <circle cx="12" cy="12" r="4"></circle>
-      <line x1="12" y1="3" x2="12" y2="1"></line>
-      <line x1="12" y1="23" x2="12" y2="21"></line>
-      <line x1="21" y1="12" x2="23" y2="12"></line>
-      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <polyline points="16 11 18 13 22 9" />
     </svg>
   );
 }
