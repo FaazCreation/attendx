@@ -59,25 +59,25 @@ export function LoginForm() {
                   router.push('/dashboard');
               } else {
                   // This is a general user.
-                  // For now, we can just show a toast and redirect them to a safe page.
-                  // In a real app, this might be a user-specific dashboard.
                   toast({
                       title: "Login Successful",
-                      description: "Welcome back!",
+                      description: "Welcome! Only admins can access the dashboard.",
                   });
-                  // Redirecting to login for now, but could be a different page.
-                  router.push('/login'); 
+                  // We don't need to redirect them away from login if they are not an admin.
+                  // They can log out or just close the page.
+                  // Signing them out automatically might be confusing.
               }
             } catch (error) {
                console.error("Error checking admin status:", error);
                toast({
                   variant: "destructive",
                   title: "Login Error",
-                  description: "Could not verify user role.",
+                  description: "Could not verify user role. Please try again.",
               });
               // Log out the user if role check fails
-              auth.signOut();
-              router.push('/login');
+              if(auth) {
+                auth.signOut();
+              }
             }
         };
         checkAdminAndRedirect();
@@ -87,6 +87,7 @@ export function LoginForm() {
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
+      if(!auth) return;
       await signInWithEmailAndPassword(auth, data.email, data.password);
       // The useEffect will handle the redirection after successful login.
     } catch (error: any) {
