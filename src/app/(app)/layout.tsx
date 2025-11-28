@@ -4,7 +4,7 @@ import Header from '@/components/layout/header';
 import AppSidebar from '@/components/layout/sidebar';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { FirebaseClientProvider, useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
@@ -13,36 +13,36 @@ import { Skeleton } from '@/components/ui/skeleton';
 function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
   const firestore = useFirestore();
 
   useEffect(() => {
+    // If auth state is resolved and there's no user, redirect to login.
     if (!isUserLoading && !user) {
       router.push('/login');
       return;
     }
 
-    if (user) {
+    // If we have a user, check their role, but only if they try to access the dashboard.
+    if (user && firestore && pathname.startsWith('/dashboard')) {
       const checkAdmin = async () => {
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
         try {
           const docSnap = await getDoc(adminRoleRef);
           if (!docSnap.exists()) {
-            // Not an admin, redirect away from dashboard if they are trying to access it.
-            // This is a simple check. For a real app, you might want more sophisticated role checking
-            // depending on which page they are on.
-            // For now, we are protecting the root of the authenticated app experience.
-            if (window.location.pathname.startsWith('/dashboard')) {
-                 router.push('/login'); // Or a general user page
-            }
+            // If the user is not an admin and tries to access the dashboard,
+            // redirect them to a safe default page, like the members page.
+            router.push('/members');
           }
         } catch (error) {
           console.error("Error checking admin status:", error);
-          router.push('/login');
+          // On error, redirect to a safe page.
+          router.push('/members');
         }
       };
       checkAdmin();
     }
-  }, [user, isUserLoading, router, firestore]);
+  }, [user, isUserLoading, router, firestore, pathname]);
 
   if (isUserLoading) {
     return (
@@ -56,6 +56,14 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     );
+  }
+  
+  // If we have a user, render the app layout.
+  // If we're still loading, we show the skeleton, so we only get here if loading is false.
+  // If there's no user, the useEffect will have already initiated a redirect.
+  // This prevents a flash of the UI before the redirect happens.
+  if (!user) {
+    return null; // or a loading spinner
   }
 
   return (
