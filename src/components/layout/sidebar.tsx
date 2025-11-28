@@ -43,17 +43,15 @@ export default function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref>
+              <Link href={item.href} passHref legacyBehavior>
                 <SidebarMenuButton
-                  asChild
+                  as="a"
                   isActive={pathname.startsWith(item.href)}
                   tooltip={item.label}
                   className="w-full justify-start"
                 >
-                  <a>
-                    <item.icon className="shrink-0" />
-                    <span>{item.label}</span>
-                  </a>
+                  <item.icon className="shrink-0" />
+                  <span>{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
