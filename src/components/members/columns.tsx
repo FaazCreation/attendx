@@ -36,21 +36,26 @@ const RoleChanger = ({ user }: { user: User }) => {
   const handleChangeRole = (newRole: User['role']) => {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', user.uid);
+    
+    // Using a non-blocking update and chaining the catch for error handling.
     updateDoc(userDocRef, { role: newRole })
-      .then(() => {
-        toast({
-          title: 'Role Updated',
-          description: `${user.name}'s role has been changed to ${newRole}.`,
-        });
-      })
-      .catch((error) => {
+      .catch((serverError) => {
+        // Create the rich, contextual error.
         const permissionError = new FirestorePermissionError({
             path: userDocRef.path,
             operation: 'update',
-            requestResourceData: { role: newRole },
+            requestResourceData: { role: newRole }, // This is the data we attempted to write
         });
+
+        // Emit the error to be caught by the global listener.
         errorEmitter.emit('permission-error', permissionError);
       });
+      
+    // Optimistically show a toast. If it fails, the error boundary will appear.
+    toast({
+      title: 'Request sent',
+      description: `Attempting to change ${user.name}'s role to ${newRole}.`,
+    });
   };
 
   return (

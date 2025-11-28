@@ -25,7 +25,7 @@
  *   operations (create, update, delete) are strictly limited to admins.
  * - Users can create their own attendance record, but cannot modify or delete it
  *   after the fact, ensuring the integrity of the attendance log. Only admins can
-*   manage existing records.
+ *   manage existing records.
  *
  * Denormalization for Authorization: The `attendanceRecords` documents contain a
  * denormalized `userId` field. This allows a user to create their own record and
@@ -84,17 +84,24 @@ service cloud.firestore {
      * @description Manages user profile documents.
      * @path /users/{userId}
      * @allow (create) A new user creating their own profile document.
-     * @allow (get/update/delete) The document owner managing their own profile.
-     * @allow (get/list) An admin reading any user's profile or listing all users.
+     * @allow (get) The document owner or an admin reading a profile.
+     * @allow (list) An admin listing all users.
+     * @allow (update) An admin updating any profile, or a user updating their own non-role fields.
+     * @allow (delete) The document owner deleting their own profile.
      * @deny (list) A non-admin user trying to list all user profiles.
-     * @deny (update) A user trying to modify another user's profile.
+     * @deny (update) A user trying to modify another user's profile or their own role.
      * @principle Restricts access to a user's own data tree, with an exception for admins.
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isOwner(userId) && request.resource.data.uid == userId;
-      allow update: if isOwner(userId) && isExistingDoc() && request.resource.data.uid == resource.data.uid;
+      // Admins can update any field.
+      // Users can update their own profile, but CANNOT change their 'uid' or 'role'.
+      allow update: if isExistingDoc() && (
+                      isAdmin() || 
+                      (isOwner(userId) && request.resource.data.uid == resource.data.uid && request.resource.data.role == resource.data.role)
+                    );
       allow delete: if isOwner(userId) && isExistingDoc();
     }
 
