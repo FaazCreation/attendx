@@ -18,10 +18,11 @@ import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -36,6 +37,7 @@ export function LoginForm() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -54,17 +56,10 @@ export function LoginForm() {
             if (docSnap.exists()) {
                 router.push('/dashboard');
             } else {
-                // If not an admin, maybe redirect to a different page or show a message
-                // For now, we will just keep them on a generic page if they are not an admin
-                // but successfully logged in. A real app might have a /home for general users.
-                // Since we only have /dashboard which is admin-only, we redirect non-admins
-                // back to login after they sign in.
                  toast({
                     title: "Login Successful",
                     description: "You are logged in, but not an admin.",
                 });
-                // In a real app, you would likely have a page for non-admins to go to.
-                // For this example, we'll log them out or redirect to a non-admin page if one existed.
                 router.push('/login');
             }
         };
@@ -76,7 +71,6 @@ export function LoginForm() {
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      // Let the useEffect handle redirection
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -117,9 +111,18 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input type={showPassword ? "text" : "password"} {...field} />
+                    </FormControl>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

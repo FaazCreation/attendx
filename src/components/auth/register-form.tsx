@@ -22,6 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 const registerSchema = z.object({
   memberId: z.string().min(1, { message: "Member ID is required." }),
@@ -39,6 +41,7 @@ export function RegisterForm() {
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -74,7 +77,6 @@ export function RegisterForm() {
         eventParticipationScore: 0
       };
 
-      // This is the updated, non-blocking call with proper error handling
       setDoc(userDocRef, userData)
         .catch((serverError) => {
           const permissionError = new FirestorePermissionError({
@@ -159,9 +161,18 @@ export function RegisterForm() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <FormControl>
-                            <Input type="password" {...field} />
-                        </FormControl>
+                         <div className="relative">
+                            <FormControl>
+                                <Input type={showPassword ? "text" : "password"} {...field} />
+                            </FormControl>
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                            >
+                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
                         <FormMessage />
                     </FormItem>
                 )}
