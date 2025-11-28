@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
-  BrainCircuit,
   CalendarClock,
   LayoutDashboard,
   Users,
@@ -25,7 +24,6 @@ const menuItems = [
   { href: "/sessions", label: "Sessions", icon: CalendarClock },
   { href: "/members", label: "Members", icon: Users },
   { href: "/reports", label: "Reports", icon: BarChart3 },
-  { href: "/ai-tools", label: "AI Tools", icon: BrainCircuit },
 ];
 
 export default function AppSidebar() {
