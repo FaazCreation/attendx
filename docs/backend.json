@@ -8,7 +8,11 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user entity."
+          "description": "Unique student identifier for the user entity."
+        },
+        "uid": {
+          "type": "string",
+          "description": "Firebase Authentication unique user ID."
         },
         "name": {
           "type": "string",
@@ -25,7 +29,7 @@
         },
         "batch": {
           "type": "string",
-          "description": "The user's batch (e.g., 2018-2019)."
+          "description": "The user's session (e.g., 2021-2022)."
         },
         "photoURL": {
           "type": "string",
@@ -43,6 +47,7 @@
       },
       "required": [
         "id",
+        "uid",
         "name",
         "email",
         "department",

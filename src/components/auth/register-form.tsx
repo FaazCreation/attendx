@@ -22,11 +22,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
 const registerSchema = z.object({
+  studentId: z.string().min(1, { message: "Student ID is required." }),
   name: z.string().min(1, { message: "Name is required." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   department: z.string().min(1, { message: "Department is required." }),
-  batch: z.string().min(1, { message: "Batch is required." }),
+  session: z.string().min(1, { message: "Session is required." }),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -40,11 +41,12 @@ export function RegisterForm() {
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+        studentId: '',
         name: '',
         email: '',
         password: '',
         department: '',
-        batch: '',
+        session: '',
     }
   });
 
@@ -58,11 +60,12 @@ export function RegisterForm() {
       });
 
       await setDoc(doc(firestore, 'users', user.uid), {
-        id: user.uid,
+        id: data.studentId, // Using the user-provided student ID
+        uid: user.uid, // Keeping Firebase Auth UID
         name: data.name,
         email: data.email,
         department: data.department,
-        batch: data.batch,
+        batch: data.session, // 'batch' field in Firestore now gets 'session' from form
         role: 'General Member', // All new sign-ups are General Members
         photoURL: '',
         eventParticipationScore: 0
@@ -97,6 +100,19 @@ export function RegisterForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+             <FormField
+                control={form.control}
+                name="studentId"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Student ID</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Your Student ID" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
             <FormField
                 control={form.control}
                 name="name"
@@ -151,10 +167,10 @@ export function RegisterForm() {
             />
              <FormField
                 control={form.control}
-                name="batch"
+                name="session"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Batch</FormLabel>
+                        <FormLabel>Session</FormLabel>
                         <FormControl>
                             <Input placeholder="e.g., 2021-2022" {...field} />
                         </FormControl>
