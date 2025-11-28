@@ -19,8 +19,6 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -33,7 +31,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const auth = useAuth();
-  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
@@ -50,46 +47,22 @@ export function LoginForm() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-        const checkAdminAndRedirect = async () => {
-          if (!firestore || !user) return;
-            const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-            try {
-              const docSnap = await getDoc(adminRoleRef);
-              if (docSnap.exists()) {
-                  router.push('/dashboard');
-              } else {
-                  // This is a general user.
-                  toast({
-                      title: "Login Successful",
-                      description: "Welcome! Only admins can access the dashboard.",
-                  });
-                  // We don't need to redirect them away from login if they are not an admin.
-                  // They can log out or just close the page.
-                  // Signing them out automatically might be confusing.
-              }
-            } catch (error) {
-               console.error("Error checking admin status:", error);
-               toast({
-                  variant: "destructive",
-                  title: "Login Error",
-                  description: "Could not verify user role. Please try again.",
-              });
-              // Log out the user if role check fails
-              if(auth) {
-                auth.signOut();
-              }
-            }
-        };
-        checkAdminAndRedirect();
+        // Redirect to members page after login.
+        // The main layout will handle role-based redirection for the dashboard.
+        router.push('/members');
     }
-  }, [user, isUserLoading, router, firestore, toast, auth]);
+  }, [user, isUserLoading, router]);
 
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
       if(!auth) return;
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      // The useEffect will handle the redirection after successful login.
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      // The useEffect will handle the redirection.
     } catch (error: any) {
       toast({
         variant: "destructive",

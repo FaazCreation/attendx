@@ -9,12 +9,14 @@ import { useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   useEffect(() => {
     // If auth state is resolved and there's no user, redirect to login.
@@ -32,17 +34,27 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
           if (!docSnap.exists()) {
             // If the user is not an admin and tries to access the dashboard,
             // redirect them to a safe default page, like the members page.
+            toast({
+              variant: "destructive",
+              title: "Access Denied",
+              description: "You do not have permission to view the dashboard.",
+            });
             router.push('/members');
           }
         } catch (error) {
           console.error("Error checking admin status:", error);
+          toast({
+              variant: "destructive",
+              title: "Permission Error",
+              description: "Could not verify your role. Please try again later.",
+          });
           // On error, redirect to a safe page.
           router.push('/members');
         }
       };
       checkAdmin();
     }
-  }, [user, isUserLoading, router, firestore, pathname]);
+  }, [user, isUserLoading, router, firestore, pathname, toast]);
 
   if (isUserLoading) {
     return (
