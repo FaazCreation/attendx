@@ -77,15 +77,8 @@ export function RegisterForm() {
         eventParticipationScore: 0
       };
 
-      setDoc(userDocRef, userData)
-        .catch((serverError) => {
-          const permissionError = new FirestorePermissionError({
-            path: userDocRef.path,
-            operation: 'create',
-            requestResourceData: userData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        });
+      // The user is now authenticated, so this setDoc call will be allowed by security rules.
+      await setDoc(userDocRef, userData);
 
       toast({
         title: "Account created!",
@@ -95,11 +88,23 @@ export function RegisterForm() {
       router.push('/login');
 
     } catch (error: any) {
-       toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: error.message,
-      });
+       // The 'any' type is used here because Firebase can throw different kinds of errors.
+       // We'll check if it's a Firestore error and emit it, otherwise show a generic toast.
+       if (error.code && error.code.startsWith('permission-denied')) {
+          const userDocRef = doc(firestore, 'users', auth.currentUser!.uid);
+          const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'create',
+            requestResourceData: 'hidden', // Data can be hidden for privacy
+          });
+          errorEmitter.emit('permission-error', permissionError);
+       } else {
+         toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: error.message,
+        });
+       }
     }
   };
 

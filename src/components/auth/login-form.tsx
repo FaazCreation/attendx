@@ -50,32 +50,50 @@ export function LoginForm() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-        const checkAdmin = async () => {
+        const checkAdminAndRedirect = async () => {
+          if (!firestore || !user) return;
             const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-            const docSnap = await getDoc(adminRoleRef);
-            if (docSnap.exists()) {
-                router.push('/dashboard');
-            } else {
-                 toast({
-                    title: "Login Successful",
-                    description: "You are logged in, but not an admin.",
-                });
-                router.push('/login');
+            try {
+              const docSnap = await getDoc(adminRoleRef);
+              if (docSnap.exists()) {
+                  router.push('/dashboard');
+              } else {
+                  // This is a general user.
+                  // For now, we can just show a toast and redirect them to a safe page.
+                  // In a real app, this might be a user-specific dashboard.
+                  toast({
+                      title: "Login Successful",
+                      description: "Welcome back!",
+                  });
+                  // Redirecting to login for now, but could be a different page.
+                  router.push('/login'); 
+              }
+            } catch (error) {
+               console.error("Error checking admin status:", error);
+               toast({
+                  variant: "destructive",
+                  title: "Login Error",
+                  description: "Could not verify user role.",
+              });
+              // Log out the user if role check fails
+              auth.signOut();
+              router.push('/login');
             }
         };
-        checkAdmin();
+        checkAdminAndRedirect();
     }
-  }, [user, isUserLoading, router, firestore, toast]);
+  }, [user, isUserLoading, router, firestore, toast, auth]);
 
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
+      // The useEffect will handle the redirection after successful login.
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Sign in failed",
-        description: error.message,
+        description: "Please check your email and password.",
       });
     }
   };
