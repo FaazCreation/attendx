@@ -8,7 +8,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique student identifier for the user entity."
+          "description": "Unique member identifier for the user entity."
         },
         "uid": {
           "type": "string",

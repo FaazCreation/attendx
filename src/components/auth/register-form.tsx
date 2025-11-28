@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
 const registerSchema = z.object({
-  studentId: z.string().min(1, { message: "Student ID is required." }),
+  studentId: z.string().min(1, { message: "Member ID is required." }),
   name: z.string().min(1, { message: "Name is required." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -105,9 +105,9 @@ export function RegisterForm() {
                 name="studentId"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Student ID</FormLabel>
+                        <FormLabel>Member ID</FormLabel>
                         <FormControl>
-                            <Input placeholder="Your Student ID" {...field} />
+                            <Input placeholder="Your Member ID" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
