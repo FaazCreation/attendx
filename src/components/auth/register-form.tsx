@@ -58,12 +58,17 @@ export function RegisterForm() {
 
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     try {
+      if(!auth || !firestore) return;
+
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
       await updateProfile(user, {
         displayName: data.name,
       });
+
+      const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
+      const userRole = isAdmin ? 'Admin' : 'General Member';
       
       const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
@@ -73,13 +78,20 @@ export function RegisterForm() {
         email: data.email,
         department: data.department,
         batch: data.session,
-        role: 'General Member',
+        role: userRole,
         photoURL: '',
         eventParticipationScore: 0
       };
 
       // The user is now authenticated, so this setDoc call will be allowed by security rules.
       await setDoc(userDocRef, userData);
+
+      // If the user is the designated admin, create an entry in the roles_admin collection
+      if (isAdmin) {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        await setDoc(adminRoleRef, { uid: user.uid });
+      }
+
 
       toast({
         title: "Account created!",
@@ -89,8 +101,6 @@ export function RegisterForm() {
       router.push('/login');
 
     } catch (error: any) {
-       // The 'any' type is used here because Firebase can throw different kinds of errors.
-       // We'll check if it's a Firestore error and emit it, otherwise show a generic toast.
        if (error.code && error.code.startsWith('permission-denied')) {
           const userDocRef = doc(firestore, 'users', auth.currentUser!.uid);
           const permissionError = new FirestorePermissionError({
