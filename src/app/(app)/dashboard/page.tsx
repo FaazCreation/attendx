@@ -51,18 +51,18 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-1 space-y-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
+      <div className="flex items-center justify-center sm:justify-between">
+        <div className="flex flex-col items-center sm:items-start">
           <div className="flex items-center gap-3">
             <AttendXIcon className="h-8 w-8 text-primary" />
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
               AttendX
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground" style={{marginLeft: '44px'}}>Attendance Management, Simplified.</p>
+          <p className="text-xs text-muted-foreground sm:ml-[44px]">Attendance Management, Simplified.</p>
         </div>
       </div>
-      <p className="text-sm md:text-base text-muted-foreground">Select an option below to get started.</p>
+      <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">Select an option below to get started.</p>
       
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {menuItems.map((item) => (
