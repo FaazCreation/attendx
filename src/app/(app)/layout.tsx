@@ -67,11 +67,6 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
             )}
            </div>
         </main>
-        {!isDashboard && (
-        <footer className="py-4 px-4 text-center text-sm text-muted-foreground border-t">
-          ক্লাব অরবিটের একটি পণ্য।<br className="sm:hidden" /> ফরহাদ হোসেন দ্বারা তৈরি।
-        </footer>
-        )}
       </div>
   );
 }

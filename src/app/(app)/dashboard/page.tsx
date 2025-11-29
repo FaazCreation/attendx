@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart3, CalendarClock, Copyright, User, Users } from 'lucide-react';
+import { BarChart3, CalendarClock, User, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -84,16 +84,6 @@ export default function DashboardPage() {
             </Card>
           </Link>
         ))}
-      </div>
-
-      <div className="mt-auto pt-8 text-center text-sm text-muted-foreground">
-        <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center gap-1.5">
-                <Copyright className="h-3.5 w-3.5" />
-                <span>ক্লাব অরবিটের একটি পণ্য।</span>
-            </div>
-            <span>ফরহাদ হোসেন দ্বারা তৈরি।</span>
-        </div>
       </div>
     </div>
   );
