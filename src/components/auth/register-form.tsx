@@ -113,10 +113,12 @@ export function RegisterForm() {
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
         <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
-        <CardTitle className="text-2xl font-bold font-headline">একটি অ্যাকাউন্ট তৈরি করুন</CardTitle>
-        <CardDescription>
-          আপনার অ্যাটেনডেন্স পরিচালনা করতে AttendX-এ যোগ দিন
-        </CardDescription>
+        <div className='font-headline'>
+          <CardTitle className="text-2xl font-bold">একটি অ্যাকাউন্ট তৈরি করুন</CardTitle>
+          <CardDescription>
+            আপনার অ্যাটেনডেন্স পরিচালনা করতে AttendX-এ যোগ দিন
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>

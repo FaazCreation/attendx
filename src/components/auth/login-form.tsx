@@ -75,10 +75,12 @@ export function LoginForm() {
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
         <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
-        <CardTitle className="text-2xl font-bold font-headline">AttendX</CardTitle>
-        <CardDescription>
-          অ্যাটেনডেন্স এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
-        </CardDescription>
+        <div className="font-headline">
+          <CardTitle className="text-2xl font-bold">AttendX</CardTitle>
+          <CardDescription>
+            অ্যাটেনডেন্স এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>

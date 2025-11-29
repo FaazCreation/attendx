@@ -12,6 +12,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Shurjo', ...fontFamily.sans],
+        headline: ['var(--font-poppins)', ...fontFamily.sans],
       },
       colors: {
         background: 'hsl(var(--background))',

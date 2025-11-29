@@ -1,13 +1,17 @@
 'use client';
 
-import { Inter } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import { FirebaseClientProvider } from '@/firebase';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { usePathname } from 'next/navigation';
 import AppShell from '@/components/layout/app-shell';
 
-const inter = Inter({ subsets: ['latin'] });
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-poppins',
+});
 
 export default function RootLayout({
   children,
@@ -26,7 +30,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       </head>
-      <body className={`font-sans antialiased ${inter.className}`}>
+      <body className={`font-sans antialiased ${poppins.variable}`}>
         <FirebaseClientProvider>
             {isAuthPage || isAdminPage ? (
               children
