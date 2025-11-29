@@ -9,12 +9,11 @@ import { useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
-// A separate component to handle fetching and displaying the members list.
-// This component is only rendered if the user has the correct permissions.
+// This new child component will only be rendered once the parent has confirmed
+// that the current user has the correct permissions. This prevents the
+// protected query from running prematurely.
 function MembersList() {
   const firestore = useFirestore();
-
-  // This query will now only run inside a component that is already protected by a role check.
   const usersCollection = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'users');
@@ -38,39 +37,48 @@ function MembersList() {
       )
   }
 
-  return users ? <MembersTable data={users} /> : <p>No members found.</p>;
+  // Handle the case where the user has permission but there's no data.
+  if (!users) {
+    return <p>No members found or there was an issue loading them.</p>;
+  }
+
+  return <MembersTable data={users} />;
 }
 
 
+// This is the main page component. Its only job is to check permissions.
 export default function MembersPage() {
   const firestore = useFirestore();
   const { user, isUserLoading: isAuthLoading } = useUser();
   const router = useRouter();
 
-  // Get the current user's document to check their role.
+  // We fetch the current user's profile to check their role.
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
   const { data: currentUserData, isLoading: isCurrentUserLoading } = useDoc(userDocRef);
-
+  
+  // The primary loading state depends on both authentication and the user profile fetch.
+  const isLoading = isAuthLoading || isCurrentUserLoading;
+  
+  // Memoize the permission check result.
   const hasPermission = useMemo(() => {
     if (!currentUserData) return false;
+    // Only Admin and Executive Member roles are allowed to see this page.
     return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
   
-  // The primary loading state now depends only on auth and the current user's profile.
-  const isLoading = isAuthLoading || isCurrentUserLoading;
-  
-  // Redirect if the user is confirmed to be a General Member.
+  // This effect will run if the user's role is determined to be 'General Member'.
   useEffect(() => {
     if (!isLoading && currentUserData && currentUserData.role === 'General Member') {
+      // Redirect unauthorized users to the dashboard to prevent access.
       router.push('/dashboard');
     }
   }, [isLoading, currentUserData, router]);
 
-
+  // Show a loading skeleton while checking auth and user profile.
   if (isLoading) {
      return (
         <div className="flex-1 space-y-6">
@@ -94,7 +102,7 @@ export default function MembersPage() {
       );
   }
   
-  // If loading is finished and the user doesn't have permission, show an access denied message.
+  // If loading is done and the user still doesn't have permission, show a clear "Access Denied" message.
   if (!hasPermission) {
     return (
        <Card className="border-destructive">
@@ -109,7 +117,7 @@ export default function MembersPage() {
     )
   }
 
-  // Only if loading is complete AND the user has permission, render the page content.
+  // Only if all checks pass, render the main page content, including the protected MembersList.
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
@@ -118,7 +126,7 @@ export default function MembersPage() {
         </h1>
       </div>
       
-      {/* The component that makes the protected query is only rendered here. */}
+      {/* The child component with the protected query is now only rendered here. */}
       <MembersList />
     </div>
   );
