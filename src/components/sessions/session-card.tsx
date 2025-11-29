@@ -9,8 +9,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
+  DialogDescription
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
