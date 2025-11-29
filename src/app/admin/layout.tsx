@@ -15,44 +15,36 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const router = useRouter();
 
-  // Check for admin role directly
-  const adminRoleDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  // Also fetch user data for other purposes (like executive member check)
+  // Memoize the user document reference
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
-
-  const { data: adminRoleData, isLoading: isAdminRoleLoading } = useDoc(adminRoleDocRef);
+  
   const { data: currentUserData, isLoading: isUserDocLoading } = useDoc(userDocRef);
 
   const hasPermission = useMemo(() => {
-    if (adminRoleData) { // If the doc in roles_admin exists, they are an admin.
-      return true;
-    }
-    if (currentUserData) { // Fallback to check for Executive Member
-      return currentUserData.role === 'Executive Member';
-    }
-    return false;
-  }, [adminRoleData, currentUserData]);
+    if (!currentUserData) return false; // If no user data, no permission
+    const role = currentUserData.role;
+    return role === 'Admin' || role === 'Executive Member';
+  }, [currentUserData]);
   
   useEffect(() => {
-    const isLoading = isUserLoading || isAdminRoleLoading || isUserDocLoading;
+    const isLoading = isUserLoading || isUserDocLoading;
+    
+    // If not loading and user is not logged in, redirect to login
     if (!isUserLoading && !user) {
         router.push('/login');
         return;
     }
-    // Wait until loading is complete before checking permissions
+    
+    // After all data has loaded, if there is a user but they don't have permission, redirect to dashboard
     if (!isLoading && user && !hasPermission) {
       router.push('/dashboard');
     }
-  }, [isUserLoading, isAdminRoleLoading, isUserDocLoading, hasPermission, router, user]);
+  }, [isUserLoading, isUserDocLoading, hasPermission, router, user]);
 
-  const isLoading = isUserLoading || isAdminRoleLoading || isUserDocLoading;
+  const isLoading = isUserLoading || isUserDocLoading;
 
   if (isLoading) {
     return (

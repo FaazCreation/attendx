@@ -13,33 +13,47 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
+    
+    function getMyRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isExecutiveMember() {
+      return getMyRole() == 'Executive Member';
+    }
 
     match /users/{userId} {
-      allow get: if isAdmin() || isOwner(userId);
+      // Admins can get any user. Users can get their own profile. Executive members can get any user.
+      allow get: if isOwner(userId) || isAdmin() || isExecutiveMember();
       allow list: if isAdmin();
-      allow create: if isOwner(userId);
-      allow update: if isAdmin() || isOwner(userId);
+      
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId;
+
+      // Admins can update anything. Users can update their own profile, but cannot change their own role.
+      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+
       allow delete: if isAdmin();
     }
 
     match /roles_admin/{userId} {
-      allow read, update, delete, list: if false;
-      allow create: if isOwner(userId);
+      allow read, write: if isAdmin(); // Admins can manage other admins
+      allow list: if isAdmin();
     }
 
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
-      // Admins can always create. Executive members can create if they declare their role.
-      // This avoids a cross-document `get()` which is unreliable in rules.
-      allow create, update: if isAdmin();
-
-      allow delete: if isAdmin();
+      allow create, update: if isAdmin() || isExecutiveMember();
+      allow delete: if isAdmin() || isExecutiveMember();
 
       match /attendanceRecords/{recordId} {
         allow get: if isAdmin() || (resource != null && isOwner(resource.data.userId));
+        
+        // Users can only list their OWN records.
         allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
         
+        // A user can create a record for themselves, but only if one doesn't already exist for that session.
         allow create: if isSignedIn() 
                       && request.resource.data.userId == request.auth.uid
                       && !exists(/databases/$(database)/documents/attendanceSessions/$(sessionId)/attendanceRecords/$(request.auth.uid));
