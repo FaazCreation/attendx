@@ -13,7 +13,7 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 const attendanceSchema = z.object({
-  attendanceCode: z.string().length(6, { message: "Code must be 6 characters." }),
+  attendanceCode: z.string().length(6, { message: "কোড অবশ্যই ৬ অক্ষরের হতে হবে।" }),
 });
 
 type AttendanceFormData = z.infer<typeof attendanceSchema>;
@@ -46,10 +46,9 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
     if (data.attendanceCode.toUpperCase() !== session.attendanceCode.toUpperCase()) {
         toast({
             variant: "destructive",
-            title: "Invalid Code",
-            description: "The attendance code is incorrect. Please try again.",
+            title: "অবৈধ কোড",
+            description: "অ্যাটেনডেন্স কোডটি ভুল। অনুগ্রহ করে আবার চেষ্টা করুন।",
         });
-        // Manually re-enable form if code is wrong
         form.reset(form.getValues()); 
         return;
     }
@@ -66,8 +65,8 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
     addDoc(attendanceRecordsColRef, recordData)
       .then(() => {
         toast({
-          title: "Attendance Marked!",
-          description: "Your attendance has been successfully recorded.",
+          title: "অ্যাটেনডেন্স চিহ্নিত!",
+          description: "আপনার অ্যাটেনডেন্স সফলভাবে রেকর্ড করা হয়েছে।",
         });
         onAttendanceMarked();
       })
@@ -81,8 +80,8 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
 
         toast({
             variant: "destructive",
-            title: "Failed to mark attendance",
-            description: "Please check permissions or try again later.",
+            title: "অ্যাটেনডেন্স চিহ্নিত করতে ব্যর্থ",
+            description: "অনুগ্রহ করে অনুমতি পরীক্ষা করুন বা পরে আবার চেষ্টা করুন।",
         });
       });
   };
@@ -95,7 +94,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
           name="attendanceCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Enter 6-Character Attendance Code</FormLabel>
+              <FormLabel>৬-অক্ষরের অ্যাটেনডেন্স কোড লিখুন</FormLabel>
               <FormControl>
                 <Input placeholder="ABCXYZ" {...field} maxLength={6} className="uppercase tracking-widest text-center" />
               </FormControl>
@@ -104,7 +103,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Submitting...' : 'Submit Attendance'}
+          {isSubmitting ? 'জমা দেওয়া হচ্ছে...' : 'অ্যাটেনডেন্স জমা দিন'}
         </Button>
       </form>
     </Form>

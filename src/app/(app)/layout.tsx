@@ -60,7 +60,7 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
                 <Button variant="outline" asChild>
                   <Link href="/dashboard">
                     <ChevronLeft className="mr-2 h-4 w-4" />
-                    Back to Dashboard
+                    ড্যাশবোর্ডে ফিরে যান
                   </Link>
                 </Button>
               </div>
@@ -69,7 +69,7 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
         </main>
         {!isDashboard && (
         <footer className="py-4 px-4 text-center text-sm text-muted-foreground border-t">
-          A product of Club Orbit.<br className="sm:hidden" /> Developed by Forhad Hossain.
+          ক্লাব অরবিটের একটি পণ্য।<br className="sm:hidden" /> ফরহাদ হোসেন দ্বারা তৈরি।
         </footer>
         )}
       </div>

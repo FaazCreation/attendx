@@ -9,6 +9,15 @@ import { Progress } from '@/components/ui/progress';
 import { Award, BarChart, Calendar, CheckSquare } from 'lucide-react';
 import { useMemo } from 'react';
 
+const getRoleInBangla = (role: string) => {
+    switch(role) {
+        case 'Admin': return 'অ্যাডমিন';
+        case 'Executive Member': return 'কার্যনির্বাহী সদস্য';
+        case 'General Member': return 'সাধারণ সদস্য';
+        default: return role;
+    }
+}
+
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -27,7 +36,6 @@ export default function ProfilePage() {
   const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
 
   const userAttendanceQuery = useMemoFirebase(() => {
-    // Ensure both firestore and user.uid are available before creating the query
     if (!firestore || !user?.uid) return null;
     return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
   }, [firestore, user?.uid]);
@@ -46,7 +54,7 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6">
          <div className="flex items-center justify-between space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">My Profile</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">আমার প্রোফাইল</h1>
         </div>
         <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
           <Skeleton className="h-24 w-24 rounded-full" />
@@ -67,14 +75,14 @@ export default function ProfilePage() {
   }
   
   if (!userData) {
-      return <div>Could not load user profile. Please try again.</div>
+      return <div>ব্যবহারকারীর প্রোফাইল লোড করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</div>
   }
 
   return (
     <div className="flex-1 space-y-6">
        <div className="flex items-center justify-between space-y-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
-          My Profile
+          আমার প্রোফাইল
         </h1>
       </div>
       <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
@@ -92,37 +100,37 @@ export default function ProfilePage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Role</CardTitle>
+                <CardTitle className="text-sm font-medium">ভূমিকা</CardTitle>
                 <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{userData.role}</div>
-                <p className="text-xs text-muted-foreground">Your current role in the club</p>
+                <div className="text-2xl font-bold">{getRoleInBangla(userData.role)}</div>
+                <p className="text-xs text-muted-foreground">ক্লাবে আপনার বর্তমান ভূমিকা</p>
             </CardContent>
         </Card>
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sessions Attended</CardTitle>
+                <CardTitle className="text-sm font-medium">উপস্থিত সেশন</CardTitle>
                 <CheckSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{attendedCount}</div>
-                <p className="text-xs text-muted-foreground">Out of {totalSessions} total sessions</p>
+                <p className="text-xs text-muted-foreground">মোট {totalSessions}টি সেশনের মধ্যে</p>
             </CardContent>
         </Card>
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Participation Score</CardTitle>
+                <CardTitle className="text-sm font-medium">অংশগ্রহণের স্কোর</CardTitle>
                 <BarChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{userData.eventParticipationScore || 0}</div>
-                <p className="text-xs text-muted-foreground">Points from events and workshops</p>
+                <p className="text-xs text-muted-foreground">ইভেন্ট এবং কর্মশালা থেকে পয়েন্ট</p>
             </CardContent>
         </Card>
          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Attendance Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">উপস্থিতির হার</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>

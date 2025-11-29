@@ -35,7 +35,7 @@ function MembersList() {
   }
 
   if (!users) {
-    return <p>No members found or there was an issue loading them.</p>;
+    return <p>কোনো সদস্য খুঁজে পাওয়া যায়নি অথবা লোড করতে সমস্যা হয়েছে।</p>;
   }
 
   return <MembersTable data={users} />;
@@ -71,7 +71,7 @@ export default function MembersPage() {
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
-              Club Members
+              ক্লাবের সদস্য
             </h1>
           </div>
           <Card>
@@ -94,10 +94,10 @@ export default function MembersPage() {
        <Card className="border-destructive">
           <CardHeader className="flex flex-row items-center gap-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
-            <CardTitle>Access Denied</CardTitle>
+            <CardTitle>প্রবেশাধিকার নেই</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You do not have permission to view this page. You may be redirected.</p>
+            <p>এই পৃষ্ঠাটি দেখার জন্য আপনার অনুমতি নেই। আপনাকে রিডাইরেক্ট করা হতে পারে।</p>
           </CardContent>
         </Card>
     )
@@ -107,7 +107,7 @@ export default function MembersPage() {
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
-          Club Members
+          ক্লাবের সদস্য
         </h1>
       </div>
       

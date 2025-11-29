@@ -49,8 +49,8 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
     if (targetUser.role === 'Admin' && !currentUserIsAdmin) {
       toast({
         variant: 'destructive',
-        title: 'Permission Denied',
-        description: "You cannot change another admin's role.",
+        title: 'অনুমতি নেই',
+        description: "আপনি অন্য অ্যাডমিনের ভূমিকা পরিবর্তন করতে পারবেন না।",
       });
       return;
     }
@@ -59,8 +59,8 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
     if (targetUser.role === 'Admin' && newRole !== 'Admin' && currentUser?.uid === targetUser.uid) {
         toast({
             variant: 'destructive',
-            title: 'Action Not Allowed',
-            description: "You cannot demote yourself from the Admin role.",
+            title: 'কার্যক্রম অনুমোদিত নয়',
+            description: "আপনি নিজেকে অ্যাডমিন ভূমিকা থেকে সরাতে পারবেন না।",
         });
         return;
     }
@@ -71,8 +71,8 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
     updateDoc(userDocRef, updatedData)
       .then(() => {
         toast({
-          title: 'Role Updated',
-          description: `${targetUser.name}'s role has been changed to ${newRole}.`,
+          title: 'ভূমিকা আপডেট হয়েছে',
+          description: `${targetUser.name}-এর ভূমিকা ${newRole}-এ পরিবর্তন করা হয়েছে।`,
         });
       })
       .catch((serverError) => {
@@ -85,8 +85,8 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
       });
       
     toast({
-      title: 'Request sent',
-      description: `Attempting to change ${targetUser.name}'s role to ${newRole}.`,
+      title: 'অনুরোধ পাঠানো হয়েছে',
+      description: `${targetUser.name}-এর ভূমিকা ${newRole}-এ পরিবর্তন করার চেষ্টা করা হচ্ছে।`,
     });
   };
 
@@ -98,21 +98,21 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
             className="h-8 w-8 p-0" 
             disabled={!currentUserIsAdmin || (targetUser.role === 'Admin' && currentUser?.uid !== targetUser.uid && !currentUserIsAdmin)}
         >
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">মেনু খুলুন</span>
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel>কার্যক্রম</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-xs font-light">Change Role</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs font-light">ভূমিকা পরিবর্তন করুন</DropdownMenuLabel>
         {userRoles.map((role) => (
           <DropdownMenuItem
             key={role}
             onClick={() => handleChangeRole(role)}
             disabled={targetUser.role === role}
           >
-            Set as {role}
+            {role} হিসেবে সেট করুন
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -123,23 +123,23 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'name',
-    header: 'Name',
+    header: 'নাম',
   },
   {
     accessorKey: 'email',
-    header: 'Email',
+    header: 'ইমেইল',
   },
   {
     accessorKey: 'department',
-    header: 'Department',
+    header: 'বিভাগ',
   },
   {
     accessorKey: 'batch',
-    header: 'Session',
+    header: 'সেশন',
   },
   {
     accessorKey: 'role',
-    header: 'Role',
+    header: 'ভূমিকা',
   },
   {
     id: 'actions',

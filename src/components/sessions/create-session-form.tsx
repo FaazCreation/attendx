@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '../ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { CalendarIcon } from 'lucide-react';
@@ -22,18 +22,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 const sessionSchema = z.object({
-  title: z.string().min(1, { message: "Title is required." }),
+  title: z.string().min(1, { message: "শিরোনাম আবশ্যক।" }),
   description: z.string().optional(),
   date: z.date({
-    required_error: "A date is required.",
+    required_error: "একটি তারিখ আবশ্যক।",
   }),
-  time: z.string().min(1, { message: "Time is required." }),
+  time: z.string().min(1, { message: "সময় আবশ্যক।" }),
   type: z.enum(["General Meeting", "AGM", "Event", "Workshop"]),
 });
 
 type SessionFormData = z.infer<typeof sessionSchema>;
 
-// Function to generate a random 6-character alphanumeric code
 const generateAttendanceCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -67,7 +66,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       ...data,
       id: sessionId,
       attendanceCode,
-      date: format(data.date, "yyyy-MM-dd'T'00:00:00"), // Store date as a string in a consistent format
+      date: format(data.date, "yyyy-MM-dd'T'00:00:00"), 
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: serverTimestamp(),
     };
@@ -75,8 +74,8 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     setDoc(sessionDocRef, sessionData)
       .then(() => {
         toast({
-          title: "Session Created",
-          description: `The session "${data.title}" has been successfully created.`,
+          title: "সেশন তৈরি হয়েছে",
+          description: `"${data.title}" সেশনটি সফলভাবে তৈরি করা হয়েছে।`,
         });
         onSessionCreated();
       })
@@ -98,9 +97,9 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>শিরোনাম</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Monthly Meeting" {...field} />
+                <Input placeholder="যেমনঃ মাসিক সভা" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,9 +110,9 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>বিবরণ</FormLabel>
               <FormControl>
-                <Textarea placeholder="A brief description of the session" {...field} />
+                <Textarea placeholder="সেশনের একটি সংক্ষিপ্ত বিবরণ" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -124,7 +123,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
+              <FormLabel>তারিখ</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -138,7 +137,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>একটি তারিখ বাছাই করুন</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -165,7 +164,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="time"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Time</FormLabel>
+              <FormLabel>সময়</FormLabel>
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>
@@ -178,18 +177,18 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type</FormLabel>
+              <FormLabel>ধরন</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a session type" />
+                    <SelectValue placeholder="একটি সেশনের ধরন নির্বাচন করুন" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                    <SelectItem value="General Meeting">General Meeting</SelectItem>
-                    <SelectItem value="AGM">AGM</SelectItem>
-                    <SelectItem value="Event">Event</SelectItem>
-                    <SelectItem value="Workshop">Workshop</SelectItem>
+                    <SelectItem value="General Meeting">সাধারণ সভা</SelectItem>
+                    <SelectItem value="AGM">এজিএম</SelectItem>
+                    <SelectItem value="Event">ইভেন্ট</SelectItem>
+                    <SelectItem value="Workshop">কর্মশালা</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -197,7 +196,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           )}
         />
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Creating...' : 'Create Session'}
+          {form.formState.isSubmitting ? 'তৈরি করা হচ্ছে...' : 'সেশন তৈরি করুন'}
         </Button>
       </form>
     </Form>

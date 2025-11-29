@@ -55,21 +55,21 @@ export default function SessionsPage() {
     <div className="flex-1 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
-          Attendance Sessions
+          অ্যাটেনডেন্স সেশন
         </h1>
         {canCreateSession && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Create Session
+                সেশন তৈরি করুন
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Create New Session</DialogTitle>
+                <DialogTitle>নতুন সেশন তৈরি করুন</DialogTitle>
                 <DialogDescription>
-                  Fill out the details for the new attendance session.
+                  নতুন অ্যাটেনডেন্স সেশনের জন্য বিবরণ পূরণ করুন।
                 </DialogDescription>
               </DialogHeader>
               <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
@@ -99,7 +99,7 @@ export default function SessionsPage() {
           ))}
         </div>
       )}
-      {!sessions && !isLoading && <p>No sessions found.</p>}
+      {!sessions && !isLoading && <p>কোনো সেশন পাওয়া যায়নি।</p>}
     </div>
   );
 }

@@ -42,7 +42,7 @@ export function MembersTable({ data }: MembersTableProps) {
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter members..."
+          placeholder="সদস্যদের ফিল্টার করুন..."
           value={globalFilter ?? ''}
           onChange={(event) =>
             setGlobalFilter(String(event.target.value))
@@ -89,7 +89,7 @@ export function MembersTable({ data }: MembersTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  কোনো ফলাফল নেই।
                 </TableCell>
               </TableRow>
             )}

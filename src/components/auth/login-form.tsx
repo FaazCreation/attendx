@@ -23,8 +23,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  email: z.string().email({ message: "অবৈধ ইমেইল ঠিকানা।" }),
+  password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -58,15 +58,15 @@ export function LoginForm() {
       if(!auth) return;
       await signInWithEmailAndPassword(auth, data.email, data.password);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "লগইন সফল হয়েছে",
+        description: "আপনাকে স্বাগতম!",
       });
       // The useEffect will handle the redirection.
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Sign in failed",
-        description: "Please check your email and password.",
+        title: "সাইন ইন ব্যর্থ হয়েছে",
+        description: "আপনার ইমেইল এবং পাসওয়ার্ড চেক করুন।",
       });
     }
   };
@@ -77,7 +77,7 @@ export function LoginForm() {
         <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
         <CardTitle className="text-2xl font-bold font-headline">AttendX</CardTitle>
         <CardDescription>
-          Sign in to manage attendance and club activities
+          অ্যাটেনডেন্স এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -88,7 +88,7 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>ইমেইল</FormLabel>
                   <FormControl>
                     <Input placeholder="member@tcpc.com" {...field} />
                   </FormControl>
@@ -101,7 +101,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>পাসওয়ার্ড</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input type={showPassword ? "text" : "password"} {...field} />
@@ -119,15 +119,15 @@ export function LoginForm() {
               )}
             />
             <Button type="submit" className="w-full" disabled={isSubmitting || isUserLoading}>
-              {isSubmitting || isUserLoading ? 'Signing in...' : 'Sign In'}
+              {isSubmitting || isUserLoading ? 'সাইন ইন করা হচ্ছে...' : 'সাইন ইন করুন'}
             </Button>
           </form>
         </Form>
         
         <div className="mt-4 text-center text-sm">
-          Don't have an account?{' '}
+          আপনার কি অ্যাকাউন্ট নেই?{' '}
           <Link href="/register" className="underline hover:text-primary">
-            Sign up
+            সাইন আপ করুন
           </Link>
         </div>
       </CardContent>

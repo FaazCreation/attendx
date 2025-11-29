@@ -20,19 +20,17 @@ import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 
 const registerSchema = z.object({
-  memberId: z.string().min(1, { message: "Member ID is required." }),
-  name: z.string().min(1, { message: "Name is required." }),
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  department: z.string().min(1, { message: "Department is required." }),
-  session: z.string().min(1, { message: "Session is required." }),
+  memberId: z.string().min(1, { message: "সদস্য আইডি আবশ্যক।" }),
+  name: z.string().min(1, { message: "নাম আবশ্যক।" }),
+  email: z.string().email({ message: "অবৈধ ইমেইল ঠিকানা।" }),
+  password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }),
+  department: z.string().min(1, { message: "বিভাগ আবশ্যক।" }),
+  session: z.string().min(1, { message: "সেশন আবশ্যক।" }),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -58,7 +56,7 @@ export function RegisterForm() {
 
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     if(!auth || !firestore) {
-      toast({ variant: "destructive", title: "Registration failed", description: "Firebase is not ready." });
+      toast({ variant: "destructive", title: "নিবন্ধন ব্যর্থ হয়েছে", description: "Firebase প্রস্তুত নয়।" });
       return;
     }
 
@@ -68,14 +66,11 @@ export function RegisterForm() {
 
       await updateProfile(user, { displayName: data.name });
 
-      // Use a batch to ensure both writes succeed or fail together.
       const batch = writeBatch(firestore);
 
-      // Determine the user's role.
       const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
       const userRole = isAdmin ? 'Admin' : 'General Member';
 
-      // 1. Create the user profile document.
       const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
         id: data.memberId,
@@ -90,28 +85,25 @@ export function RegisterForm() {
       };
       batch.set(userDocRef, userData);
 
-      // 2. If the user is the designated admin, create an entry in the roles_admin collection.
       if (isAdmin) {
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
         batch.set(adminRoleRef, { uid: user.uid, role: "Admin" });
       }
 
-      // Commit the batch.
       await batch.commit();
 
       toast({
-        title: "Account created!",
-        description: "You have been successfully registered.",
+        title: "অ্যাকাউন্ট তৈরি হয়েছে!",
+        description: "আপনি সফলভাবে নিবন্ধিত হয়েছেন।",
       });
 
       router.push('/login');
 
     } catch (error: any) {
-      // This will catch auth errors (e.g., email already in use) and batch commit errors.
       toast({
         variant: "destructive",
-        title: "Registration failed",
-        description: error.message || "An unknown error occurred. Please check the details and try again.",
+        title: "নিবন্ধন ব্যর্থ হয়েছে",
+        description: error.message || "একটি অজানা ত্রুটি ঘটেছে। অনুগ্রহ করে বিবরণ পরীক্ষা করে আবার চেষ্টা করুন।",
       });
     }
   };
@@ -121,9 +113,9 @@ export function RegisterForm() {
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
         <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
-        <CardTitle className="text-2xl font-bold font-headline">Create an Account</CardTitle>
+        <CardTitle className="text-2xl font-bold font-headline">একটি অ্যাকাউন্ট তৈরি করুন</CardTitle>
         <CardDescription>
-          Join AttendX to manage your attendance
+          আপনার অ্যাটেনডেন্স পরিচালনা করতে AttendX-এ যোগ দিন
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -134,9 +126,9 @@ export function RegisterForm() {
                 name="memberId"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Member ID</FormLabel>
+                        <FormLabel>সদস্য আইডি</FormLabel>
                         <FormControl>
-                            <Input placeholder="Your Member ID" {...field} />
+                            <Input placeholder="আপনার সদস্য আইডি" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -147,9 +139,9 @@ export function RegisterForm() {
                 name="name"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel>সম্পূর্ণ নাম</FormLabel>
                         <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <Input placeholder="যেমনঃ জন ডো" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -160,7 +152,7 @@ export function RegisterForm() {
                 name="email"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>ইমেইল</FormLabel>
                         <FormControl>
                             <Input placeholder="member@tcpc.com" {...field} />
                         </FormControl>
@@ -173,7 +165,7 @@ export function RegisterForm() {
                 name="password"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>পাসওয়ার্ড</FormLabel>
                          <div className="relative">
                             <FormControl>
                                 <Input type={showPassword ? "text" : "password"} {...field} />
@@ -195,56 +187,56 @@ export function RegisterForm() {
                 name="department"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Department</FormLabel>
+                        <FormLabel>বিভাগ</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a department" />
+                                    <SelectValue placeholder="একটি বিভাগ নির্বাচন করুন" />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Professional</SelectLabel>
-                                    <SelectItem value="Computer Science and Engineering">Computer Science and Engineering</SelectItem>
-                                    <SelectItem value="Bachelor of Business Administration">Bachelor of Business Administration</SelectItem>
-                                    <SelectItem value="Theater and Media Studies">Theater and Media Studies</SelectItem>
-                                    <SelectItem value="Tourism and Hospitality Management">Tourism and Hospitality Management</SelectItem>
+                                    <SelectLabel>প্রফেশনাল</SelectLabel>
+                                    <SelectItem value="Computer Science and Engineering">কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং</SelectItem>
+                                    <SelectItem value="Bachelor of Business Administration">ব্যাচেলর অফ বিজনেস অ্যাডমিনিস্ট্রেশন</SelectItem>
+                                    <SelectItem value="Theater and Media Studies">থিয়েটার অ্যান্ড মিডিয়া স্টাডিজ</SelectItem>
+                                    <SelectItem value="Tourism and Hospitality Management">ট্যুরিজম অ্যান্ড হসপিটালিটি ম্যানেজমেন্ট</SelectItem>
                                 </SelectGroup>
                                 <SelectGroup>
-                                    <SelectLabel>Science</SelectLabel>
-                                    <SelectItem value="Biochemistry and Molecular Biology">Biochemistry and Molecular Biology</SelectItem>
-                                    <SelectItem value="Physics">Physics</SelectItem>
-                                    <SelectItem value="Chemistry">Chemistry</SelectItem>
-                                    <SelectItem value="Botany">Botany</SelectItem>
-                                    <SelectItem value="Mathematics">Mathematics</SelectItem>
-                                    <SelectItem value="Geography & Env.">Geography & Env.</SelectItem>
-                                    <SelectItem value="Home Economics">Home Economics</SelectItem>
-                                    <SelectItem value="Psychology">Psychology</SelectItem>
-                                    <SelectItem value="Zoology">Zoology</SelectItem>
-                                    <SelectItem value="Statistics">Statistics</SelectItem>
+                                    <SelectLabel>বিজ্ঞান</SelectLabel>
+                                    <SelectItem value="Biochemistry and Molecular Biology">বায়োকেমিস্ট্রি অ্যান্ড মলিকুলার বায়োলজি</SelectItem>
+                                    <SelectItem value="Physics">পদার্থবিজ্ঞান</SelectItem>
+                                    <SelectItem value="Chemistry">রসায়ন</SelectItem>
+                                    <SelectItem value="Botany">উদ্ভিদবিজ্ঞান</SelectItem>
+                                    <SelectItem value="Mathematics">গণিত</SelectItem>
+                                    <SelectItem value="Geography & Env.">ভূগোল ও পরিবেশ</SelectItem>
+                                    <SelectItem value="Home Economics">হোম ইকোনমিক্স</SelectItem>
+                                    <SelectItem value="Psychology">মনোবিজ্ঞান</SelectItem>
+                                    <SelectItem value="Zoology">প্রাণিবিজ্ঞান</SelectItem>
+                                    <SelectItem value="Statistics">পরিসংখ্যান</SelectItem>
                                 </SelectGroup>
                                 <SelectGroup>
-                                    <SelectLabel>Social Science</SelectLabel>
-                                    <SelectItem value="Economics">Economics</SelectItem>
-                                    <SelectItem value="Political Science">Political Science</SelectItem>
-                                    <SelectItem value="Sociology">Sociology</SelectItem>
-                                    <SelectItem value="Social Work">Social Work</SelectItem>
+                                    <SelectLabel>সমাজ বিজ্ঞান</SelectLabel>
+                                    <SelectItem value="Economics">অর্থনীতি</SelectItem>
+                                    <SelectItem value="Political Science">রাষ্ট্রবিজ্ঞান</SelectItem>
+                                    <SelectItem value="Sociology">সমাজবিজ্ঞান</SelectItem>
+                                    <SelectItem value="Social Work">সমাজকর্ম</SelectItem>
                                 </SelectGroup>
                                 <SelectGroup>
-                                    <SelectLabel>Arts</SelectLabel>
-                                    <SelectItem value="Bangla">Bangla</SelectItem>
-                                    <SelectItem value="English">English</SelectItem>
-                                    <SelectItem value="History">History</SelectItem>
-                                    <SelectItem value="Islamic History">Islamic History</SelectItem>
-                                    <SelectItem value="Islamic Studies">Islamic Studies</SelectItem>
-                                    <SelectItem value="Philosophy">Philosophy</SelectItem>
+                                    <SelectLabel>কলা</SelectLabel>
+                                    <SelectItem value="Bangla">বাংলা</SelectItem>
+                                    <SelectItem value="English">ইংরেজি</SelectItem>
+                                    <SelectItem value="History">ইতিহাস</SelectItem>
+                                    <SelectItem value="Islamic History">ইসলামের ইতিহাস</SelectItem>
+                                    <SelectItem value="Islamic Studies">ইসলামিক স্টাডিজ</SelectItem>
+                                    <SelectItem value="Philosophy">দর্শন</SelectItem>
                                 </SelectGroup>
                                 <SelectGroup>
-                                    <SelectLabel>Business Studies</SelectLabel>
-                                    <SelectItem value="Accounting">Accounting</SelectItem>
-                                    <SelectItem value="Finance And Banking">Finance And Banking</SelectItem>
-                                    <SelectItem value="Management">Management</MSelectItem>
-                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                    <SelectLabel>ব্যবসায় শিক্ষা</SelectLabel>
+                                    <SelectItem value="Accounting">হিসাববিজ্ঞান</SelectItem>
+                                    <SelectItem value="Finance And Banking">ফিন্যান্স অ্যান্ড ব্যাংকিং</SelectItem>
+                                    <SelectItem value="Management">ম্যানেজমেন্ট</SelectItem>
+                                    <SelectItem value="Marketing">মার্কেটিং</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
@@ -257,19 +249,19 @@ export function RegisterForm() {
                 name="session"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Session</FormLabel>
+                        <FormLabel>সেশন</FormLabel>
                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a session" />
+                                    <SelectValue placeholder="একটি সেশন নির্বাচন করুন" />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                                <SelectItem value="2020-2021">2020-2021</SelectItem>
-                                <SelectItem value="2021-2022">2021-2022</SelectItem>
-                                <SelectItem value="2022-2023">2022-2023</SelectItem>
-                                <SelectItem value="2023-2024">2023-2024</SelectItem>
-                                <SelectItem value="2024-2025">2024-2025</SelectItem>
+                                <SelectItem value="2020-2021">২০২০-২০২১</SelectItem>
+                                <SelectItem value="2021-2022">২০২১-২০২২</SelectItem>
+                                <SelectItem value="2022-2023">২০২২-২০২৩</SelectItem>
+                                <SelectItem value="2023-2024">২০২৩-২০২৪</SelectItem>
+                                <SelectItem value="2024-2025">২০২৪-২০২৫</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -278,19 +270,17 @@ export function RegisterForm() {
             />
 
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Creating Account...' : 'Create Account'}
+              {form.formState.isSubmitting ? 'অ্যাকাউন্ট তৈরি করা হচ্ছে...' : 'অ্যাকাউন্ট তৈরি করুন'}
             </Button>
           </form>
         </Form>
         <div className="mt-4 text-center text-sm">
-          Already have an account?{' '}
+          ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
           <Link href="/login" className="underline hover:text-primary">
-            Sign in
+            সাইন ইন করুন
           </Link>
         </div>
       </CardContent>
     </Card>
   );
 }
-
-    

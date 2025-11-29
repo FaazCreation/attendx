@@ -10,10 +10,10 @@ import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
 
 const allMenuItems = [
-  { href: '/profile', label: 'My Profile', icon: User, description: "View and edit your personal details", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/sessions', label: 'Sessions', icon: CalendarClock, description: "View and manage attendance sessions", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/members', label: 'Members', icon: Users, description: "Browse and manage club members", roles: ['Admin', 'Executive Member'] },
-  { href: '/reports', label: 'Reports', icon: BarChart3, description: "Generate and export attendance data", roles: ['Admin', 'Executive Member'] },
+  { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার ব্যক্তিগত বিবরণ দেখুন এবং সম্পাদনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
+  { href: '/members', label: 'সদস্য', icon: Users, description: "ক্লাবের সদস্যদের ব্রাউজ ও পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
+  { href: '/reports', label: 'রিপোর্ট', icon: BarChart3, description: "অ্যাটেনডেন্স ডেটা তৈরি এবং এক্সপোর্ট করুন", roles: ['Admin', 'Executive Member'] },
 ];
 
 export default function DashboardPage() {
@@ -62,7 +62,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">Select an option below to get started.</p>
+      <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">শুরু করতে নিচের একটি বিকল্প নির্বাচন করুন।</p>
       
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {menuItems.map((item) => (
@@ -90,9 +90,9 @@ export default function DashboardPage() {
         <div className="flex flex-col items-center justify-center">
             <div className="flex items-center gap-1.5">
                 <Copyright className="h-3.5 w-3.5" />
-                <span>A product of Club Orbit.</span>
+                <span>ক্লাব অরবিটের একটি পণ্য।</span>
             </div>
-            <span>Developed by Forhad Hossain.</span>
+            <span>ফরহাদ হোসেন দ্বারা তৈরি।</span>
         </div>
       </div>
     </div>

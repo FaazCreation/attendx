@@ -30,6 +30,8 @@ import { doc, deleteDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { format } from 'date-fns';
+import { bn } from 'date-fns/locale';
 
 type Session = {
   id: string;
@@ -60,9 +62,19 @@ const formatTime = (timeString: string) => {
   const h = parseInt(hours, 10);
   const m = parseInt(minutes, 10);
   const ampm = h >= 12 ? 'PM' : 'AM';
-  const formattedHours = h % 12 || 12; // Convert 0 to 12
+  const formattedHours = h % 12 || 12; 
   return `${formattedHours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
 };
+
+const getSessionTypeInBangla = (type: string) => {
+  switch(type) {
+    case 'General Meeting': return 'সাধারণ সভা';
+    case 'AGM': return 'এজিএম';
+    case 'Event': return 'ইভেন্ট';
+    case 'Workshop': return 'কর্মশালা';
+    default: return type;
+  }
+}
 
 export function SessionCard({ session, userRole, attendanceRecords }: SessionCardProps) {
     const { user } = useUser();
@@ -89,8 +101,8 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
         deleteDoc(sessionDocRef)
             .then(() => {
                 toast({
-                    title: "Session Deleted",
-                    description: `The session "${session.title}" has been removed.`,
+                    title: "সেশন মুছে ফেলা হয়েছে",
+                    description: `"${session.title}" সেশনটি সরানো হয়েছে।`,
                 });
             })
             .catch((error) => {
@@ -101,8 +113,8 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
                 errorEmitter.emit('permission-error', permissionError);
                  toast({
                     variant: 'destructive',
-                    title: 'Deletion Failed',
-                    description: 'You do not have permission to delete this session.',
+                    title: 'মুছে ফেলতে ব্যর্থ',
+                    description: 'এই সেশনটি মুছে ফেলার অনুমতি আপনার নেই।',
                 });
             });
     };
@@ -112,13 +124,13 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
       <CardHeader>
         <div className="flex sm:flex-row flex-col sm:items-start sm:justify-between gap-2">
             <CardTitle className="text-lg font-bold line-clamp-2">{session.title}</CardTitle>
-            <Badge variant={session.type === 'AGM' ? 'destructive' : 'secondary'} className="w-fit">{session.type}</Badge>
+            <Badge variant={session.type === 'AGM' ? 'destructive' : 'secondary'} className="w-fit">{getSessionTypeInBangla(session.type)}</Badge>
         </div>
       </CardHeader>
       <CardContent className="flex-grow space-y-2">
         <div className="flex items-center text-sm text-muted-foreground">
           <Calendar className="mr-2 h-4 w-4" />
-          <span>{new Date(session.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span>{format(new Date(session.date), 'PPPP', { locale: bn })}</span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="mr-2 h-4 w-4" />
@@ -130,13 +142,13 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
                     <Button disabled={hasAttended} className="w-full">
-                        {hasAttended ? <><Check className="mr-2 h-4 w-4" />Attended</> : 'Attend Session'}
+                        {hasAttended ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> : 'সেশনে যোগ দিন'}
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                           <span className="block sm:inline">Mark Attendance for </span>
+                           <span className="block sm:inline">এর জন্য অ্যাটেনডেন্স চিহ্নিত করুন </span>
                            <span className="block sm:inline font-semibold">"{session.title}"</span>
                         </DialogTitle>
                     </DialogHeader>
@@ -150,17 +162,17 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
                 <DialogTrigger asChild>
                     <Button variant="outline">
                         <QrCode className="mr-2 h-4 w-4" />
-                        Show Code
+                        কোড দেখান
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xs">
                      <DialogHeader>
-                        <DialogTitle>Scan to Attend</DialogTitle>
+                        <DialogTitle>অ্যাটেন্ড করতে স্ক্যান করুন</DialogTitle>
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center p-4">
                         <Image src={qrCodeUrl} alt={`QR Code for ${session.title}`} width={200} height={200} />
                         <p className="mt-4 text-lg font-semibold tracking-widest">{session.attendanceCode}</p>
-                        <p className="text-sm text-muted-foreground">Or use the code above</p>
+                        <p className="text-sm text-muted-foreground">অথবা উপরের কোডটি ব্যবহার করুন</p>
                     </div>
                 </DialogContent>
             </Dialog>
@@ -171,21 +183,21 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
                 <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="icon">
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete Session</span>
+                        <span className="sr-only">সেশন মুছুন</span>
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>আপনি কি পুরোপুরি নিশ্চিত?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the
+                        এই কাজটি আর বাতিল করা যাবে না। এটি স্থায়ীভাবে
                         <span className="font-semibold"> {session.title} </span> 
-                        session and all of its attendance records.
+                        সেশন এবং এর সমস্ত অ্যাটেনডেন্স রেকর্ড মুছে ফেলবে।
                     </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                    <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>চালিয়ে যান</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

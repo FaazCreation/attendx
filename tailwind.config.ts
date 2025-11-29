@@ -11,7 +11,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', ...fontFamily.sans],
+        sans: ['"Hind Siliguri"', ...fontFamily.sans],
       },
       colors: {
         background: 'hsl(var(--background))',

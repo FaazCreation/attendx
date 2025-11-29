@@ -41,7 +41,7 @@ export default function ReportsPage() {
       <div className="flex-1 space-y-6">
         <div className="flex items-center justify-between space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
-            Reports
+            রিপোর্ট
           </h1>
         </div>
         <Card>
@@ -61,10 +61,10 @@ export default function ReportsPage() {
        <Card className="border-destructive">
           <CardHeader className="flex flex-row items-center gap-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
-            <CardTitle>Access Denied</CardTitle>
+            <CardTitle>প্রবেশাধিকার নেই</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You do not have permission to view this page. Redirecting to dashboard...</p>
+            <p>এই পৃষ্ঠাটি দেখার জন্য আপনার অনুমতি নেই। ড্যাশবোর্ডে রিডাইরেক্ট করা হচ্ছে...</p>
           </CardContent>
         </Card>
     )
@@ -74,20 +74,20 @@ export default function ReportsPage() {
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
-          Reports
+          রিপোর্ট
         </h1>
         <Button>
             <Download className="mr-2 h-4 w-4" />
-            Export All Data
+            সব ডেটা এক্সপোর্ট করুন
           </Button>
       </div>
       
       <Card>
         <CardHeader>
-          <CardTitle>Generate Reports</CardTitle>
+          <CardTitle>রিপোর্ট তৈরি করুন</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Reporting features are coming soon. You'll be able to generate detailed reports on member attendance and engagement.</p>
+          <p>রিপোর্টিং বৈশিষ্ট্য শীঘ্রই আসছে। আপনি সদস্যের উপস্থিতি এবং অংশগ্রহণের উপর বিস্তারিত রিপোর্ট তৈরি করতে পারবেন।</p>
         </CardContent>
       </Card>
     </div>
