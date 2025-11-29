@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore } from '@/firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -71,9 +71,9 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       createdAt: serverTimestamp(),
     };
 
-    const sessionsCollectionRef = collection(firestore, 'attendanceSessions');
+    const sessionDocRef = doc(firestore, 'attendanceSessions', sessionId);
     
-    addDoc(sessionsCollectionRef, sessionData)
+    setDoc(sessionDocRef, sessionData)
       .then(() => {
         toast({
           title: "Session Created",
@@ -84,7 +84,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       .catch((error) => {
         if (error.code && error.code.startsWith('permission-denied')) {
           const permissionError = new FirestorePermissionError({
-            path: sessionsCollectionRef.path,
+            path: sessionDocRef.path,
             operation: 'create',
             requestResourceData: sessionData,
           });
