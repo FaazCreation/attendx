@@ -54,7 +54,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center text-center sm:justify-start sm:text-left">
         <div className="flex items-center gap-3">
           <AttendXIcon className="h-8 w-8 text-primary" />
-          <div>
+          <div className="text-left">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
               AttendX
             </h1>
