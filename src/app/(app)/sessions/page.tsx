@@ -1,7 +1,7 @@
 'use client';
 
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -14,10 +14,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CreateSessionForm } from '@/components/sessions/create-session-form';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { SessionCard } from '@/components/sessions/session-card';
 
 export default function SessionsPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const sessionsCollection = useMemoFirebase(() => {
@@ -27,43 +29,60 @@ export default function SessionsPage() {
 
   const { data: sessions, isLoading } = useCollection(sessionsCollection);
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
+
+  const canCreateSession = useMemo(() => {
+    if (!userData) return false;
+    return userData.role === 'Admin' || userData.role === 'Executive Member';
+  }, [userData]);
+
+
   return (
     <div className="flex-1 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
           Attendance Sessions
         </h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Session
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Session</DialogTitle>
-              <DialogDescription>
-                Fill out the details for the new attendance session.
-              </DialogDescription>
-            </DialogHeader>
-            <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        {canCreateSession && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create Session
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Create New Session</DialogTitle>
+                <DialogDescription>
+                  Fill out the details for the new attendance session.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
       
-      {isLoading && (
-        <div className="space-y-4">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
+      {(isLoading || isUserLoading) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
         </div>
       )}
 
-      {sessions && (
-        <div className="space-y-4">
-          {/* TODO: Implement session list component */}
-          <p>{sessions.length} session(s) found.</p>
+      {sessions && userData && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {sessions.map((session) => (
+            <SessionCard key={session.id} session={session} userRole={userData.role} />
+          ))}
         </div>
       )}
       {!sessions && !isLoading && <p>No sessions found.</p>}
