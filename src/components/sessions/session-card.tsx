@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
@@ -74,7 +74,10 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Mark Attendance for "{session.title}"</DialogTitle>
+                        <DialogTitle>
+                           <span className="block sm:inline">Mark Attendance for </span>
+                           <span className="block sm:inline font-semibold">"{session.title}"</span>
+                        </DialogTitle>
                     </DialogHeader>
                     <AttendanceForm session={session} onAttendanceMarked={() => setIsAttendOpen(false)} />
                 </DialogContent>
