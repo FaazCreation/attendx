@@ -92,14 +92,17 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'email',
     header: 'Email',
+    cell: ({ row }) => <div className="truncate max-w-[120px] md:max-w-none">{row.getValue('email')}</div>,
   },
-    {
+  {
     accessorKey: 'department',
     header: 'Department',
+    cell: ({ row }) => <div className="hidden md:table-cell">{row.getValue('department')}</div>,
   },
   {
     accessorKey: 'batch',
     header: 'Session',
+     cell: ({ row }) => <div className="hidden md:table-cell">{row.getValue('batch')}</div>,
   },
   {
     accessorKey: 'role',
