@@ -48,9 +48,9 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const isDashboard = pathname === '/dashboard';
 
   return (
-      <div>
+      <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
            {children}
            {!isDashboard && (
             <div className="mt-8">
@@ -63,6 +63,9 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
             </div>
           )}
         </main>
+        <footer className="py-4 px-4 text-center text-sm text-muted-foreground">
+          A product of Club Orbit. Developed by Forhad Hossain.
+        </footer>
       </div>
   );
 }
