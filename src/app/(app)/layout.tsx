@@ -64,7 +64,7 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
           )}
         </main>
         <footer className="py-4 px-4 text-center text-sm text-muted-foreground">
-          A product of Club Orbit. Developed by Forhad Hossain.
+          A product of Club Orbit.<br className="sm:hidden" /> Developed by Forhad Hossain.
         </footer>
       </div>
   );
