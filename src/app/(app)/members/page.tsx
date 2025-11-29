@@ -28,10 +28,10 @@ export default function MembersPage() {
     return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
 
-  // Immediately determine if the user is a General Member once their data loads.
+  // Determine if the user is a General Member once their data loads.
   const isGeneralMember = !isCurrentUserLoading && currentUserData?.role === 'General Member';
 
-  // Step 3: If the user is a General Member, redirect them immediately after checking.
+  // Step 3: If the user is a General Member, redirect them.
   useEffect(() => {
     if (isGeneralMember) {
       router.push('/dashboard');
@@ -41,8 +41,10 @@ export default function MembersPage() {
   // Step 4: Only create the collection query if the user has permission.
   const usersCollection = useMemoFirebase(() => {
     // Only query if Firestore is ready AND the user is confirmed to have viewing permissions.
-    if (!firestore || !canViewMembers) return null; 
-    return collection(firestore, 'users');
+    if (firestore && canViewMembers) {
+      return collection(firestore, 'users');
+    }
+    return null; // Return null if permissions are not yet confirmed
   }, [firestore, canViewMembers]);
 
   // The useCollection hook will only run if usersCollection is not null.
