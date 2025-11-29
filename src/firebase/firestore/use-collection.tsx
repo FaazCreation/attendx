@@ -91,6 +91,13 @@ export function useCollection<T = any>(
           memoizedTargetRefOrQuery.type === 'collection'
             ? (memoizedTargetRefOrQuery as CollectionReference).path
             : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
+        
+        // If the path is empty, it means the query was invalid (likely during initialization).
+        // Don't create an error in this case, as it's a transient state.
+        if (!path) {
+            setIsLoading(false);
+            return;
+        }
 
         const contextualError = new FirestorePermissionError({
           operation: 'list',
