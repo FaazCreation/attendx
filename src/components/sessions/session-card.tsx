@@ -130,7 +130,7 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
       <CardContent className="flex-grow space-y-2">
         <div className="flex items-center text-sm text-muted-foreground">
           <Calendar className="mr-2 h-4 w-4" />
-          <span>{format(new Date(session.date), 'PPPP', { locale: bn })}</span>
+          <span>{format(new Date(session.date), 'EEEE, do MMMM yyyy', { locale: bn })}</span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="mr-2 h-4 w-4" />
