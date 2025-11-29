@@ -1,6 +1,6 @@
 'use client';
 
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useCollection } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { MembersTable } from '@/components/members/members-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 function MembersList() {
   const firestore = useFirestore();
-  const usersCollection = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'users');
-  }, [firestore]);
 
-  const { data: users, isLoading: areMembersLoading } = useCollection(usersCollection);
+  const { data: users, isLoading: areMembersLoading } = useCollection(
+    () => {
+      if (!firestore) return null;
+      return collection(firestore, 'users');
+    },
+    [firestore]
+  );
   
   if (areMembersLoading) {
       return (

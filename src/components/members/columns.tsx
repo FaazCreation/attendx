@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { doc, updateDoc } from 'firebase/firestore';
-import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirestore, useUser, useDoc } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -34,12 +34,13 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
   const { toast } = useToast();
   const userRoles: User['role'][] = ['Admin', 'Executive Member', 'General Member'];
 
-  const currentUserDocRef = useMemoFirebase(() => {
-    if (!firestore || !currentUser) return null;
-    return doc(firestore, 'users', currentUser.uid);
-  }, [firestore, currentUser]);
-
-  const { data: currentUserData } = useDoc(currentUserDocRef);
+  const { data: currentUserData } = useDoc(
+    () => {
+      if (!firestore || !currentUser) return null;
+      return doc(firestore, 'users', currentUser.uid);
+    },
+    [firestore, currentUser]
+  );
   
   const currentUserIsAdmin = currentUserData?.role === 'Admin';
   

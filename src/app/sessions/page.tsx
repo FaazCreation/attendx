@@ -1,6 +1,6 @@
 'use client';
 
-import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
 import { collection, doc, collectionGroup, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -22,26 +22,29 @@ export default function SessionsPage() {
   const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const sessionsCollection = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'attendanceSessions');
-  }, [firestore]);
+  const { data: sessions, isLoading: areSessionsLoading } = useCollection(
+    () => {
+      if (!firestore) return null;
+      return collection(firestore, 'attendanceSessions');
+    },
+    [firestore]
+  );
 
-  const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
+  const { data: userData, isLoading: isUserLoading } = useDoc(
+    () => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'users', user.uid);
+    },
+    [firestore, user]
+  );
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-
-  const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
-
-  const userAttendanceQuery = useMemoFirebase(() => {
-    if (!firestore || !user?.uid) return null;
-    return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
-  }, [firestore, user?.uid]);
-
-  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(userAttendanceQuery);
+  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(
+    () => {
+      if (!firestore || !user?.uid) return null;
+      return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
+    },
+    [firestore, user?.uid]
+  );
 
   const isLoading = areSessionsLoading || isUserLoading || isAttendanceLoading;
 

@@ -1,13 +1,13 @@
 'use client';
 
-import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase';
+import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
 import { doc, collection, query, where, collectionGroup } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Award, BarChart, Calendar, CheckSquare, Edit } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { EditProfilePhoto } from '@/components/profile/edit-profile-photo';
@@ -26,26 +26,30 @@ export default function ProfilePage() {
   const firestore = useFirestore();
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
 
+  const { data: userData, isLoading: isProfileLoading } = useDoc(
+    () => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'users', user.uid);
+    },
+    [firestore, user]
+  );
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
+  const { data: sessions, isLoading: areSessionsLoading } = useCollection(
+    () => {
+      if (!firestore) return null;
+      return collection(firestore, 'attendanceSessions');
+    },
+    [firestore]
+  );
 
-  const { data: userData, isLoading: isProfileLoading } = useDoc(userDocRef);
+  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(
+    () => {
+      if (!firestore || !user?.uid) return null;
+      return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
+    },
+    [firestore, user?.uid]
+  );
 
-  const sessionsCollection = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'attendanceSessions');
-  }, [firestore]);
-  const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
-
-  const userAttendanceQuery = useMemoFirebase(() => {
-    if (!firestore || !user?.uid) return null;
-    return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
-  }, [firestore, user?.uid]);
-
-  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(userAttendanceQuery);
 
   const isLoading = isUserLoading || isProfileLoading || areSessionsLoading || isAttendanceLoading;
 

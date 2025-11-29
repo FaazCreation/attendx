@@ -2,18 +2,23 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { BarChart, Calendar, Users } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function AdminStats() {
     const firestore = useFirestore();
 
-    const usersCollection = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
-    const { data: users, isLoading: usersLoading } = useCollection(usersCollection);
+    const { data: users, isLoading: usersLoading } = useCollection(
+        () => firestore ? collection(firestore, 'users') : null,
+        [firestore]
+    );
 
-    const sessionsCollection = useMemoFirebase(() => firestore ? collection(firestore, 'attendanceSessions') : null, [firestore]);
-    const { data: sessions, isLoading: sessionsLoading } = useCollection(sessionsCollection);
+    const { data: sessions, isLoading: sessionsLoading } = useCollection(
+        () => firestore ? collection(firestore, 'attendanceSessions') : null,
+        [firestore]
+    );
+
 
     if (usersLoading || sessionsLoading) {
         return (

@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { User, CalendarClock, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
@@ -19,12 +19,13 @@ export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-
-  const { data: userData, isLoading: isProfileLoading } = useDoc(userDocRef);
+  const { data: userData, isLoading: isProfileLoading } = useDoc(
+    () => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'users', user.uid);
+    },
+    [firestore, user]
+  );
 
   const menuItems = useMemo(() => {
     if (!userData) return [];

@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser, useFirestore, useDoc, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
+import { useUser, useFirestore, useDoc, FirebaseClientProvider } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 import { doc } from 'firebase/firestore';
@@ -15,52 +15,53 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const router = useRouter();
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-  
-  const { data: currentUserData, isLoading: isUserDocLoading } = useDoc(userDocRef);
+  const { data: currentUserData, isLoading: isUserDocLoading } = useDoc(
+    () => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'users', user.uid);
+    },
+    [firestore, user]
+  );
 
   const hasPermission = useMemo(() => {
-    if (isUserLoading || isUserDocLoading || !currentUserData) return undefined;
+    if (isUserLoading || isUserDocLoading) return undefined;
+    if (!currentUserData) return false;
     const role = currentUserData.role;
     return role === 'Admin' || role === 'Executive Member';
   }, [currentUserData, isUserLoading, isUserDocLoading]);
-  
+
   useEffect(() => {
-    if (isUserLoading || isUserDocLoading) {
-        return; // Wait until all loading is complete
+    if (hasPermission === undefined) {
+      return; // Still loading, do nothing.
     }
 
     if (!user) {
-        router.push('/login');
-        return;
+      router.push('/login');
+      return;
     }
-    
+
     if (hasPermission === false) {
       router.push('/dashboard');
     }
-  }, [isUserLoading, isUserDocLoading, hasPermission, router, user]);
+  }, [hasPermission, user, router]);
 
-  const isLoading = hasPermission === undefined;
 
-  if (isLoading) {
+  if (hasPermission === undefined) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex items-center gap-4">
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-            </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!user || !hasPermission) {
-     return (
-       <div className="flex items-center justify-center h-screen bg-background">
+  if (!hasPermission) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
         <Card className="w-full max-w-md border-destructive">
           <CardHeader className="flex flex-row items-center gap-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
@@ -70,7 +71,7 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
             <p>এই পৃষ্ঠাটি দেখার জন্য আপনার অনুমতি নেই। আপনাকে ড্যাশবোর্ডে ফেরত পাঠানো হচ্ছে...</p>
           </CardContent>
         </Card>
-       </div>
+      </div>
     );
   }
 
@@ -93,7 +94,7 @@ export default function AdminLayout({
 }) {
   return (
     <FirebaseClientProvider>
-        <ProtectedAdminLayout>{children}</ProtectedAdminLayout>
+      <ProtectedAdminLayout>{children}</ProtectedAdminLayout>
     </FirebaseClientProvider>
   );
 }
