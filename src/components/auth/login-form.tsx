@@ -47,9 +47,8 @@ export function LoginForm() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-        // Redirect to members page after login.
-        // The main layout will handle role-based redirection for the dashboard.
-        router.push('/members');
+        // Redirect to dashboard page after login.
+        router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
 

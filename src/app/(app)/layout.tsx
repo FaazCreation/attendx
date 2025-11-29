@@ -1,8 +1,6 @@
 'use client';
 
 import Header from '@/components/layout/header';
-import AppSidebar from '@/components/layout/sidebar';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { FirebaseClientProvider, useUser } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
@@ -10,6 +8,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
+import { AttendXIcon } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 
 function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -19,42 +21,11 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // If auth state is resolved and there's no user, redirect to login.
     if (!isUserLoading && !user) {
       router.push('/login');
       return;
     }
-
-    // If we have a user, check their role, but only if they try to access the dashboard.
-    if (user && firestore && pathname.startsWith('/dashboard')) {
-      const checkAdmin = async () => {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        try {
-          const docSnap = await getDoc(adminRoleRef);
-          if (!docSnap.exists()) {
-            // If the user is not an admin and tries to access the dashboard,
-            // redirect them to a safe default page, like the members page.
-            toast({
-              variant: "destructive",
-              title: "Access Denied",
-              description: "You do not have permission to view the dashboard.",
-            });
-            router.push('/members');
-          }
-        } catch (error) {
-          console.error("Error checking admin status:", error);
-          toast({
-              variant: "destructive",
-              title: "Permission Error",
-              description: "Could not verify your role. Please try again later.",
-          });
-          // On error, redirect to a safe page.
-          router.push('/members');
-        }
-      };
-      checkAdmin();
-    }
-  }, [user, isUserLoading, router, firestore, pathname, toast]);
+  }, [user, isUserLoading, router]);
 
   if (isUserLoading) {
     return (
@@ -70,24 +41,29 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
     );
   }
   
-  // If we have a user, render the app layout.
-  // If we're still loading, we show the skeleton, so we only get here if loading is false.
-  // If there's no user, the useEffect will have already initiated a redirect.
-  // This prevents a flash of the UI before the redirect happens.
   if (!user) {
-    return null; // or a loading spinner
+    return null; // Redirect is happening
   }
 
+  const isDashboard = pathname === '/dashboard';
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
+      <div>
         <Header />
-        <div className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8">
+           {!isDashboard && (
+            <div className="mb-6">
+              <Button variant="outline" asChild>
+                <Link href="/dashboard">
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back to Dashboard
+                </Link>
+              </Button>
+            </div>
+          )}
           {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </main>
+      </div>
   );
 }
 

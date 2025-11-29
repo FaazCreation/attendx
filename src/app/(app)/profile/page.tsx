@@ -49,13 +49,18 @@ export default function ProfilePage() {
 
   return (
     <div className="flex-1 space-y-6">
+       <div className="flex items-center justify-between space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight font-headline">
+          My Profile
+        </h1>
+      </div>
       <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
         <Avatar className="h-24 w-24 border-2 border-primary">
           <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || ''} />
           <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
         </Avatar>
         <div className="space-y-1 text-center md:text-left">
-          <h1 className="text-3xl font-bold font-headline">{userData.name}</h1>
+          <h2 className="text-3xl font-bold font-headline">{userData.name}</h2>
           <p className="text-md text-muted-foreground">{userData.email}</p>
           <p className="text-sm text-muted-foreground">{userData.department} - {userData.batch}</p>
         </div>
