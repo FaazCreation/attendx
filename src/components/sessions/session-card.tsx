@@ -115,6 +115,7 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
+    const formattedDate = toBengaliNumerals(format(new Date(session.date), 'EEEE, do MMMM yyyy', { locale: bn }));
 
     const hasAttended = useMemo(() => {
         if (!user) return false;
@@ -157,7 +158,7 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
       <CardContent className="flex-grow space-y-2">
         <div className="flex items-center text-sm text-muted-foreground">
           <Calendar className="mr-2 h-4 w-4" />
-          <span>{format(new Date(session.date), 'EEEE, do MMMM yyyy', { locale: bn })}</span>
+          <span>{formattedDate}</span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="mr-2 h-4 w-4" />
