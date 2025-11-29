@@ -15,20 +15,33 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const router = useRouter();
 
+  // Check for admin role directly
+  const adminRoleDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  // Also fetch user data for other purposes (like executive member check)
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: currentUserData, isLoading: isCurrentUserLoading } = useDoc(userDocRef);
+  const { data: adminRoleData, isLoading: isAdminRoleLoading } = useDoc(adminRoleDocRef);
+  const { data: currentUserData, isLoading: isUserDocLoading } = useDoc(userDocRef);
 
   const hasPermission = useMemo(() => {
-    if (!currentUserData) return false;
-    return ['Admin', 'Executive Member'].includes(currentUserData.role);
-  }, [currentUserData]);
+    if (adminRoleData) { // If the doc in roles_admin exists, they are an admin.
+      return true;
+    }
+    if (currentUserData) { // Fallback to check for Executive Member
+      return currentUserData.role === 'Executive Member';
+    }
+    return false;
+  }, [adminRoleData, currentUserData]);
   
   useEffect(() => {
-    const isLoading = isUserLoading || isCurrentUserLoading;
+    const isLoading = isUserLoading || isAdminRoleLoading || isUserDocLoading;
     if (!isUserLoading && !user) {
         router.push('/login');
         return;
@@ -37,9 +50,9 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
     if (!isLoading && user && !hasPermission) {
       router.push('/dashboard');
     }
-  }, [isUserLoading, isCurrentUserLoading, hasPermission, router, user]);
+  }, [isUserLoading, isAdminRoleLoading, isUserDocLoading, hasPermission, router, user]);
 
-  const isLoading = isUserLoading || isCurrentUserLoading;
+  const isLoading = isUserLoading || isAdminRoleLoading || isUserDocLoading;
 
   if (isLoading) {
     return (
@@ -57,7 +70,7 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   if (!user || !hasPermission) {
      return (
        <div className="flex items-center justify-center h-screen bg-background">
-        <Card className="border-destructive w-full max-w-md">
+        <Card className="w-full max-w-md border-destructive">
           <CardHeader className="flex flex-row items-center gap-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
             <CardTitle>প্রবেশাধিকার নেই</CardTitle>
