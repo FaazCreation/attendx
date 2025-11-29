@@ -27,9 +27,9 @@ export default function ProfilePage() {
   const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
 
   const userAttendanceQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    if (!firestore || !user?.uid) return null;
     return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
-  }, [firestore, user]);
+  }, [firestore, user?.uid]);
 
   const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(userAttendanceQuery);
 
