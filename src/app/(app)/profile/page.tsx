@@ -1,19 +1,17 @@
 'use client';
 
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase';
-import { doc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs, collectionGroup } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Award, BarChart, Calendar, CheckSquare } from 'lucide-react';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const [attendedCount, setAttendedCount] = useState(0);
-  const [isAttendanceLoading, setIsAttendanceLoading] = useState(true);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -28,34 +26,18 @@ export default function ProfilePage() {
   }, [firestore]);
   const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
 
-  useEffect(() => {
-    const fetchAttendance = async () => {
-      if (!firestore || !user || !sessions) {
-        setIsAttendanceLoading(false);
-        return;
-      }
-      
-      setIsAttendanceLoading(true);
-      let count = 0;
-      for (const session of sessions) {
-        const attendanceRecordsRef = collection(firestore, `attendanceSessions/${session.id}/attendanceRecords`);
-        const q = query(attendanceRecordsRef, where('userId', '==', user.uid));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          count++;
-        }
-      }
-      setAttendedCount(count);
-      setIsAttendanceLoading(false);
-    };
+  const userAttendanceQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
+  }, [firestore, user]);
 
-    fetchAttendance();
-  }, [firestore, user, sessions]);
+  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(userAttendanceQuery);
 
   const isLoading = isUserLoading || isProfileLoading || areSessionsLoading || isAttendanceLoading;
 
   const initials = user?.displayName?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
 
+  const attendedCount = attendanceRecords?.length || 0;
   const totalSessions = sessions?.length || 0;
   const attendanceRate = totalSessions > 0 ? Math.round((attendedCount / totalSessions) * 100) : 0;
 

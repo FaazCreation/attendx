@@ -62,12 +62,10 @@ service cloud.firestore {
 
     /**
      * Checks if the user has administrative privileges by verifying the existence
-     * of their UID in the /roles_admin collection or if they are the designated super admin.
+     * of their UID in the /roles_admin collection.
      */
     function isAdmin() {
-      return isSignedIn() && 
-             (exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
-              request.auth.uid == '90e685nyfFNSSRsEEvgjhGsdl063');
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
     
     /**
@@ -122,6 +120,17 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if false;
     }
+    
+    /**
+     * @description Rule for querying the attendanceRecords collection group.
+     * @path /attendanceRecords/{recordId}
+     * @allow (list) An authenticated user to query for their own attendance records.
+     * @principle Enables the profile page to efficiently fetch a user's attendance history.
+     */
+    match /{path=**}/attendanceRecords/{recordId} {
+      allow list: if isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid;
+    }
+
 
     /**
      * @description Defines attendance sessions for events, meetings, etc.
