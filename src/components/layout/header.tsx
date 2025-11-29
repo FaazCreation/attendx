@@ -2,6 +2,16 @@
 import Link from "next/link";
 import { AttendXIcon } from "@/components/icons";
 import { UserNav } from "@/components/layout/user-nav";
+import { Button } from "@/components/ui/button";
+import { Bell } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   return (
@@ -14,8 +24,24 @@ export default function Header() {
             </span>
         </Link>
       </div>
-      <div className="flex-1" />
-      <UserNav />
+      <div className="flex flex-1 items-center justify-end gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative h-9 w-9">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Toggle notifications</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-80" align="end">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="p-4 text-sm text-center text-muted-foreground">
+              No new notifications
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <UserNav />
+      </div>
     </header>
   );
 }
