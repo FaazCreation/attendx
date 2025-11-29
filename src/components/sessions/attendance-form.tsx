@@ -38,7 +38,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
     }
   });
 
-  const onSubmit: SubmitHandler<AttendanceFormData> = async (data) => {
+  const onSubmit: SubmitHandler<AttendanceFormData> = (data) => {
     if (!firestore || !user) return;
 
     if (data.attendanceCode.toUpperCase() !== session.attendanceCode.toUpperCase()) {
@@ -59,14 +59,15 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         geolocation: '', // Geolocation can be added in the future
     };
 
-    try {
-        await addDoc(attendanceRecordsColRef, recordData);
+    addDoc(attendanceRecordsColRef, recordData)
+      .then(() => {
         toast({
           title: "Attendance Marked!",
           description: "Your attendance has been successfully recorded.",
         });
         onAttendanceMarked();
-      } catch (error: any) {
+      })
+      .catch((error: any) => {
         if (error.code && error.code.startsWith('permission-denied')) {
           const permissionError = new FirestorePermissionError({
             path: attendanceRecordsColRef.path, // The path of the collection we tried to write to
@@ -81,7 +82,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
             description: error.message || 'An unknown error occurred.',
           });
         }
-      }
+      });
   };
 
   return (
