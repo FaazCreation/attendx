@@ -9,50 +9,69 @@ import { useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
+// A separate component to handle fetching and displaying the members list.
+// This component is only rendered if the user has the correct permissions.
+function MembersList() {
+  const firestore = useFirestore();
+
+  // This query will now only run inside a component that is already protected by a role check.
+  const usersCollection = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'users');
+  }, [firestore]);
+
+  const { data: users, isLoading: areMembersLoading } = useCollection(usersCollection);
+  
+  if (areMembersLoading) {
+      return (
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+      )
+  }
+
+  return users ? <MembersTable data={users} /> : <p>No members found.</p>;
+}
+
+
 export default function MembersPage() {
   const firestore = useFirestore();
   const { user, isUserLoading: isAuthLoading } = useUser();
   const router = useRouter();
 
-  // Step 1: Get the current user's document to check their role.
+  // Get the current user's document to check their role.
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
   const { data: currentUserData, isLoading: isCurrentUserLoading } = useDoc(userDocRef);
-  
-  // Step 2: Determine if the user has permission to fetch the members list.
-  const canViewMembers = useMemo(() => {
+
+  const hasPermission = useMemo(() => {
     if (!currentUserData) return false;
     return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
-
-  // Step 3: Only create the collection query if the user has permission.
-  const usersCollection = useMemoFirebase(() => {
-    // This is the critical step: Only create the query if Firestore is ready AND the user's role has been confirmed.
-    if (firestore && canViewMembers) {
-      return collection(firestore, 'users');
-    }
-    return null; // Return null if permissions are not yet confirmed, preventing the query.
-  }, [firestore, canViewMembers]);
-
-  // The useCollection hook will now only run if usersCollection is not null.
-  const { data: users, isLoading: areMembersLoading } = useCollection(usersCollection);
-
-  // Step 4: Handle redirection for unauthorized users.
+  
+  // The primary loading state now depends only on auth and the current user's profile.
+  const isLoading = isAuthLoading || isCurrentUserLoading;
+  
+  // Redirect if the user is confirmed to be a General Member.
   useEffect(() => {
-    // Once we confirm the user data is loaded and the role is unauthorized, redirect.
-    if (!isCurrentUserLoading && currentUserData && !['Admin', 'Executive Member'].includes(currentUserData.role)) {
+    if (!isLoading && currentUserData && currentUserData.role === 'General Member') {
       router.push('/dashboard');
     }
-  }, [currentUserData, isCurrentUserLoading, router]);
+  }, [isLoading, currentUserData, router]);
 
-  // The final loading state depends on all sequential checks.
-  const isLoading = isAuthLoading || isCurrentUserLoading || (canViewMembers && areMembersLoading);
 
-  // Show a loading state until all checks are complete.
-  if (isLoading || (!canViewMembers && !isCurrentUserLoading && !currentUserData) || isAuthLoading || isCurrentUserLoading) {
+  if (isLoading) {
      return (
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between space-y-2">
@@ -75,9 +94,8 @@ export default function MembersPage() {
       );
   }
   
-  // This state is reached if user data has loaded, but they don't have permission.
-  // The useEffect for redirection will handle moving them away, but we show a message in the meantime.
-  if (!canViewMembers) {
+  // If loading is finished and the user doesn't have permission, show an access denied message.
+  if (!hasPermission) {
     return (
        <Card className="border-destructive">
           <CardHeader className="flex flex-row items-center gap-4">
@@ -85,13 +103,13 @@ export default function MembersPage() {
             <CardTitle>Access Denied</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You do not have permission to view this page. You will be redirected.</p>
+            <p>You do not have permission to view this page. You may be redirected.</p>
           </CardContent>
         </Card>
     )
   }
 
-  // Finally, render the table if loading is complete and permissions are granted.
+  // Only if loading is complete AND the user has permission, render the page content.
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
@@ -100,7 +118,8 @@ export default function MembersPage() {
         </h1>
       </div>
       
-      {users && <MembersTable data={users} />}
+      {/* The component that makes the protected query is only rendered here. */}
+      <MembersList />
     </div>
   );
 }
