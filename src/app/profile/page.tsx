@@ -6,8 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { Award, BarChart, Calendar, CheckSquare } from 'lucide-react';
-import { useMemo } from 'react';
+import { Award, BarChart, Calendar, CheckSquare, Edit } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { EditProfilePhoto } from '@/components/profile/edit-profile-photo';
 
 const getRoleInBangla = (role: string) => {
     switch(role) {
@@ -21,6 +24,8 @@ const getRoleInBangla = (role: string) => {
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -84,10 +89,27 @@ export default function ProfilePage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           আমার প্রোফাইল
         </h1>
+        <Dialog open={isPhotoDialogOpen} onOpenChange={setIsPhotoDialogOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                    <Edit className="mr-2 h-4 w-4" />
+                    ছবি পরিবর্তন করুন
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>প্রোফাইল ছবি পরিবর্তন করুন</DialogTitle>
+                </DialogHeader>
+                <EditProfilePhoto 
+                    currentUser={userData} 
+                    onPhotoChanged={() => setIsPhotoDialogOpen(false)} 
+                />
+            </DialogContent>
+        </Dialog>
       </div>
       <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
         <Avatar className="h-24 w-24 border-2 border-primary">
-          <AvatarImage src={userData.photoURL || user?.photoURL || ''} alt={userData.name || ''} />
+          <AvatarImage src={userData.photoURL || user?.photoURL || '/placeholder.png'} alt={userData.name || ''} />
           <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
         </Avatar>
         <div className="space-y-1 text-center md:text-left">
