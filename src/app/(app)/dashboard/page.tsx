@@ -12,7 +12,7 @@ import { AttendXIcon } from '@/components/icons';
 const allMenuItems = [
   { href: '/profile', label: 'My Profile', icon: User, description: "View and edit your personal details", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/sessions', label: 'Sessions', icon: CalendarClock, description: "View and manage attendance sessions", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/members', label: 'Members', icon: Users, description: "Browse and manage club members", roles: ['Admin', 'Executive Member'] },
+  { href: '/members', label: 'Members', icon: Users, description: "Browse and manage club members", roles: ['Admin'] },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: "Generate and export attendance data", roles: ['Admin', 'Executive Member'] },
 ];
 

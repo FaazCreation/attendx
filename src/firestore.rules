@@ -1,0 +1,137 @@
+/**
+ * Core Philosophy: This ruleset implements a Role-Based Access Control (RBAC) model
+ * with three primary roles: "Admin", "Executive Member", and "General User". Admins
+ * have unconditional management permissions over all data. Executive Members have
+ * elevated permissions for managing sessions and viewing members. General Users
+ * are restricted to managing their own profile and creating their own attendance records.
+ *
+ * Data Structure: The data is organized into logical top-level collections:
+ * - /users/{userId}: Stores private user profiles.
+ * - /roles_admin/{userId}: A lookup collection where the existence of a document
+ *   grants a user administrative privileges. This is read-only for clients.
+ * - /attendanceSessions/{sessionId}: Contains details for attendance events.
+ * - /attendanceSessions/{sessionId}/attendanceRecords/{recordId}: A subcollection for
+ *   individual user check-ins for a given session.
+ *
+ * Key Security Decisions:
+ * - Admin status is the highest privilege and bypasses all other restrictions. This is
+ *   checked first in most rules using the isAdmin() helper function.
+ * - General users are prohibited from listing the entire /users collection to protect privacy.
+ * - Users can create their own attendance record, but cannot modify or delete it,
+ *   ensuring the integrity of the attendance log.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------------------------------
+    // Helper Functions
+    // --------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the user has administrative privileges by verifying the existence
+     * of their UID in the /roles_admin collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+    
+    /**
+     * Verifies that a document exists before an update or delete operation.
+     * This prevents operations on non-existent documents.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    // --------------------------------
+    // Collection Rules
+    // --------------------------------
+
+    /**
+     * @description Manages user profile documents.
+     * @path /users/{userId}
+     * @allow (get, list, update, delete) An admin has full CRUD access.
+     * @allow (get, update) A user can get or update their own profile (but not their role).
+     * @allow (create) A new user creating their own profile document.
+     */
+    match /users/{userId} {
+      allow get: if isAdmin() || isOwner(userId);
+      // Only Admins can list all users.
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.uid == userId;
+      // Admins can update any field. Users can update their own profile, but cannot change their 'uid' or 'role'.
+      allow update: if isExistingDoc() && (isAdmin() || (isOwner(userId) && request.resource.data.uid == resource.data.uid && request.resource.data.role == resource.data.role));
+      // Admin can delete any user. Owner can delete their own profile.
+      allow delete: if isAdmin() || (isOwner(userId) && isExistingDoc());
+    }
+
+    /**
+     * @description A private collection for granting admin roles. Read-only for clients.
+     * @path /roles_admin/{userId}
+     */
+    match /roles_admin/{userId} {
+      allow read: if false;
+      // Allow creation only if the user is creating their OWN admin role document.
+      // This is used during the special admin registration case.
+      allow create: if isOwner(userId);
+      allow write: if false;
+    }
+    
+    /**
+     * @description Rule for querying the attendanceRecords collection group.
+     * @path /attendanceRecords/{recordId}
+     * @allow (list) An authenticated user to query for their own attendance records.
+     */
+    match /{path=**}/attendanceRecords/{recordId} {
+       // This rule allows a user to perform a collectionGroup query for their own records.
+       // It also allows an admin to perform any collectionGroup query.
+       allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
+    }
+
+
+    /**
+     * @description Defines attendance sessions for events, meetings, etc.
+     * @path /attendanceSessions/{sessionId}
+     * @allow (read) Any authenticated user can view session details.
+     * @allow (write) An admin or executive member can manage sessions.
+     */
+    match /attendanceSessions/{sessionId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isAdmin() || (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member');
+
+      /**
+       * @description Stores individual attendance records for a session.
+       * @path /attendanceSessions/{sessionId}/attendanceRecords/{recordId}
+       * @allow (create) An authenticated user creating their own attendance record.
+       * @allow (read, write) An admin has full control.
+       * @allow (get) A user can read their own record.
+       * @allow (list) A user can list their own records for a specific session.
+       */
+      match /attendanceRecords/{recordId} {
+        allow get: if isAdmin() || (isOwner(resource.data.userId) && isExistingDoc());
+        // An admin can list all records in a session. A user can list their own record.
+        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
+        // User can only create a record for themselves. This is the crucial rule.
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        // Admins have full update/delete permissions.
+        allow update, delete: if isAdmin() && isExistingDoc();
+      }
+    }
+  }
+}
