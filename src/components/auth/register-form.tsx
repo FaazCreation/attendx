@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -57,19 +57,25 @@ export function RegisterForm() {
   });
 
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
-    try {
-      if(!auth || !firestore) return;
+    if(!auth || !firestore) {
+      toast({ variant: "destructive", title: "Registration failed", description: "Firebase is not ready." });
+      return;
+    }
 
+    try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
-      await updateProfile(user, {
-        displayName: data.name,
-      });
+      await updateProfile(user, { displayName: data.name });
 
+      // Use a batch to ensure both writes succeed or fail together.
+      const batch = writeBatch(firestore);
+
+      // Determine the user's role.
       const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
       const userRole = isAdmin ? 'Admin' : 'General Member';
-      
+
+      // 1. Create the user profile document.
       const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
         id: data.memberId,
@@ -82,43 +88,16 @@ export function RegisterForm() {
         photoURL: '',
         eventParticipationScore: 0
       };
+      batch.set(userDocRef, userData);
 
-      // The user is now authenticated, so this setDoc call will be allowed by security rules.
-      await setDoc(userDocRef, userData).catch(error => {
-        // This catch block handles potential permission errors on creating the user document
-         if (error.code && error.code.startsWith('permission-denied')) {
-            const permissionError = new FirestorePermissionError({
-              path: userDocRef.path,
-              operation: 'create',
-              requestResourceData: userData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-            // We throw the error to stop execution and show the user a meaningful message
-            throw permissionError;
-         }
-         throw error;
-      });
-
-      // If the user is the designated admin, create an entry in the roles_admin collection
+      // 2. If the user is the designated admin, create an entry in the roles_admin collection.
       if (isAdmin) {
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        // This operation should be done by a trusted server environment in a real app,
-        // but for this project, we handle it client-side with appropriate rules.
-        // We add a catch block for robust error handling.
-        await setDoc(adminRoleRef, { uid: user.uid }).catch(error => {
-           if (error.code && error.code.startsWith('permission-denied')) {
-              const permissionError = new FirestorePermissionError({
-                path: adminRoleRef.path,
-                operation: 'create',
-                requestResourceData: { uid: user.uid },
-              });
-              errorEmitter.emit('permission-error', permissionError);
-              throw permissionError;
-           }
-           throw error;
-        });
+        batch.set(adminRoleRef, { uid: user.uid, role: "Admin" });
       }
 
+      // Commit the batch.
+      await batch.commit();
 
       toast({
         title: "Account created!",
@@ -128,21 +107,12 @@ export function RegisterForm() {
       router.push('/login');
 
     } catch (error: any) {
-       // Check if the error was already handled and emitted as a FirestorePermissionError
-       if (error instanceof FirestorePermissionError) {
-         // The global error handler will display it, but we can also toast a user-friendly message
-         toast({
-            variant: "destructive",
-            title: "Registration Error",
-            description: "A permission error occurred while setting up your account.",
-         });
-       } else {
-         toast({
-          variant: "destructive",
-          title: "Registration failed",
-          description: error.message || "An unknown error occurred.",
-        });
-       }
+      // This will catch auth errors (e.g., email already in use) and batch commit errors.
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: error.message || "An unknown error occurred. Please check the details and try again.",
+      });
     }
   };
 
@@ -273,7 +243,7 @@ export function RegisterForm() {
                                     <SelectLabel>Business Studies</SelectLabel>
                                     <SelectItem value="Accounting">Accounting</SelectItem>
                                     <SelectItem value="Finance And Banking">Finance And Banking</SelectItem>
-                                    <SelectItem value="Management">Management</SelectItem>
+                                    <SelectItem value="Management">Management</MSelectItem>
                                     <SelectItem value="Marketing">Marketing</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
@@ -322,3 +292,5 @@ export function RegisterForm() {
     </Card>
   );
 }
+
+    
