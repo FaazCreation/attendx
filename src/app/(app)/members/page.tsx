@@ -14,6 +14,7 @@ export default function MembersPage() {
   const { user, isUserLoading: isAuthLoading } = useUser();
   const router = useRouter();
 
+  // Step 1: Get the current user's document to check their role.
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
@@ -21,29 +22,32 @@ export default function MembersPage() {
 
   const { data: currentUserData, isLoading: isCurrentUserLoading } = useDoc(userDocRef);
   
-  const canFetchMembers = useMemo(() => {
+  // Step 2: Determine if the user has permission to fetch the members list.
+  const canViewMembers = useMemo(() => {
     if (!currentUserData) return false;
     return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
 
+  // Step 3: Only create the collection query if the user has permission.
   const usersCollection = useMemoFirebase(() => {
-    // Only create the query if the user has the appropriate role
-    if (!firestore || !canFetchMembers) return null;
+    if (!firestore || !canViewMembers) return null; // Important: Don't query if not allowed
     return collection(firestore, 'users');
-  }, [firestore, canFetchMembers]);
+  }, [firestore, canViewMembers]);
 
-  // This hook will now only run if usersCollection is not null
+  // The useCollection hook will only run if usersCollection is not null.
   const { data: users, isLoading: areMembersLoading } = useCollection(usersCollection);
 
-  const isLoading = isAuthLoading || isCurrentUserLoading || (canFetchMembers && areMembersLoading);
-  const isGeneralMember = currentUserData?.role === 'General Member';
+  const isLoading = isAuthLoading || isCurrentUserLoading || (canViewMembers && areMembersLoading);
+  const isGeneralMember = !isCurrentUserLoading && currentUserData?.role === 'General Member';
   
+  // Step 4: If the user is a General Member, redirect them immediately after checking.
   useEffect(() => {
     if (!isCurrentUserLoading && isGeneralMember) {
       router.push('/dashboard');
     }
-  }, [currentUserData, isCurrentUserLoading, isGeneralMember, router]);
+  }, [isCurrentUserLoading, isGeneralMember, router]);
 
+  // Show a loading state until all checks are complete.
   if (isLoading || isGeneralMember) {
      return (
         <div className="flex-1 space-y-6">
@@ -67,7 +71,9 @@ export default function MembersPage() {
       );
   }
   
-  if (!canFetchMembers) {
+  // This state is reached if the user's role is not one that can view members,
+  // but before the redirect effect kicks in.
+  if (!canViewMembers) {
     return (
        <Card className="border-destructive">
           <CardHeader className="flex flex-row items-center gap-4">
@@ -81,6 +87,7 @@ export default function MembersPage() {
     )
   }
 
+  // Finally, render the table if loading is complete and permissions are granted.
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
