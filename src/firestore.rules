@@ -1,6 +1,6 @@
 /**
  * Core Philosophy: This ruleset implements a Role-Based Access Control (RBAC) model
- * with three primary roles: "Admin", "Executive Member", and "General User". Admins
+ * with three primary roles: "Admin", "Executive Member", and "General Member". Admins
  * have unconditional management permissions over all data. Executive Members have
  * elevated permissions for managing sessions and viewing members. General Users
  * are restricted to managing their own profile and creating their own attendance records.
@@ -28,108 +28,90 @@ service cloud.firestore {
     // Helper Functions
     // --------------------------------
 
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the authenticated user's UID matches the provided userId.
-     * This is the foundation of the user-ownership model.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * Checks if the user has administrative privileges by verifying the existence
-     * of their UID in the /roles_admin collection.
-     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
     
-    /**
-     * Verifies that a document exists before an update or delete operation.
-     * This prevents operations on non-existent documents.
-     */
+    function isExecutiveMember() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member';
+    }
+
     function isExistingDoc() {
       return resource != null;
+    }
+    
+    function isNewDoc() {
+      return resource == null;
     }
 
     // --------------------------------
     // Collection Rules
     // --------------------------------
 
-    /**
-     * @description Manages user profile documents.
-     * @path /users/{userId}
-     * @allow (get, list, update, delete) An admin has full CRUD access.
-     * @allow (get, update) A user can get or update their own profile (but not their role).
-     * @allow (create) A new user creating their own profile document.
-     */
     match /users/{userId} {
-      allow get: if isAdmin() || isOwner(userId);
-      // Only Admins should be able to list all users.
-      allow list: if isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.uid == userId;
-      // Admins can update any field. Users can update their own profile, but cannot change their 'uid' or 'role'.
+      // Admins and owners can get. Execs can get for the members page.
+      allow get: if isAdmin() || isOwner(userId) || isExecutiveMember();
+      
+      // Only Admins and Execs can list users.
+      allow list: if isAdmin() || isExecutiveMember();
+      
+      // New users can create their own profile.
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId
+                    && request.resource.data.role == 'General Member'
+                    && request.resource.data.keys().hasAll(['id', 'uid', 'name', 'email', 'department', 'batch', 'role', 'photoURL', 'eventParticipationScore']);
+
+      // Admins can update any field. Users can update their own profile, but NOT their role or uid.
       allow update: if isExistingDoc() && (isAdmin() || (isOwner(userId) && request.resource.data.uid == resource.data.uid && request.resource.data.role == resource.data.role));
-      // Admin can delete any user. Owner can delete their own profile.
+
+      // Admins and owners can delete their own account.
       allow delete: if isAdmin() || (isOwner(userId) && isExistingDoc());
     }
 
-    /**
-     * @description A private collection for granting admin roles. Read-only for clients.
-     * @path /roles_admin/{userId}
-     */
     match /roles_admin/{userId} {
-      allow read: if false;
-      // Allow creation only if the user is creating their OWN admin role document.
-      // This is used during the special admin registration case.
+      // This collection should not be readable or writable by clients, except for a specific admin creation scenario.
+      allow read, update, delete, list: if false;
+      
+      // Allow a user to create their OWN admin document. This is used in the special admin registration flow.
       allow create: if isOwner(userId);
-      allow write: if false;
     }
     
-    /**
-     * @description Rule for querying the attendanceRecords collection group.
-     * @path /attendanceRecords/{recordId}
-     * @allow (list) An authenticated user to query for their own attendance records.
-     */
+    // This allows a CollectionGroup query across all `attendanceRecords` subcollections.
     match /{path=**}/attendanceRecords/{recordId} {
-       // This rule allows a user to perform a collectionGroup query for their own records.
-       // It also allows an admin to perform any collectionGroup query.
+       // An admin can query anything. A signed-in user can only query for their OWN records.
        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
     }
 
-
-    /**
-     * @description Defines attendance sessions for events, meetings, etc.
-     * @path /attendanceSessions/{sessionId}
-     * @allow (read) Any authenticated user can view session details.
-     * @allow (write) An admin or executive member can manage sessions.
-     */
     match /attendanceSessions/{sessionId} {
+      // Any signed-in user can view session details.
       allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member';
+      
+      // Only Admins or Executive Members can create, update, or delete sessions.
+      allow create, update, delete: if isAdmin() || isExecutiveMember();
 
-      /**
-       * @description Stores individual attendance records for a session.
-       * @path /attendanceSessions/{sessionId}/attendanceRecords/{recordId}
-       * @allow (create) An authenticated user creating their own attendance record.
-       * @allow (read, write) An admin has full control.
-       * @allow (get) A user can read their own record.
-       * @allow (list) A user can list their own records for a specific session.
-       */
       match /attendanceRecords/{recordId} {
+        // Admins and the record owner can get the document.
         allow get: if isAdmin() || (isOwner(resource.data.userId) && isExistingDoc());
-        // An admin can list all records in a session. A user can list their own record.
+        
+        // Admins can list all records in a session. A user can list their own records for a session.
         allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
-        // User can only create a record for themselves. The incoming user ID must match the authenticated user.
-        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        // Admins have full update/delete permissions.
+        
+        // Any signed-in user can create a record for THEMSELVES. They cannot create a record for another user.
+        // We also check that a record for this user in this session doesn't already exist.
+        allow create: if isNewDoc() 
+                      && isSignedIn() 
+                      && request.resource.data.userId == request.auth.uid
+                      && !exists(/databases/$(database)/documents/attendanceSessions/$(sessionId)/attendanceRecords/$(request.auth.uid));
+
+        // Only admins can update or delete records to protect data integrity.
         allow update, delete: if isAdmin() && isExistingDoc();
       }
     }
