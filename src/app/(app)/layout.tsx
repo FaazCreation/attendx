@@ -67,9 +67,11 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
             )}
            </div>
         </main>
+        {!isDashboard && (
         <footer className="py-4 px-4 text-center text-sm text-muted-foreground border-t">
           A product of Club Orbit.<br className="sm:hidden" /> Developed by Forhad Hossain.
         </footer>
+        )}
       </div>
   );
 }

@@ -8,6 +8,9 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { AttendanceChart } from '@/components/dashboard/attendance-chart';
 
 const allMenuItems = [
   { href: '/profile', label: 'My Profile', icon: User, description: "View and edit your personal details", roles: ['Admin', 'Executive Member', 'General Member'] },
@@ -50,7 +53,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6">
+    <div className="flex flex-col flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <div className="flex items-center gap-3">
           <AttendXIcon className="h-8 w-8 text-primary" />
@@ -81,6 +84,22 @@ export default function DashboardPage() {
             </Card>
           </Link>
         ))}
+      </div>
+
+       <div className="space-y-4 mt-6">
+          <StatsCards />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <div className="lg:col-span-4">
+              <AttendanceChart />
+            </div>
+            <div className="lg:col-span-3">
+              <RecentActivity />
+            </div>
+          </div>
+        </div>
+
+      <div className="mt-auto pt-8 text-center text-sm text-muted-foreground">
+        A product of Club Orbit. Developed by Forhad Hossain.
       </div>
     </div>
   );
