@@ -33,6 +33,7 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
         router.push('/login');
         return;
     }
+    // Wait until loading is complete before checking permissions
     if (!isLoading && user && !hasPermission) {
       router.push('/dashboard');
     }
@@ -44,7 +45,6 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex items-center gap-4">
-            <Skeleton className="h-12 w-12" />
             <div className="space-y-2">
                 <Skeleton className="h-4 w-[250px]" />
                 <Skeleton className="h-4 w-[200px]" />
