@@ -4,14 +4,13 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { serverTimestamp, collection, addDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { v4 as uuidv4 } from 'uuid';
 
 const attendanceSchema = z.object({
   attendanceCode: z.string().length(6, { message: "Code must be 6 characters." }),
@@ -51,19 +50,19 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         return;
     }
     
-    const recordId = uuidv4();
-    const attendanceRecordRef = doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, recordId);
+    const attendanceRecordsColRef = collection(firestore, `attendanceSessions/${session.id}/attendanceRecords`);
 
     const recordData = {
-        id: recordId,
         sessionId: session.id,
         userId: user.uid,
         timestamp: serverTimestamp(),
         geolocation: '', // Geolocation can be added in the future
     };
 
-    setDoc(attendanceRecordRef, recordData)
-      .then(() => {
+    // Use addDoc to let Firestore generate the document ID
+    addDoc(attendanceRecordsColRef, recordData)
+      .then((docRef) => {
+        // You can use the new docRef.id if needed
         toast({
           title: "Attendance Marked!",
           description: "Your attendance has been successfully recorded.",
@@ -73,7 +72,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
       .catch((error) => {
         if (error.code && error.code.startsWith('permission-denied')) {
           const permissionError = new FirestorePermissionError({
-            path: attendanceRecordRef.path,
+            path: attendanceRecordsColRef.path, // The path of the collection we tried to write to
             operation: 'create',
             requestResourceData: recordData,
           });

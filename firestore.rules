@@ -128,7 +128,9 @@ service cloud.firestore {
      * @principle Enables the profile page to efficiently fetch a user's attendance history.
      */
     match /{path=**}/attendanceRecords/{recordId} {
-      allow list: if isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid;
+       // This rule allows a user to query the 'attendanceRecords' collection group
+       // but only if the query is filtered by their own userId.
+       allow list: if isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid;
     }
 
 
@@ -163,7 +165,10 @@ service cloud.firestore {
         allow get: if isAdmin() || (isOwner(resource.data.userId) && isExistingDoc());
         // A user can list their own attendance records within a specific session
         allow list: if isAdmin() || (isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid);
-        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.sessionId == sessionId;
+        // Ensure user can only create a record for themselves in the correct session
+        allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.sessionId == sessionId;
         allow update: if isAdmin() && isExistingDoc();
         allow delete: if isAdmin() && isExistingDoc();
       }
