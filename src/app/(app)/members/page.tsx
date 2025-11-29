@@ -30,12 +30,11 @@ export default function MembersPage() {
 
   // Step 3: Only create the collection query if the user has permission.
   const usersCollection = useMemoFirebase(() => {
-    // Only query if Firestore is ready AND the user is confirmed to have viewing permissions.
-    // This is the critical step to prevent the race condition.
+    // This is the critical step: Only create the query if Firestore is ready AND the user's role has been confirmed.
     if (firestore && canViewMembers) {
       return collection(firestore, 'users');
     }
-    return null; // Return null if permissions are not yet confirmed or denied.
+    return null; // Return null if permissions are not yet confirmed, preventing the query.
   }, [firestore, canViewMembers]);
 
   // The useCollection hook will now only run if usersCollection is not null.
@@ -43,16 +42,17 @@ export default function MembersPage() {
 
   // Step 4: Handle redirection for unauthorized users.
   useEffect(() => {
-    // Once we confirm the user data is loaded and the role is 'General Member', redirect.
-    if (!isCurrentUserLoading && currentUserData && currentUserData.role === 'General Member') {
+    // Once we confirm the user data is loaded and the role is unauthorized, redirect.
+    if (!isCurrentUserLoading && currentUserData && !['Admin', 'Executive Member'].includes(currentUserData.role)) {
       router.push('/dashboard');
     }
   }, [currentUserData, isCurrentUserLoading, router]);
 
+  // The final loading state depends on all sequential checks.
   const isLoading = isAuthLoading || isCurrentUserLoading || (canViewMembers && areMembersLoading);
 
   // Show a loading state until all checks are complete.
-  if (isLoading) {
+  if (isLoading || (!canViewMembers && !isCurrentUserLoading && !currentUserData) || isAuthLoading || isCurrentUserLoading) {
      return (
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between space-y-2">
@@ -76,7 +76,7 @@ export default function MembersPage() {
   }
   
   // This state is reached if user data has loaded, but they don't have permission.
-  // The useEffect for redirection will handle moving them away.
+  // The useEffect for redirection will handle moving them away, but we show a message in the meantime.
   if (!canViewMembers) {
     return (
        <Card className="border-destructive">
