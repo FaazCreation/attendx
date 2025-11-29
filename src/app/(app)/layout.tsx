@@ -2,23 +2,13 @@
 
 import Header from '@/components/layout/header';
 import { FirebaseClientProvider, useUser } from '@/firebase';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import Link from 'next/link';
-import { AttendXIcon } from '@/components/icons';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
 
 function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const pathname = usePathname();
-  const firestore = useFirestore();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -45,8 +35,6 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
     return null; // Redirect is happening
   }
 
-  const isDashboard = pathname === '/dashboard';
-
   return (
       <div className="flex flex-col h-screen w-full">
         <Header />
@@ -55,16 +43,6 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex-grow">
               {children}
             </div>
-            {!isDashboard && (
-              <div className="mt-8 flex justify-end">
-                <Button variant="outline" asChild>
-                  <Link href="/dashboard">
-                    <ChevronLeft className="mr-2 h-4 w-4" />
-                    ড্যাশবোর্ডে ফিরে যান
-                  </Link>
-                </Button>
-              </div>
-            )}
            </div>
         </main>
       </div>
