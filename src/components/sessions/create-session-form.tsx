@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -61,18 +61,17 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     
     const sessionId = uuidv4();
     const attendanceCode = generateAttendanceCode();
+    const sessionDocRef = doc(collection(firestore, 'attendanceSessions'), sessionId);
 
     const sessionData = {
       ...data,
       id: sessionId,
       attendanceCode,
-      date: format(data.date, "yyyy-MM-dd"),
-      qrCodeURL: '', // This can be generated and updated later
+      date: format(data.date, "yyyy-MM-dd"), // Store date as a string
+      qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: serverTimestamp(),
     };
 
-    const sessionDocRef = doc(firestore, 'attendanceSessions', sessionId);
-    
     setDoc(sessionDocRef, sessionData)
       .then(() => {
         toast({
@@ -82,20 +81,12 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
         onSessionCreated();
       })
       .catch((error) => {
-        if (error.code && error.code.startsWith('permission-denied')) {
-          const permissionError = new FirestorePermissionError({
+        const permissionError = new FirestorePermissionError({
             path: sessionDocRef.path,
             operation: 'create',
             requestResourceData: sessionData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Failed to create session",
-            description: error.message,
-          });
-        }
+        });
+        errorEmitter.emit('permission-error', permissionError);
       });
   };
 

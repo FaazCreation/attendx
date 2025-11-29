@@ -57,11 +57,11 @@ export default function MembersPage() {
   
   const hasPermission = useMemo(() => {
     if (!currentUserData) return false;
-    return currentUserData.role === 'Admin';
+    return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
   
   useEffect(() => {
-    if (!isLoading && currentUserData && currentUserData.role !== 'Admin') {
+    if (!isLoading && currentUserData && !['Admin', 'Executive Member'].includes(currentUserData.role)) {
       router.push('/dashboard');
     }
   }, [isLoading, currentUserData, router]);

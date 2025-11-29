@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { doc, updateDoc } from 'firebase/firestore';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -28,19 +28,25 @@ export type User = {
   role: 'Admin' | 'Executive Member' | 'General Member';
 };
 
-const RoleChanger = ({ user }: { user: User }) => {
+const RoleChanger = ({ user: targetUser }: { user: User }) => {
   const firestore = useFirestore();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
   const userRoles: User['role'][] = ['Admin', 'Executive Member', 'General Member'];
-  
-  const currentUserIsAdmin = currentUser?.email === 'fh7614@gmail.com';
 
+  const currentUserDocRef = useMemoFirebase(() => {
+    if (!firestore || !currentUser) return null;
+    return doc(firestore, 'users', currentUser.uid);
+  }, [firestore, currentUser]);
+
+  const { data: currentUserData } = useDoc(currentUserDocRef);
+  
+  const currentUserIsAdmin = currentUserData?.role === 'Admin';
+  
   const handleChangeRole = (newRole: User['role']) => {
     if (!firestore) return;
     
-    // Prevent non-admins from changing an Admin's role
-    if (user.role === 'Admin' && !currentUserIsAdmin) {
+    if (targetUser.role === 'Admin' && !currentUserIsAdmin) {
       toast({
         variant: 'destructive',
         title: 'Permission Denied',
@@ -48,29 +54,50 @@ const RoleChanger = ({ user }: { user: User }) => {
       });
       return;
     }
-
-    const userDocRef = doc(firestore, 'users', user.uid);
     
-    updateDoc(userDocRef, { role: newRole })
+    // An admin cannot demote themselves if they are the only admin
+    if (targetUser.role === 'Admin' && newRole !== 'Admin' && currentUser?.uid === targetUser.uid) {
+        toast({
+            variant: 'destructive',
+            title: 'Action Not Allowed',
+            description: "You cannot demote yourself from the Admin role.",
+        });
+        return;
+    }
+
+    const userDocRef = doc(firestore, 'users', targetUser.uid);
+    const updatedData = { role: newRole };
+
+    updateDoc(userDocRef, updatedData)
+      .then(() => {
+        toast({
+          title: 'Role Updated',
+          description: `${targetUser.name}'s role has been changed to ${newRole}.`,
+        });
+      })
       .catch((serverError) => {
         const permissionError = new FirestorePermissionError({
             path: userDocRef.path,
             operation: 'update',
-            requestResourceData: { role: newRole },
+            requestResourceData: updatedData,
         });
         errorEmitter.emit('permission-error', permissionError);
       });
       
     toast({
       title: 'Request sent',
-      description: `Attempting to change ${user.name}'s role to ${newRole}.`,
+      description: `Attempting to change ${targetUser.name}'s role to ${newRole}.`,
     });
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0" disabled={!currentUserIsAdmin && user.role === 'Admin'}>
+        <Button 
+            variant="ghost" 
+            className="h-8 w-8 p-0" 
+            disabled={!currentUserIsAdmin || (targetUser.role === 'Admin' && currentUser?.uid !== targetUser.uid && !currentUserIsAdmin)}
+        >
           <span className="sr-only">Open menu</span>
           <MoreHorizontal className="h-4 w-4" />
         </Button>
@@ -83,7 +110,7 @@ const RoleChanger = ({ user }: { user: User }) => {
           <DropdownMenuItem
             key={role}
             onClick={() => handleChangeRole(role)}
-            disabled={user.role === role}
+            disabled={targetUser.role === role}
           >
             Set as {role}
           </DropdownMenuItem>

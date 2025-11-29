@@ -37,6 +37,8 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
       attendanceCode: '',
     }
   });
+  
+  const { formState: { isSubmitting } } = form;
 
   const onSubmit: SubmitHandler<AttendanceFormData> = (data) => {
     if (!firestore || !user) return;
@@ -47,6 +49,8 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
             title: "Invalid Code",
             description: "The attendance code is incorrect. Please try again.",
         });
+        // Manually re-enable form if code is wrong
+        form.reset(form.getValues()); 
         return;
     }
     
@@ -68,20 +72,18 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         onAttendanceMarked();
       })
       .catch((error: any) => {
-        if (error.code && error.code.startsWith('permission-denied')) {
-          const permissionError = new FirestorePermissionError({
-            path: attendanceRecordsColRef.path, // The path of the collection we tried to write to
+        const permissionError = new FirestorePermissionError({
+            path: attendanceRecordsColRef.path,
             operation: 'create',
             requestResourceData: recordData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        } else {
-          toast({
+        });
+        errorEmitter.emit('permission-error', permissionError);
+
+        toast({
             variant: "destructive",
             title: "Failed to mark attendance",
-            description: error.message || 'An unknown error occurred.',
-          });
-        }
+            description: "Please check permissions or try again later.",
+        });
       });
   };
 
@@ -101,8 +103,8 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Submitting...' : 'Submit Attendance'}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Submitting...' : 'Submit Attendance'}
         </Button>
       </form>
     </Form>
