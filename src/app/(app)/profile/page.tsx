@@ -1,12 +1,13 @@
 'use client';
 
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase';
+import { doc, collection, query, where } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Award, BarChart, Calendar, CheckSquare } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
@@ -18,14 +19,33 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: userData, isLoading: isProfileLoading } = useDoc(userDocRef);
+
+  const sessionsCollection = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'attendanceSessions');
+  }, [firestore]);
+  const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
+
+  const userAttendanceQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
+  }, [firestore, user]);
+  const { data: userAttendance, isLoading: isAttendanceLoading } = useCollection(userAttendanceQuery);
   
-  const isLoading = isUserLoading || isProfileLoading;
+  const isLoading = isUserLoading || isProfileLoading || areSessionsLoading || isAttendanceLoading;
   
   const initials = user?.displayName?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
+
+  const attendedCount = userAttendance?.length || 0;
+  const totalSessions = sessions?.length || 0;
+  const attendanceRate = totalSessions > 0 ? Math.round((attendedCount / totalSessions) * 100) : 0;
 
   if (isLoading) {
     return (
       <div className="space-y-6">
+         <div className="flex items-center justify-between space-y-2">
+            <Skeleton className="h-8 w-48" />
+        </div>
         <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
           <Skeleton className="h-24 w-24 rounded-full" />
           <div className="space-y-2 text-center md:text-left">
@@ -83,8 +103,8 @@ export default function ProfilePage() {
                 <CheckSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">Out of 15 total sessions</p>
+                <div className="text-2xl font-bold">{attendedCount}</div>
+                <p className="text-xs text-muted-foreground">Out of {totalSessions} total sessions</p>
             </CardContent>
         </Card>
         <Card>
@@ -103,8 +123,8 @@ export default function ProfilePage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold mb-2">80%</div>
-                <Progress value={80} className="h-2" />
+                <div className="text-2xl font-bold mb-2">{attendanceRate}%</div>
+                <Progress value={attendanceRate} className="h-2" />
             </CardContent>
         </Card>
       </div>
