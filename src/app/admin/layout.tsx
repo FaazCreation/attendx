@@ -15,7 +15,6 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const router = useRouter();
 
-  // Memoize the user document reference
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
@@ -24,27 +23,27 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const { data: currentUserData, isLoading: isUserDocLoading } = useDoc(userDocRef);
 
   const hasPermission = useMemo(() => {
-    if (!currentUserData) return false; // If no user data, no permission
+    if (isUserLoading || isUserDocLoading || !currentUserData) return undefined;
     const role = currentUserData.role;
     return role === 'Admin' || role === 'Executive Member';
-  }, [currentUserData]);
+  }, [currentUserData, isUserLoading, isUserDocLoading]);
   
   useEffect(() => {
-    const isLoading = isUserLoading || isUserDocLoading;
-    
-    // If not loading and user is not logged in, redirect to login
-    if (!isUserLoading && !user) {
+    if (isUserLoading || isUserDocLoading) {
+        return; // Wait until all loading is complete
+    }
+
+    if (!user) {
         router.push('/login');
         return;
     }
     
-    // After all data has loaded, if there is a user but they don't have permission, redirect to dashboard
-    if (!isLoading && user && !hasPermission) {
+    if (hasPermission === false) {
       router.push('/dashboard');
     }
   }, [isUserLoading, isUserDocLoading, hasPermission, router, user]);
 
-  const isLoading = isUserLoading || isUserDocLoading;
+  const isLoading = hasPermission === undefined;
 
   if (isLoading) {
     return (
