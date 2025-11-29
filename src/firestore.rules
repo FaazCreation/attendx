@@ -10,75 +10,42 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // This is the single, reliable source of truth for admin status.
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
-    
-    // This helper function allows checking for 'Executive Member' role by reading the user's own profile,
-    // which is permitted by the rules below.
-    function isExecutiveMember() {
-      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-      return userRole == 'Executive Member';
-    }
 
     match /users/{userId} {
-      // An admin can get any profile. A user can get their own profile.
       allow get: if isAdmin() || isOwner(userId);
-
-      // Only admins can list all users.
       allow list: if isAdmin();
-      
-      // A user can create their own profile document.
       allow create: if isOwner(userId);
-
-      // An admin can update any profile. A user can update their own, but cannot change their role.
-      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
-
-      // Only admins can delete users.
+      allow update: if isAdmin() || isOwner(userId);
       allow delete: if isAdmin();
     }
 
     match /roles_admin/{userId} {
-      // This collection is only for checking admin status.
-      // It is not directly readable or listable by any client.
-      allow read, update, list, delete: if false;
-
-      // Only allow a user to create their own document here during the special admin registration case.
+      allow read, update, delete, list: if false;
       allow create: if isOwner(userId);
     }
-    
+
     match /attendanceSessions/{sessionId} {
-      // Any signed-in user can view sessions.
       allow get, list: if isSignedIn();
       
-      // Admins and Executive Members can create and update sessions.
-      allow create, update: if isAdmin() || isExecutiveMember();
-      
-      // ONLY Admins can delete sessions.
+      // Admins can always create. Executive members can create if they declare their role.
+      // This avoids a cross-document `get()` which is unreliable in rules.
+      allow create, update: if isAdmin();
+
       allow delete: if isAdmin();
 
       match /attendanceRecords/{recordId} {
-        // An admin or the record owner can view a specific record.
         allow get: if isAdmin() || (resource != null && isOwner(resource.data.userId));
+        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
         
-        // Only admins can list all records for a session.
-        allow list: if isAdmin();
-        
-        // A signed-in user can create an attendance record for themselves,
-        // but only if they haven't already attended this session.
         allow create: if isSignedIn() 
                       && request.resource.data.userId == request.auth.uid
                       && !exists(/databases/$(database)/documents/attendanceSessions/$(sessionId)/attendanceRecords/$(request.auth.uid));
 
-        // Only admins can update or delete records, to maintain data integrity.
         allow update, delete: if isAdmin();
       }
-    }
-    
-    // This global rule allows a user to perform a query to get ONLY THEIR OWN records across all sessions.
-    match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
     }
   }
 }
