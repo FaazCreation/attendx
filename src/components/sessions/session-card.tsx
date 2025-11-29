@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Check, Clock, QrCode } from "lucide-react";
+import { Calendar, Check, Clock, QrCode, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,22 @@ import {
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
 import { useMemo, useState } from "react";
-import { useUser } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { doc, deleteDoc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 type Session = {
   id: string;
@@ -51,8 +66,14 @@ const formatTime = (timeString: string) => {
 
 export function SessionCard({ session, userRole, attendanceRecords }: SessionCardProps) {
     const { user } = useUser();
+    const firestore = useFirestore();
+    const { toast } = useToast();
     const [isAttendOpen, setIsAttendOpen] = useState(false);
+
+    const isAdmin = userRole === 'Admin';
+    const isExecutive = userRole === 'Executive Member';
     const isGeneralMember = userRole === 'General Member';
+
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
 
@@ -60,6 +81,31 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
         if (!user) return false;
         return attendanceRecords.some(record => record.sessionId === session.id && record.userId === user.uid);
     }, [attendanceRecords, session.id, user]);
+    
+    const handleDelete = () => {
+        if (!firestore) return;
+        const sessionDocRef = doc(firestore, 'attendanceSessions', session.id);
+        
+        deleteDoc(sessionDocRef)
+            .then(() => {
+                toast({
+                    title: "Session Deleted",
+                    description: `The session "${session.title}" has been removed.`,
+                });
+            })
+            .catch((error) => {
+                const permissionError = new FirestorePermissionError({
+                    path: sessionDocRef.path,
+                    operation: 'delete',
+                });
+                errorEmitter.emit('permission-error', permissionError);
+                 toast({
+                    variant: 'destructive',
+                    title: 'Deletion Failed',
+                    description: 'You do not have permission to delete this session.',
+                });
+            });
+    };
 
   return (
     <Card className="flex flex-col">
@@ -80,10 +126,10 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-        {isGeneralMember ? (
+        {isGeneralMember && (
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
-                    <Button disabled={hasAttended}>
+                    <Button disabled={hasAttended} className="w-full">
                         {hasAttended ? <><Check className="mr-2 h-4 w-4" />Attended</> : 'Attend Session'}
                     </Button>
                 </DialogTrigger>
@@ -97,12 +143,14 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
                     <AttendanceForm session={session} onAttendanceMarked={() => setIsAttendOpen(false)} />
                 </DialogContent>
             </Dialog>
-        ) : (
+        )}
+        
+        {(isAdmin || isExecutive) && (
              <Dialog>
                 <DialogTrigger asChild>
                     <Button variant="outline">
                         <QrCode className="mr-2 h-4 w-4" />
-                        Show QR
+                        Show Code
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xs">
@@ -116,6 +164,31 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
                     </div>
                 </DialogContent>
             </Dialog>
+        )}
+
+        {isAdmin && (
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete Session</span>
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the
+                        <span className="font-semibold"> {session.title} </span> 
+                        session and all of its attendance records.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         )}
       </CardFooter>
     </Card>

@@ -67,7 +67,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       ...data,
       id: sessionId,
       attendanceCode,
-      date: format(data.date, "yyyy-MM-dd"), // Store date as a string
+      date: format(data.date, "yyyy-MM-dd'T'00:00:00"), // Store date as a string in a consistent format
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: serverTimestamp(),
     };
