@@ -6,11 +6,11 @@ import { Download, AlertTriangle } from 'lucide-react';
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ReportsPage() {
-  const { user } = useUser();
+  const { user, isUserLoading: isAuthLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
 
@@ -19,26 +19,55 @@ export default function ReportsPage() {
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
+  const { data: currentUserData, isLoading: isCurrentUserLoading } = useDoc(userDocRef);
 
-  const isGeneralMember = userData?.role === 'General Member';
+  const canViewPage = useMemo(() => {
+    if (!currentUserData) return false;
+    return ['Admin', 'Executive Member'].includes(currentUserData.role);
+  }, [currentUserData]);
+
+  const isGeneralMember = !isCurrentUserLoading && currentUserData?.role === 'General Member';
 
   useEffect(() => {
-    if (!isUserLoading && isGeneralMember) {
+    if (!isCurrentUserLoading && isGeneralMember) {
       router.push('/dashboard');
     }
-  }, [userData, isUserLoading, isGeneralMember, router]);
+  }, [isCurrentUserLoading, isGeneralMember, router]);
 
-  if (isUserLoading || isGeneralMember) {
+  const isLoading = isAuthLoading || isCurrentUserLoading;
+
+  if (isLoading || isGeneralMember) {
     return (
       <div className="flex-1 space-y-6">
         <div className="flex items-center justify-between space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-36" />
+          <h1 className="text-3xl font-bold tracking-tight font-headline">
+            Reports
+          </h1>
         </div>
-        <Skeleton className="h-32 w-full" />
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-8 w-48" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-10 w-full" />
+            </CardContent>
+        </Card>
       </div>
     );
+  }
+
+  if (!canViewPage) {
+    return (
+       <Card className="border-destructive">
+          <CardHeader className="flex flex-row items-center gap-4">
+            <AlertTriangle className="h-8 w-8 text-destructive" />
+            <CardTitle>Access Denied</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>You do not have permission to view this page. Redirecting to dashboard...</p>
+          </CardContent>
+        </Card>
+    )
   }
 
   return (

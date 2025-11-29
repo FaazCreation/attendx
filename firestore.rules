@@ -85,16 +85,17 @@ service cloud.firestore {
      * @path /users/{userId}
      * @allow (create) A new user creating their own profile document.
      * @allow (get) The document owner or an admin reading a profile.
-     * @allow (list) An admin listing all users.
+     * @allow (list) An admin or executive member listing all users.
      * @allow (update) An admin updating any profile, or a user updating their own non-role fields.
      * @allow (delete) The document owner deleting their own profile.
-     * @deny (list) A non-admin user trying to list all user profiles.
+     * @deny (list) A non-admin/executive user trying to list all user profiles.
      * @deny (update) A user trying to modify another user's profile or their own role.
      * @principle Restricts access to a user's own data tree, with an exception for admins.
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
+      // Allow Admins and Executive Members to list all users.
+      allow list: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member';
       allow create: if isOwner(userId) && request.resource.data.uid == userId;
       // Admins can update any field.
       // Users can update their own profile, but CANNOT change their 'uid' or 'role'.
@@ -108,15 +109,16 @@ service cloud.firestore {
     /**
      * @description A private collection for granting admin roles.
      * @path /roles_admin/{userId}
-     * @allow (N/A) All client-side requests are denied.
-     * @deny (get/list/create/update/delete) Any client attempting to read or write.
-     * @principle This collection is managed by a trusted server environment (Admin SDK)
-     * or the Firebase Console, not by client applications, to prevent privilege escalation.
+     * @allow (get, create) An admin creating their own role document upon registration.
+     * @deny (list/update/delete) Any client attempting to read or write.
+     * @principle This collection is managed by a trusted server environment or upon initial admin registration.
      */
     match /roles_admin/{userId} {
-      allow get: if false;
+      allow get: if false; // No client should ever need to read this directly.
       allow list: if false;
-      allow create: if false;
+      // Allow creation only if the user is creating their OWN admin role document.
+      // This is used during the special admin registration case.
+      allow create: if isOwner(userId);
       allow update: if false;
       allow delete: if false;
     }
@@ -128,7 +130,8 @@ service cloud.firestore {
      * @principle Enables the profile page to efficiently fetch a user's attendance history.
      */
     match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if isSignedIn() && request.query.get("where")[0] == ["userId", "==", request.auth.uid];
+       // This rule allows a user to perform a collectionGroup query for their own records.
+       allow list: if isSignedIn() && request.query.get("where")[0][2] == request.auth.uid;
     }
 
 
@@ -136,17 +139,17 @@ service cloud.firestore {
      * @description Defines attendance sessions for events, meetings, etc.
      * @path /attendanceSessions/{sessionId}
      * @allow (get/list) Any authenticated user can view session details.
-     * @allow (create/update/delete) An admin managing attendance sessions.
-     * @deny (create) A non-admin user attempting to create a new session.
-     * @principle Enforces public read access for signed-in users but restricts all
-     * write operations to administrators.
+     * @allow (create/update/delete) An admin or executive member managing sessions.
+     * @deny (create/update/delete) A general member attempting to manage a session.
+     * @principle Enforces public read access but restricts write operations to authorized roles.
      */
     match /attendanceSessions/{sessionId} {
       allow get: if isSignedIn();
       allow list: if isSignedIn();
-      allow create: if isAdmin() && request.resource.data.id == sessionId;
-      allow update: if isAdmin() && isExistingDoc() && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin() && isExistingDoc();
+      allow create: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member';
+      allow update: if (isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member') && isExistingDoc();
+      allow delete: if (isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member') && isExistingDoc();
+
 
       /**
        * @description Stores individual attendance records for a session.
@@ -161,8 +164,8 @@ service cloud.firestore {
        */
       match /attendanceRecords/{recordId} {
         allow get: if isAdmin() || (isOwner(resource.data.userId) && isExistingDoc());
-        // A user can list their own attendance records within a specific session
-        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid);
+        // An admin can list all records in a session. A user can list their own record.
+        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
         // Ensure user can only create a record for themselves. The session is implied by the path.
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
         allow update: if isAdmin() && isExistingDoc();

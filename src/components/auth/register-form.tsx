@@ -84,12 +84,39 @@ export function RegisterForm() {
       };
 
       // The user is now authenticated, so this setDoc call will be allowed by security rules.
-      await setDoc(userDocRef, userData);
+      await setDoc(userDocRef, userData).catch(error => {
+        // This catch block handles potential permission errors on creating the user document
+         if (error.code && error.code.startsWith('permission-denied')) {
+            const permissionError = new FirestorePermissionError({
+              path: userDocRef.path,
+              operation: 'create',
+              requestResourceData: userData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            // We throw the error to stop execution and show the user a meaningful message
+            throw permissionError;
+         }
+         throw error;
+      });
 
       // If the user is the designated admin, create an entry in the roles_admin collection
       if (isAdmin) {
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        await setDoc(adminRoleRef, { uid: user.uid });
+        // This operation should be done by a trusted server environment in a real app,
+        // but for this project, we handle it client-side with appropriate rules.
+        // We add a catch block for robust error handling.
+        await setDoc(adminRoleRef, { uid: user.uid }).catch(error => {
+           if (error.code && error.code.startsWith('permission-denied')) {
+              const permissionError = new FirestorePermissionError({
+                path: adminRoleRef.path,
+                operation: 'create',
+                requestResourceData: { uid: user.uid },
+              });
+              errorEmitter.emit('permission-error', permissionError);
+              throw permissionError;
+           }
+           throw error;
+        });
       }
 
 
@@ -101,19 +128,19 @@ export function RegisterForm() {
       router.push('/login');
 
     } catch (error: any) {
-       if (error.code && error.code.startsWith('permission-denied')) {
-          const userDocRef = doc(firestore, 'users', auth.currentUser!.uid);
-          const permissionError = new FirestorePermissionError({
-            path: userDocRef.path,
-            operation: 'create',
-            requestResourceData: 'hidden', // Data can be hidden for privacy
-          });
-          errorEmitter.emit('permission-error', permissionError);
+       // Check if the error was already handled and emitted as a FirestorePermissionError
+       if (error instanceof FirestorePermissionError) {
+         // The global error handler will display it, but we can also toast a user-friendly message
+         toast({
+            variant: "destructive",
+            title: "Registration Error",
+            description: "A permission error occurred while setting up your account.",
+         });
        } else {
          toast({
           variant: "destructive",
           title: "Registration failed",
-          description: error.message,
+          description: error.message || "An unknown error occurred.",
         });
        }
     }

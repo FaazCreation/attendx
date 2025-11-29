@@ -28,9 +28,20 @@ export default function MembersPage() {
     return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
 
-  // Step 3: Only create the collection query if the user has permission.
+  // Immediately determine if the user is a General Member once their data loads.
+  const isGeneralMember = !isCurrentUserLoading && currentUserData?.role === 'General Member';
+
+  // Step 3: If the user is a General Member, redirect them immediately after checking.
+  useEffect(() => {
+    if (isGeneralMember) {
+      router.push('/dashboard');
+    }
+  }, [isGeneralMember, router]);
+
+  // Step 4: Only create the collection query if the user has permission.
   const usersCollection = useMemoFirebase(() => {
-    if (!firestore || !canViewMembers) return null; // Important: Don't query if not allowed
+    // Only query if Firestore is ready AND the user is confirmed to have viewing permissions.
+    if (!firestore || !canViewMembers) return null; 
     return collection(firestore, 'users');
   }, [firestore, canViewMembers]);
 
@@ -38,16 +49,8 @@ export default function MembersPage() {
   const { data: users, isLoading: areMembersLoading } = useCollection(usersCollection);
 
   const isLoading = isAuthLoading || isCurrentUserLoading || (canViewMembers && areMembersLoading);
-  const isGeneralMember = !isCurrentUserLoading && currentUserData?.role === 'General Member';
   
-  // Step 4: If the user is a General Member, redirect them immediately after checking.
-  useEffect(() => {
-    if (!isCurrentUserLoading && isGeneralMember) {
-      router.push('/dashboard');
-    }
-  }, [isCurrentUserLoading, isGeneralMember, router]);
-
-  // Show a loading state until all checks are complete.
+  // Show a loading state until all checks are complete OR if the user is a general member (and about to be redirected).
   if (isLoading || isGeneralMember) {
      return (
         <div className="flex-1 space-y-6">
@@ -72,7 +75,7 @@ export default function MembersPage() {
   }
   
   // This state is reached if the user's role is not one that can view members,
-  // but before the redirect effect kicks in.
+  // but before the redirect effect kicks in. Show an access denied message.
   if (!canViewMembers) {
     return (
        <Card className="border-destructive">
