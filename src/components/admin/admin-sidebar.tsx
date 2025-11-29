@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { AttendXIcon } from '../icons';
 
 const adminNavItems = [
-    { href: '/admin/dashboard', label: 'ড্যাশবোর্ড', icon: LayoutDashboard },
+    { href: '/admin', label: 'ড্যাশবোর্ড', icon: LayoutDashboard },
     { href: '/admin/members', label: 'সদস্য', icon: Users },
     { href: '/admin/reports', label: 'রিপোর্ট', icon: BarChart3 },
 ];
