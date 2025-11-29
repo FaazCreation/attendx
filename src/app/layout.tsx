@@ -1,27 +1,43 @@
-import type {Metadata} from 'next';
+'use client';
+
+import { Inter } from 'next/font/google';
+import { FirebaseClientProvider } from '@/firebase';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { usePathname } from 'next/navigation';
+import AppShell from '@/components/layout/app-shell';
 
-export const metadata: Metadata = {
-  title: 'AttendX',
-  description: 'তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব অ্যাটেনডেন্স ম্যানেজমেন্ট সিস্টেম',
-};
+const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const pathname = usePathname();
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
+  const isAdminPage = pathname.startsWith('/admin');
+
   return (
-    <html lang="en" suppressHydrationWarning>
+     <html lang="en" suppressHydrationWarning>
       <head>
+        <title>AttendX</title>
+        <meta name="description" content="তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব অ্যাটেনডেন্স ম্যানেজমেন্ট সিস্টেম" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-sans antialiased">
-        {children}
+      <body className={`font-sans antialiased ${inter.className}`}>
+        <FirebaseClientProvider>
+            {isAuthPage || isAdminPage ? (
+              children
+            ) : (
+              <AppShell>
+                {children}
+              </AppShell>
+            )}
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

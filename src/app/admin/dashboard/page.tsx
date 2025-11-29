@@ -29,7 +29,8 @@ function AdminStats() {
     const totalSessions = sessions?.length || 0;
 
     // This is a placeholder for total attendance. A more complex query would be needed for a real number.
-    const totalAttendance = sessions?.reduce((acc, s) => acc + (s.attendees?.length || 0), 0) || 'N/A';
+    const totalAttendance = 'N/A';
+
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

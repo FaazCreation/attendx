@@ -54,7 +54,7 @@ export default function SessionsPage() {
   return (
     <div className="flex-1 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           অ্যাটেনডেন্স সেশন
         </h1>
         {canCreateSession && (
@@ -89,7 +89,7 @@ export default function SessionsPage() {
 
       {sessions && userData && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {sessions.map((session) => (
+          {sessions.map((session: any) => (
             <SessionCard 
               key={session.id} 
               session={session} 

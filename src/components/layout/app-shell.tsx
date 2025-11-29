@@ -1,25 +1,24 @@
 'use client';
 
 import Header from '@/components/layout/header';
-import { FirebaseClientProvider, useUser } from '@/firebase';
+import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
+export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
-      return;
     }
   }, [user, isUserLoading, router]);
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center">
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
             <Skeleton className="h-12 w-12 rounded-full" />
             <div className="space-y-2">
@@ -30,15 +29,11 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  
-  if (!user) {
-    return null; // Redirect is happening
-  }
 
   return (
       <div className="flex flex-col h-screen w-full">
         <Header />
-        <main className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex flex-1 flex-col overflow-y-auto bg-background p-4 sm:p-6 lg:p-8">
            <div className="flex flex-col flex-grow min-h-full">
             <div className="flex-grow">
               {children}
@@ -46,18 +41,5 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
            </div>
         </main>
       </div>
-  );
-}
-
-
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <FirebaseClientProvider>
-        <ProtectedAppLayout>{children}</ProtectedAppLayout>
-    </FirebaseClientProvider>
   );
 }

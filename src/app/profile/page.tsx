@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase';
-import { doc, collection, query, where, getDocs, collectionGroup } from 'firebase/firestore';
+import { doc, collection, query, where, collectionGroup } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
   const isLoading = isUserLoading || isProfileLoading || areSessionsLoading || isAttendanceLoading;
 
-  const initials = userData?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
+  const initials = userData?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
 
   const attendedCount = attendanceRecords?.length || 0;
   const totalSessions = sessions?.length || 0;
@@ -54,7 +54,7 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6">
          <div className="flex items-center justify-between space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">আমার প্রোফাইল</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">আমার প্রোফাইল</h1>
         </div>
         <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
           <Skeleton className="h-24 w-24 rounded-full" />
@@ -81,7 +81,7 @@ export default function ProfilePage() {
   return (
     <div className="flex-1 space-y-6">
        <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           আমার প্রোফাইল
         </h1>
       </div>
@@ -91,7 +91,7 @@ export default function ProfilePage() {
           <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
         </Avatar>
         <div className="space-y-1 text-center md:text-left">
-          <h2 className="text-3xl font-bold font-headline">{userData.name}</h2>
+          <h2 className="text-3xl font-bold">{userData.name}</h2>
           <p className="text-md text-muted-foreground">{userData.email}</p>
           <p className="text-sm text-muted-foreground">{userData.department} - {userData.batch}</p>
         </div>

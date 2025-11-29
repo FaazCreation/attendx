@@ -1,25 +1,23 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart3, CalendarClock, User, Users } from 'lucide-react';
+import { User, CalendarClock, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
-import { useRouter } from 'next/navigation';
 
 const allMenuItems = [
   { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার ব্যক্তিগত বিবরণ দেখুন এবং সম্পাদনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/admin/dashboard', label: 'অ্যাডমিন ড্যাশবোর্ড', icon: Users, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
+  { href: '/admin/dashboard', label: 'অ্যাডমিন প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
 ];
 
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
-  const router = useRouter();
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -30,10 +28,6 @@ export default function DashboardPage() {
 
   const menuItems = useMemo(() => {
     if (!userData) return [];
-    // Redirect non-admins trying to access special menus
-    if (userData.role === 'General Member') {
-      return allMenuItems.filter(item => item.roles.includes('General Member'));
-    }
     return allMenuItems.filter(item => item.roles.includes(userData.role));
   }, [userData]);
 

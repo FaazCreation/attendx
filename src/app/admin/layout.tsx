@@ -29,10 +29,14 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   
   useEffect(() => {
     const isLoading = isUserLoading || isCurrentUserLoading;
-    if (!isLoading && !hasPermission) {
+    if (!isUserLoading && !user) {
+        router.push('/login');
+        return;
+    }
+    if (!isLoading && user && !hasPermission) {
       router.push('/dashboard');
     }
-  }, [isUserLoading, isCurrentUserLoading, hasPermission, router]);
+  }, [isUserLoading, isCurrentUserLoading, hasPermission, router, user]);
 
   const isLoading = isUserLoading || isCurrentUserLoading;
 
@@ -50,9 +54,9 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!hasPermission) {
+  if (!user || !hasPermission) {
      return (
-       <div className="flex items-center justify-center h-screen">
+       <div className="flex items-center justify-center h-screen bg-background">
         <Card className="border-destructive w-full max-w-md">
           <CardHeader className="flex flex-row items-center gap-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
@@ -67,7 +71,7 @@ function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen w-full bg-background">
       <AdminSidebar />
       <div className="flex flex-1 flex-col">
         <Header />

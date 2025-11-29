@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, ChevronLeft, LayoutDashboard, Users } from 'lucide-react';
+import { BarChart3, ChevronLeft, LayoutDashboard, Users, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
@@ -16,11 +16,11 @@ export function AdminSidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="w-64 flex-shrink-0 border-r bg-background flex flex-col">
+        <aside className="w-64 flex-shrink-0 border-r bg-card flex flex-col">
             <div className="flex h-16 items-center border-b px-6">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-                    <AttendXIcon className="h-6 w-6 text-primary" />
-                    <span>AttendX অ্যাডমিন</span>
+                    <ShieldCheck className="h-6 w-6 text-primary" />
+                    <span>অ্যাডমিন প্যানেল</span>
                 </Link>
             </div>
             <nav className="flex-1 overflow-y-auto py-4">
