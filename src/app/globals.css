@@ -10,25 +10,25 @@
     --card-foreground: 232 64% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 232 64% 10%;
-    --primary: 232 64% 30%; /* #1A237E */
+    --primary: 142 76% 36%; /* A nice green */
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 92.5%;
     --secondary-foreground: 232 64% 10%;
     --muted: 0 0% 92.5%;
     --muted-foreground: 0 0% 45.1%;
-    --accent: 180 100% 25.1%; /* #008080 */
+    --accent: 142 66% 46%; /* A complementary green accent */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 232 64% 30%;
+    --ring: 142 76% 36%;
     --radius: 0.5rem;
-    --chart-1: 232 64% 45%;
-    --chart-2: 180 100% 35%;
-    --chart-3: 232 40% 60%;
-    --chart-4: 180 70% 40%;
-    --chart-5: 232 50% 50%;
+    --chart-1: 142 76% 40%;
+    --chart-2: 142 66% 50%;
+    --chart-3: 142 56% 60%;
+    --chart-4: 142 46% 70%;
+    --chart-5: 142 36% 80%;
 
     --sidebar-background: 232 64% 25%;
     --sidebar-foreground: 0 0% 90%;
@@ -47,25 +47,25 @@
     --card-foreground: 0 0% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 0 0% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 142 10% 95%;
     --secondary: 217 33% 17%;
     --secondary-foreground: 0 0% 98%;
     --muted: 217 33% 17%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 180 80% 45%;
+    --accent: 142 61% 55%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 180 80% 55%;
+    --ring: 142 71% 45%;
     
-    --chart-1: 210 40% 98%;
-    --chart-2: 180 80% 45%;
-    --chart-3: 210 40% 70%;
-    --chart-4: 180 80% 55%;
-    --chart-5: 210 40% 80%;
+    --chart-1: 142 71% 45%;
+    --chart-2: 142 61% 55%;
+    --chart-3: 142 51% 65%;
+    --chart-4: 142 41% 75%;
+    --chart-5: 142 31% 85%;
 
     --sidebar-background: 222 47% 9%;
     --sidebar-foreground: 0 0% 90%;
