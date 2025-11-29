@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, QrCode } from "lucide-react";
+import { Calendar, Check, Clock, QrCode } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Session = {
   id: string;
@@ -25,11 +25,18 @@ type Session = {
   attendanceCode: string;
 };
 
+type AttendanceRecord = {
+    id: string;
+    sessionId: string;
+    userId: string;
+}
+
 type UserRole = 'Admin' | 'Executive Member' | 'General Member';
 
 interface SessionCardProps {
   session: Session;
   userRole: UserRole;
+  attendanceRecords: AttendanceRecord[];
 }
 
 const formatTime = (timeString: string) => {
@@ -42,11 +49,15 @@ const formatTime = (timeString: string) => {
   return `${formattedHours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
 };
 
-export function SessionCard({ session, userRole }: SessionCardProps) {
+export function SessionCard({ session, userRole, attendanceRecords }: SessionCardProps) {
     const [isAttendOpen, setIsAttendOpen] = useState(false);
     const isGeneralMember = userRole === 'General Member';
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
+
+    const hasAttended = useMemo(() => {
+        return attendanceRecords.some(record => record.sessionId === session.id);
+    }, [attendanceRecords, session.id]);
 
   return (
     <Card className="flex flex-col">
@@ -70,7 +81,9 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
         {isGeneralMember ? (
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
-                    <Button>Attend Session</Button>
+                    <Button disabled={hasAttended}>
+                        {hasAttended ? <><Check className="mr-2 h-4 w-4" />Attended</> : 'Attend Session'}
+                    </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>

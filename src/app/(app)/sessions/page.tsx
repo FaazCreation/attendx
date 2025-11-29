@@ -1,7 +1,7 @@
 'use client';
 
 import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, collectionGroup, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -27,7 +27,7 @@ export default function SessionsPage() {
     return collection(firestore, 'attendanceSessions');
   }, [firestore]);
 
-  const { data: sessions, isLoading } = useCollection(sessionsCollection);
+  const { data: sessions, isLoading: areSessionsLoading } = useCollection(sessionsCollection);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -35,6 +35,15 @@ export default function SessionsPage() {
   }, [firestore, user]);
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
+
+  const userAttendanceQuery = useMemoFirebase(() => {
+    if (!firestore || !user?.uid) return null;
+    return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
+  }, [firestore, user?.uid]);
+
+  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(userAttendanceQuery);
+
+  const isLoading = areSessionsLoading || isUserLoading || isAttendanceLoading;
 
   const canCreateSession = useMemo(() => {
     if (!userData) return false;
@@ -69,7 +78,7 @@ export default function SessionsPage() {
         )}
       </div>
       
-      {(isLoading || isUserLoading) && (
+      {isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
@@ -81,7 +90,12 @@ export default function SessionsPage() {
       {sessions && userData && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {sessions.map((session) => (
-            <SessionCard key={session.id} session={session} userRole={userData.role} />
+            <SessionCard 
+              key={session.id} 
+              session={session} 
+              userRole={userData.role}
+              attendanceRecords={attendanceRecords || []}
+            />
           ))}
         </div>
       )}
