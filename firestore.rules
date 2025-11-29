@@ -165,10 +165,8 @@ service cloud.firestore {
         allow get: if isAdmin() || (isOwner(resource.data.userId) && isExistingDoc());
         // A user can list their own attendance records within a specific session
         allow list: if isAdmin() || (isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid);
-        // Ensure user can only create a record for themselves in the correct session
-        allow create: if isSignedIn() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.sessionId == sessionId;
+        // Ensure user can only create a record for themselves. The session is implied by the path.
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
         allow update: if isAdmin() && isExistingDoc();
         allow delete: if isAdmin() && isExistingDoc();
       }
