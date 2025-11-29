@@ -89,6 +89,17 @@ export default function ProfilePage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           আমার প্রোফাইল
         </h1>
+      </div>
+      <div className="flex flex-col items-center space-y-4 pt-4 md:flex-row md:space-y-0 md:space-x-6">
+        <Avatar className="h-24 w-24 border-2 border-primary">
+          <AvatarImage src={userData.photoURL || user?.photoURL || '/placeholder.png'} alt={userData.name || ''} />
+          <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 space-y-1 text-center md:text-left">
+          <h2 className="text-3xl font-bold">{userData.name}</h2>
+          <p className="text-md text-muted-foreground">{userData.email}</p>
+          <p className="text-sm text-muted-foreground">{userData.department} - {userData.batch}</p>
+        </div>
         <Dialog open={isPhotoDialogOpen} onOpenChange={setIsPhotoDialogOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -106,17 +117,6 @@ export default function ProfilePage() {
                 />
             </DialogContent>
         </Dialog>
-      </div>
-      <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
-        <Avatar className="h-24 w-24 border-2 border-primary">
-          <AvatarImage src={userData.photoURL || user?.photoURL || '/placeholder.png'} alt={userData.name || ''} />
-          <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
-        </Avatar>
-        <div className="space-y-1 text-center md:text-left">
-          <h2 className="text-3xl font-bold">{userData.name}</h2>
-          <p className="text-md text-muted-foreground">{userData.email}</p>
-          <p className="text-sm text-muted-foreground">{userData.department} - {userData.batch}</p>
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
