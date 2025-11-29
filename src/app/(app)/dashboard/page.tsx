@@ -7,6 +7,7 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
+import { AttendXIcon } from '@/components/icons';
 
 const allMenuItems = [
   { href: '/profile', label: 'My Profile', icon: User, description: "View and edit your personal details", roles: ['Admin', 'Executive Member', 'General Member'] },
@@ -51,9 +52,12 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
-          Welcome to AttendX
-        </h1>
+        <div className="flex items-center gap-3">
+          <AttendXIcon className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
+            AttendX
+          </h1>
+        </div>
       </div>
       <p className="text-sm md:text-base text-muted-foreground">Select an option below to get started.</p>
       
