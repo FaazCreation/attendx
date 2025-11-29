@@ -72,9 +72,8 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow get: if isAdmin() || isOwner(userId);
-      // Only Admins and Executive Members should be able to list users.
-      // The client-side code will handle redirecting General Members.
-      allow list: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Executive Member';
+      // Only Admins should be able to list all users.
+      allow list: if isAdmin();
       allow create: if isOwner(userId) && request.resource.data.uid == userId;
       // Admins can update any field. Users can update their own profile, but cannot change their 'uid' or 'role'.
       allow update: if isExistingDoc() && (isAdmin() || (isOwner(userId) && request.resource.data.uid == resource.data.uid && request.resource.data.role == resource.data.role));
@@ -128,7 +127,7 @@ service cloud.firestore {
         allow get: if isAdmin() || (isOwner(resource.data.userId) && isExistingDoc());
         // An admin can list all records in a session. A user can list their own record.
         allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
-        // User can only create a record for themselves. This is the crucial rule.
+        // User can only create a record for themselves. The incoming user ID must match the authenticated user.
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
         // Admins have full update/delete permissions.
         allow update, delete: if isAdmin() && isExistingDoc();
