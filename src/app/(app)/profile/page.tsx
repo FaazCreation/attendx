@@ -46,7 +46,7 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6">
          <div className="flex items-center justify-between space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight font-headline">My Profile</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">My Profile</h1>
         </div>
         <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
           <Skeleton className="h-24 w-24 rounded-full" />
@@ -73,7 +73,7 @@ export default function ProfilePage() {
   return (
     <div className="flex-1 space-y-6">
        <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight font-headline">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
           My Profile
         </h1>
       </div>

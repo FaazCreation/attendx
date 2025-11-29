@@ -40,7 +40,7 @@ export default function ReportsPage() {
     return (
       <div className="flex-1 space-y-6">
         <div className="flex items-center justify-between space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight font-headline">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
             Reports
           </h1>
         </div>
@@ -73,7 +73,7 @@ export default function ReportsPage() {
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight font-headline">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-headline">
           Reports
         </h1>
         <Button>
