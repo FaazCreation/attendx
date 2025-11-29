@@ -48,22 +48,26 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const isDashboard = pathname === '/dashboard';
 
   return (
-      <div className="flex flex-col h-screen w-full overflow-hidden">
+      <div className="flex flex-col h-screen w-full">
         <Header />
-        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-           {children}
-           {!isDashboard && (
-            <div className="mt-8">
-              <Button variant="outline" asChild>
-                <Link href="/dashboard">
-                  <ChevronLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
-                </Link>
-              </Button>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+           <div className="flex flex-col min-h-full">
+            <div className="flex-grow">
+              {children}
             </div>
-          )}
+            {!isDashboard && (
+              <div className="mt-8">
+                <Button variant="outline" asChild>
+                  <Link href="/dashboard">
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Back to Dashboard
+                  </Link>
+                </Button>
+              </div>
+            )}
+           </div>
         </main>
-        <footer className="py-4 px-4 text-center text-sm text-muted-foreground">
+        <footer className="py-4 px-4 text-center text-sm text-muted-foreground border-t">
           A product of Club Orbit.<br className="sm:hidden" /> Developed by Forhad Hossain.
         </footer>
       </div>
