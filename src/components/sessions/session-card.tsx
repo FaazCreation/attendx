@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
 import { useMemo, useState } from "react";
+import { useUser } from "@/firebase";
 
 type Session = {
   id: string;
@@ -50,14 +51,16 @@ const formatTime = (timeString: string) => {
 };
 
 export function SessionCard({ session, userRole, attendanceRecords }: SessionCardProps) {
+    const { user } = useUser();
     const [isAttendOpen, setIsAttendOpen] = useState(false);
     const isGeneralMember = userRole === 'General Member';
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
 
     const hasAttended = useMemo(() => {
-        return attendanceRecords.some(record => record.sessionId === session.id);
-    }, [attendanceRecords, session.id]);
+        if (!user) return false;
+        return attendanceRecords.some(record => record.sessionId === session.id && record.userId === user.uid);
+    }, [attendanceRecords, session.id, user]);
 
   return (
     <Card className="flex flex-col">

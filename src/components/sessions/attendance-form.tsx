@@ -59,17 +59,14 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         geolocation: '', // Geolocation can be added in the future
     };
 
-    // Use addDoc to let Firestore generate the document ID
-    addDoc(attendanceRecordsColRef, recordData)
-      .then((docRef) => {
-        // You can use the new docRef.id if needed
+    try {
+        await addDoc(attendanceRecordsColRef, recordData);
         toast({
           title: "Attendance Marked!",
           description: "Your attendance has been successfully recorded.",
         });
         onAttendanceMarked();
-      })
-      .catch((error) => {
+      } catch (error: any) {
         if (error.code && error.code.startsWith('permission-denied')) {
           const permissionError = new FirestorePermissionError({
             path: attendanceRecordsColRef.path, // The path of the collection we tried to write to
@@ -81,10 +78,10 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
           toast({
             variant: "destructive",
             title: "Failed to mark attendance",
-            description: error.message,
+            description: error.message || 'An unknown error occurred.',
           });
         }
-      });
+      }
   };
 
   return (
