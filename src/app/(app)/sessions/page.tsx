@@ -5,9 +5,20 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { CreateSessionForm } from '@/components/sessions/create-session-form';
+import { useState } from 'react';
 
 export default function SessionsPage() {
   const firestore = useFirestore();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const sessionsCollection = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -18,14 +29,27 @@ export default function SessionsPage() {
 
   return (
     <div className="flex-1 space-y-6">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
           Attendance Sessions
         </h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Session
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Session
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create New Session</DialogTitle>
+              <DialogDescription>
+                Fill out the details for the new attendance session.
+              </DialogDescription>
+            </DialogHeader>
+            <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
       
       {isLoading && (
