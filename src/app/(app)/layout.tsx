@@ -51,8 +51,9 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
       <div>
         <Header />
         <main className="p-4 sm:p-6 lg:p-8">
+           {children}
            {!isDashboard && (
-            <div className="mb-6">
+            <div className="mt-8">
               <Button variant="outline" asChild>
                 <Link href="/dashboard">
                   <ChevronLeft className="mr-2 h-4 w-4" />
@@ -61,7 +62,6 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
               </Button>
             </div>
           )}
-          {children}
         </main>
       </div>
   );
