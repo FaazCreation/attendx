@@ -35,7 +35,7 @@ export default function ProfilePage() {
 
   const isLoading = isUserLoading || isProfileLoading || areSessionsLoading || isAttendanceLoading;
 
-  const initials = user?.displayName?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
+  const initials = userData?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
 
   const attendedCount = attendanceRecords?.length || 0;
   const totalSessions = sessions?.length || 0;
@@ -45,27 +45,28 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6">
          <div className="flex items-center justify-between space-y-2">
-            <Skeleton className="h-8 w-48" />
+            <h1 className="text-3xl font-bold tracking-tight font-headline">My Profile</h1>
         </div>
         <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
           <Skeleton className="h-24 w-24 rounded-full" />
           <div className="space-y-2 text-center md:text-left">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-5 w-64" />
+            <Skeleton className="h-4 w-48" />
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
         </div>
       </div>
     );
   }
   
   if (!userData) {
-      return <div>Could not load user profile.</div>
+      return <div>Could not load user profile. Please try again.</div>
   }
 
   return (
@@ -77,7 +78,7 @@ export default function ProfilePage() {
       </div>
       <div className="flex flex-col items-center space-y-4 md:flex-row md:space-y-0 md:space-x-6">
         <Avatar className="h-24 w-24 border-2 border-primary">
-          <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || ''} />
+          <AvatarImage src={userData.photoURL || user?.photoURL || ''} alt={userData.name || ''} />
           <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
         </Avatar>
         <div className="space-y-1 text-center md:text-left">
@@ -114,7 +115,7 @@ export default function ProfilePage() {
                 <BarChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{userData.eventParticipationScore}</div>
+                <div className="text-2xl font-bold">{userData.eventParticipationScore || 0}</div>
                 <p className="text-xs text-muted-foreground">Points from events and workshops</p>
             </CardContent>
         </Card>
