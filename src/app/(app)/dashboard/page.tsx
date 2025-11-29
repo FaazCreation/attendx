@@ -51,15 +51,15 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-1 space-y-6">
-      <div className="flex items-center justify-center sm:justify-between">
-        <div className="flex flex-col items-center sm:items-start">
-          <div className="flex items-center gap-3">
-            <AttendXIcon className="h-8 w-8 text-primary" />
+      <div className="flex items-center justify-center text-center sm:justify-start sm:text-left">
+        <div className="flex items-center gap-3">
+          <AttendXIcon className="h-8 w-8 text-primary" />
+          <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
               AttendX
             </h1>
+            <p className="text-[6px] sm:text-xs text-muted-foreground">Attendance Management, Simplified.</p>
           </div>
-          <p className="text-[6px] sm:text-xs text-muted-foreground sm:ml-[44px]">Attendance Management, Simplified.</p>
         </div>
       </div>
       <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">Select an option below to get started.</p>
