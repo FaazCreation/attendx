@@ -12,7 +12,7 @@ import { AttendXIcon } from '@/components/icons';
 const allMenuItems = [
   { href: '/profile', label: 'My Profile', icon: User, description: "View and edit your personal details", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/sessions', label: 'Sessions', icon: CalendarClock, description: "View and manage attendance sessions", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/members', label: 'Members', icon: Users, description: "Browse and manage club members", roles: ['Admin', 'Executive Member'] },
+  { href: '/members', label: 'Members', icon: Users, description: "Browse and manage club members", roles: ['Admin'] },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: "Generate and export attendance data", roles: ['Admin', 'Executive Member'] },
 ];
 
@@ -52,11 +52,14 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
-        <div className="flex items-center gap-3">
-          <AttendXIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
-            AttendX
-          </h1>
+        <div>
+          <div className="flex items-center gap-3">
+            <AttendXIcon className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
+              AttendX
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground" style={{marginLeft: '44px'}}>Attendance Management, Simplified.</p>
         </div>
       </div>
       <p className="text-sm md:text-base text-muted-foreground">Select an option below to get started.</p>
