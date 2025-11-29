@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -31,17 +32,28 @@ interface SessionCardProps {
   userRole: UserRole;
 }
 
+const formatTime = (timeString: string) => {
+  if (!timeString) return '';
+  const [hours, minutes] = timeString.split(':');
+  const h = parseInt(hours, 10);
+  const m = parseInt(minutes, 10);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const formattedHours = h % 12 || 12; // Convert 0 to 12
+  return `${formattedHours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+};
+
 export function SessionCard({ session, userRole }: SessionCardProps) {
     const [isAttendOpen, setIsAttendOpen] = useState(false);
     const isGeneralMember = userRole === 'General Member';
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
+    const formattedTime = formatTime(session.time);
 
   return (
     <Card className="flex flex-col">
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex sm:flex-row flex-col sm:items-start sm:justify-between gap-2">
             <CardTitle className="text-lg font-bold line-clamp-2">{session.title}</CardTitle>
-            <Badge variant={session.type === 'AGM' ? 'destructive' : 'secondary'}>{session.type}</Badge>
+            <Badge variant={session.type === 'AGM' ? 'destructive' : 'secondary'} className="w-fit">{session.type}</Badge>
         </div>
       </CardHeader>
       <CardContent className="flex-grow space-y-2">
@@ -51,7 +63,7 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="mr-2 h-4 w-4" />
-          <span>{session.time}</span>
+          <span>{formattedTime}</span>
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
