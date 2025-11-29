@@ -59,7 +59,7 @@ export default function DashboardPage() {
               AttendX
             </h1>
           </div>
-          <p className="text-[11px] sm:text-xs text-muted-foreground sm:ml-[44px]">Attendance Management, Simplified.</p>
+          <p className="text-[6px] sm:text-xs text-muted-foreground sm:ml-[44px]">Attendance Management, Simplified.</p>
         </div>
       </div>
       <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">Select an option below to get started.</p>
