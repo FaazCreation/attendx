@@ -8,9 +8,6 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
-import { StatsCards } from '@/components/dashboard/stats-cards';
-import { RecentActivity } from '@/components/dashboard/recent-activity';
-import { AttendanceChart } from '@/components/dashboard/attendance-chart';
 
 const allMenuItems = [
   { href: '/profile', label: 'My Profile', icon: User, description: "View and edit your personal details", roles: ['Admin', 'Executive Member', 'General Member'] },
@@ -85,18 +82,6 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
-
-       <div className="space-y-4 mt-6">
-          <StatsCards />
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="lg:col-span-4">
-              <AttendanceChart />
-            </div>
-            <div className="lg:col-span-3">
-              <RecentActivity />
-            </div>
-          </div>
-        </div>
 
       <div className="mt-auto pt-8 text-center text-sm text-muted-foreground">
         A product of Club Orbit. Developed by Forhad Hossain.
