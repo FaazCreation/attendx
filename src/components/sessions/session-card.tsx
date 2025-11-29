@@ -56,15 +56,42 @@ interface SessionCardProps {
   attendanceRecords: AttendanceRecord[];
 }
 
+const toBengaliNumerals = (numStr: string): string => {
+    const bengaliNumerals: { [key: string]: string } = {
+        '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
+        '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
+    };
+    return numStr.replace(/\d/g, (d) => bengaliNumerals[d]);
+};
+
 const formatTime = (timeString: string) => {
   if (!timeString) return '';
   const [hours, minutes] = timeString.split(':');
   const h = parseInt(hours, 10);
   const m = parseInt(minutes, 10);
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const formattedHours = h % 12 || 12; 
-  return `${formattedHours.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+
+  let timeOfDay, displayHours;
+  
+  if (h >= 5 && h < 12) {
+    timeOfDay = 'সকাল';
+    displayHours = h;
+  } else if (h >= 12 && h < 16) {
+    timeOfDay = 'দুপুর';
+    displayHours = h > 12 ? h - 12 : h;
+  } else if (h >= 16 && h < 18) {
+    timeOfDay = 'বিকাল';
+    displayHours = h - 12;
+  } else {
+    timeOfDay = 'রাত';
+    displayHours = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  }
+
+  const bengaliHours = toBengaliNumerals(String(displayHours).padStart(2,'0'));
+  const bengaliMinutes = toBengaliNumerals(String(m).padStart(2,'0'));
+
+  return `${timeOfDay} ${bengaliHours}:${bengaliMinutes}`;
 };
+
 
 const getSessionTypeInBangla = (type: string) => {
   switch(type) {
