@@ -48,9 +48,9 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   const isDashboard = pathname === '/dashboard';
 
   return (
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col h-screen w-full overflow-hidden">
         <Header />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
            {children}
            {!isDashboard && (
             <div className="mt-8">
