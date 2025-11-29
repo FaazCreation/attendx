@@ -28,6 +28,7 @@ export default function ProfilePage() {
 
   const userAttendanceQuery = useMemoFirebase(() => {
     if (!firestore || !user?.uid) return null;
+    // Use collectionGroup to query across all attendanceRecords subcollections
     return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
   }, [firestore, user?.uid]);
 

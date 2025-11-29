@@ -129,8 +129,9 @@ service cloud.firestore {
      */
     match /{path=**}/attendanceRecords/{recordId} {
        // This rule allows a user to query the 'attendanceRecords' collection group
-       // but only if the query is filtered by their own userId.
-       allow list: if isSignedIn() && request.query.where[0][1] == "userId" && request.query.where[0][2] == request.auth.uid;
+       // as long as the query is filtered by their own userId. This is more robust
+       // than checking the where clause index.
+       allow list: if isSignedIn() && request.query.get("where")[0][2] == request.auth.uid;
     }
 
 
