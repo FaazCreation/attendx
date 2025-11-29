@@ -17,7 +17,7 @@
  *
  * Key Security Decisions:
  * - Admin status is efficiently determined by checking for the existence of a document
- *   at /roles_admin/{request.auth.uid}. This avoids storing roles on user documents,
+ *   at /roles_admin/$(request.auth.uid). This avoids storing roles on user documents,
  *   which could be manipulated by the user.
  * - General users are prohibited from listing the entire /users collection to protect
  *   user privacy. Only admins can list all users.
@@ -128,10 +128,7 @@ service cloud.firestore {
      * @principle Enables the profile page to efficiently fetch a user's attendance history.
      */
     match /{path=**}/attendanceRecords/{recordId} {
-       // This rule allows a user to query the 'attendanceRecords' collection group
-       // as long as the query is filtered by their own userId. This is more robust
-       // than checking the where clause index.
-       allow list: if isSignedIn() && request.query.get("where")[0][2] == request.auth.uid;
+       allow list: if isSignedIn() && request.query.get("where")[0] == ["userId", "==", request.auth.uid];
     }
 
 
