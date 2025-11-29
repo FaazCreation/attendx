@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { doc, updateDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -30,28 +30,37 @@ export type User = {
 
 const RoleChanger = ({ user }: { user: User }) => {
   const firestore = useFirestore();
+  const { user: currentUser } = useUser();
   const { toast } = useToast();
   const userRoles: User['role'][] = ['Admin', 'Executive Member', 'General Member'];
+  
+  const currentUserIsAdmin = currentUser?.email === 'fh7614@gmail.com';
 
   const handleChangeRole = (newRole: User['role']) => {
     if (!firestore) return;
+    
+    // Prevent non-admins from changing an Admin's role
+    if (user.role === 'Admin' && !currentUserIsAdmin) {
+      toast({
+        variant: 'destructive',
+        title: 'Permission Denied',
+        description: "You cannot change another admin's role.",
+      });
+      return;
+    }
+
     const userDocRef = doc(firestore, 'users', user.uid);
     
-    // Using a non-blocking update and chaining the catch for error handling.
     updateDoc(userDocRef, { role: newRole })
       .catch((serverError) => {
-        // Create the rich, contextual error.
         const permissionError = new FirestorePermissionError({
             path: userDocRef.path,
             operation: 'update',
-            requestResourceData: { role: newRole }, // This is the data we attempted to write
+            requestResourceData: { role: newRole },
         });
-
-        // Emit the error to be caught by the global listener.
         errorEmitter.emit('permission-error', permissionError);
       });
       
-    // Optimistically show a toast. If it fails, the error boundary will appear.
     toast({
       title: 'Request sent',
       description: `Attempting to change ${user.name}'s role to ${newRole}.`,
@@ -61,7 +70,7 @@ const RoleChanger = ({ user }: { user: User }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
+        <Button variant="ghost" className="h-8 w-8 p-0" disabled={!currentUserIsAdmin && user.role === 'Admin'}>
           <span className="sr-only">Open menu</span>
           <MoreHorizontal className="h-4 w-4" />
         </Button>
