@@ -28,32 +28,31 @@ export default function MembersPage() {
     return ['Admin', 'Executive Member'].includes(currentUserData.role);
   }, [currentUserData]);
 
-  // Determine if the user is a General Member once their data loads.
-  const isGeneralMember = !isCurrentUserLoading && currentUserData?.role === 'General Member';
-
-  // Step 3: If the user is a General Member, redirect them.
-  useEffect(() => {
-    if (isGeneralMember) {
-      router.push('/dashboard');
-    }
-  }, [isGeneralMember, router]);
-
-  // Step 4: Only create the collection query if the user has permission.
+  // Step 3: Only create the collection query if the user has permission.
   const usersCollection = useMemoFirebase(() => {
     // Only query if Firestore is ready AND the user is confirmed to have viewing permissions.
+    // This is the critical step to prevent the race condition.
     if (firestore && canViewMembers) {
       return collection(firestore, 'users');
     }
-    return null; // Return null if permissions are not yet confirmed
+    return null; // Return null if permissions are not yet confirmed or denied.
   }, [firestore, canViewMembers]);
 
-  // The useCollection hook will only run if usersCollection is not null.
+  // The useCollection hook will now only run if usersCollection is not null.
   const { data: users, isLoading: areMembersLoading } = useCollection(usersCollection);
 
+  // Step 4: Handle redirection for unauthorized users.
+  useEffect(() => {
+    // Once we confirm the user data is loaded and the role is 'General Member', redirect.
+    if (!isCurrentUserLoading && currentUserData && currentUserData.role === 'General Member') {
+      router.push('/dashboard');
+    }
+  }, [currentUserData, isCurrentUserLoading, router]);
+
   const isLoading = isAuthLoading || isCurrentUserLoading || (canViewMembers && areMembersLoading);
-  
-  // Show a loading state until all checks are complete OR if the user is a general member (and about to be redirected).
-  if (isLoading || isGeneralMember) {
+
+  // Show a loading state until all checks are complete.
+  if (isLoading) {
      return (
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between space-y-2">
@@ -76,8 +75,8 @@ export default function MembersPage() {
       );
   }
   
-  // This state is reached if the user's role is not one that can view members,
-  // but before the redirect effect kicks in. Show an access denied message.
+  // This state is reached if user data has loaded, but they don't have permission.
+  // The useEffect for redirection will handle moving them away.
   if (!canViewMembers) {
     return (
        <Card className="border-destructive">
@@ -86,7 +85,7 @@ export default function MembersPage() {
             <CardTitle>Access Denied</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You do not have permission to view this page. Redirecting to dashboard...</p>
+            <p>You do not have permission to view this page. You will be redirected.</p>
           </CardContent>
         </Card>
     )
