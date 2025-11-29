@@ -50,13 +50,13 @@ function ProtectedAppLayout({ children }: { children: React.ReactNode }) {
   return (
       <div className="flex flex-col h-screen w-full">
         <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-           <div className="flex flex-col min-h-full">
+        <main className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+           <div className="flex flex-col flex-grow min-h-full">
             <div className="flex-grow">
               {children}
             </div>
             {!isDashboard && (
-              <div className="mt-8">
+              <div className="mt-8 flex justify-end">
                 <Button variant="outline" asChild>
                   <Link href="/dashboard">
                     <ChevronLeft className="mr-2 h-4 w-4" />
