@@ -58,10 +58,10 @@ service cloud.firestore {
 
     match /users/{userId} {
       // Admins and owners can get. Execs can get for the members page.
-      allow get: if isSignedIn() && (isAdmin() || isOwner(userId) || isExecutiveMember());
+      allow get: if isAdmin() || isOwner(userId) || isExecutiveMember();
       
-      // Only Admins can list users.
-      allow list: if isAdmin();
+      // Only Admins and Execs can list users.
+      allow list: if isAdmin() || isExecutiveMember();
       
       // New users can create their own profile.
       allow create: if isOwner(userId)
@@ -95,7 +95,7 @@ service cloud.firestore {
       allow get, list: if isSignedIn();
       
       // Only Admins or Executive Members can create, update, or delete sessions.
-      allow write: if isAdmin() || isExecutiveMember();
+      allow create, update, delete: if isAdmin() || isExecutiveMember();
 
       match /attendanceRecords/{recordId} {
         // Admins and the record owner can get the document.
@@ -104,7 +104,7 @@ service cloud.firestore {
         // Admins can list all records in a session. A user can list their own records for a session.
         allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
         
-        // Any signed-in user can create a record for THEMSELVES.
+        // Any signed-in user can create a record for THEMSELVES. They cannot create a record for another user.
         // We also check that a record for this user in this session doesn't already exist.
         allow create: if isNewDoc() 
                       && isSignedIn() 
