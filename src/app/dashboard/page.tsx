@@ -37,25 +37,13 @@ export default function DashboardPage() {
     [firestore, user]
   );
   
-  const { data: adminRoleDoc, isLoading: isAdminRoleLoading } = useDoc(
-    () => {
-      if (!firestore || !user) return null;
-      return doc(firestore, 'roles_admin', user.uid);
-    },
-    [firestore, user]
-  );
-
   const menuItems = useMemo(() => {
-    if (!user) return [];
-    if (adminRoleDoc) {
-      return allMenuItems; // Admins with role doc see all items
-    }
-    if (!userData) return [];
+    if (!user || !userData) return [];
     // Filter items based on user role
-    return allMenuItems.filter(item => item.roles.includes(userData.role) && item.href !== '/orbitpanel');
-  }, [userData, user, adminRoleDoc]);
+    return allMenuItems.filter(item => item.roles.includes(userData.role));
+  }, [userData, user]);
 
-  if (isProfileLoading || isAdminRoleLoading) {
+  if (isProfileLoading) {
     return (
         <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between space-y-2">

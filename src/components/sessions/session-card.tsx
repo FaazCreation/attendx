@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
 import { useMemo, useState, useEffect } from "react";
-import { useFirestore, useUser, useDoc } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -121,21 +121,19 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
                 setHasAttended(docSnap.exists());
             } catch (error) {
                 console.error("Error checking attendance:", error);
-                // We don't block the UI for this, but we could show a toast.
-                setHasAttended(false); // Assume not attended on error
+                setHasAttended(false); 
             } finally {
                 setIsCheckingAttendance(false);
             }
         };
 
         checkAttendance();
-    // We only want to re-run this effect if the user or session changes.
     }, [firestore, user, session.id, isAttendOpen]);
 
 
     const isAdmin = userRole === 'Admin';
     const isExecutive = userRole === 'Executive Member';
-    const isGeneralMember = userRole === 'General Member';
+    const canManageSession = isAdmin || isExecutive;
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
@@ -145,7 +143,6 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
         const now = new Date();
         const sessionDate = new Date(session.date);
         
-        // Set session end time to 11 PM on the session date
         const sessionEndTime = new Date(sessionDate);
         sessionEndTime.setHours(23, 0, 0, 0);
 
@@ -198,30 +195,28 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-        {isGeneralMember && (
-            <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
-                <DialogTrigger asChild>
-                    <Button disabled={isButtonDisabled} className="w-full">
-                        {isCheckingAttendance 
-                            ? 'লোড হচ্ছে...' 
-                            : hasAttended 
-                                ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> 
-                                : (isAttendanceOver ? 'সময় শেষ' : 'সেশনে যোগ দিন')}
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                           <span className="block sm:inline">এর জন্য অ্যাটেনডেন্স চিহ্নিত করুন </span>
-                           <span className="block sm:inline font-semibold">"{session.title}"</span>
-                        </DialogTitle>
-                    </DialogHeader>
-                    <AttendanceForm session={session} onAttendanceMarked={() => setIsAttendOpen(false)} />
-                </DialogContent>
-            </Dialog>
-        )}
+        <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
+            <DialogTrigger asChild>
+                <Button disabled={isButtonDisabled} className="w-full">
+                    {isCheckingAttendance 
+                        ? 'লোড হচ্ছে...' 
+                        : hasAttended 
+                            ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> 
+                            : (isAttendanceOver ? 'সময় শেষ' : 'সেশনে যোগ দিন')}
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
+                       <span className="block sm:inline">এর জন্য অ্যাটেনডেন্স চিহ্নিত করুন </span>
+                       <span className="block sm:inline font-semibold">"{session.title}"</span>
+                    </DialogTitle>
+                </DialogHeader>
+                <AttendanceForm session={session} onAttendanceMarked={() => setIsAttendOpen(false)} />
+            </DialogContent>
+        </Dialog>
         
-        {(isAdmin || isExecutive) && (
+        {canManageSession && (
              <Dialog>
                 <DialogTrigger asChild>
                     <Button variant="outline">
