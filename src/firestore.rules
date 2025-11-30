@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -50,7 +51,7 @@ service cloud.firestore {
 
       match /attendanceRecords/{recordId} {
         // Allow a user to get their own attendance record, and admins to get any.
-        allow get: if isAdmin() || isOwner(recordId);
+        allow get: if isAdmin() || (resource != null && isOwner(resource.data.userId));
         
         // Deny all list operations by default.
         allow list: if false;
