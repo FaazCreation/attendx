@@ -32,8 +32,8 @@ service cloud.firestore {
     }
 
     match /roles_admin/{userId} {
-      allow read, write: if isAdmin();
-      allow list: if isAdmin();
+      allow get: if isOwner(userId);
+      allow list, create, update, delete: if isAdmin();
     }
     
     match /attendanceSessions/{sessionId} {
