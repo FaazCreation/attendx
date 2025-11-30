@@ -15,6 +15,13 @@ const allMenuItems = [
   { href: '/admin', label: 'অ্যাডমিন প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
 ];
 
+const getMenuItemDescription = (description: string, role: string) => {
+  if (role === 'General Member') {
+    return description.replace(/ (ও|এবং) পরিচালনা করুন/g, ' দেখুন');
+  }
+  return description;
+}
+
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
@@ -75,7 +82,7 @@ export default function DashboardPage() {
                   <div className="flex-1 space-y-1">
                     <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
                     <CardDescription className="text-xs md:text-sm">
-                      {item.description}
+                      {getMenuItemDescription(item.description, userData.role)}
                     </CardDescription>
                   </div>
                 </div>
