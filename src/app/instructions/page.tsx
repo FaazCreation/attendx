@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,7 +14,7 @@ export default function InstructionsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold font-headline">AttendX সম্পর্কে কিছু কথা</CardTitle>
+          <CardTitle className="text-2xl font-bold">AttendX সম্পর্কে কিছু কথা</CardTitle>
           <CardDescription>
             তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের জন্য একটি আধুনিক অ্যাটেনডেন্স ম্যানেজমেন্ট সিস্টেম।
           </CardDescription>
