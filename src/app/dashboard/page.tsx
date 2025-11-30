@@ -67,19 +67,19 @@ export default function DashboardPage() {
         {menuItems.map((item) => (
           <Link href={item.href} key={item.href}>
             <Card className="hover:bg-muted/50 hover:border-primary/50 transition-all transform hover:-translate-y-1 h-full flex flex-col">
-              <CardHeader className="flex-1">
-                <div className="flex items-center gap-4">
+              <CardHeader className="flex-1 p-4">
+                <div className="flex items-start gap-4">
                   <div className="bg-primary/10 p-3 rounded-md">
                     <item.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1 space-y-1">
                     <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
+                    <CardDescription className="text-xs md:text-sm">
+                      {item.description}
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardDescription className="px-6 pb-4 text-xs md:text-sm">
-                {item.description}
-              </CardDescription>
             </Card>
           </Link>
         ))}
