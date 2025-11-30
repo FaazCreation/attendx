@@ -69,41 +69,51 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="flex flex-col flex-1 space-y-6">
-      <div className="flex items-center justify-center text-center sm:justify-start sm:text-left">
-        <div className="flex items-center gap-3">
-          <AttendXIcon className="h-8 w-8 text-primary" />
-          <div className="text-left font-headline flex flex-col">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
-              AttendX
-            </h1>
-            <p className="text-[6px] sm:text-xs text-muted-foreground leading-tight">Attendance Management, Simplified.</p>
+    <div className="flex flex-col flex-1 h-full">
+      <div className="flex-grow space-y-6">
+        <div className="flex items-center justify-center text-center sm:justify-start sm:text-left">
+          <div className="flex items-center gap-3">
+            <AttendXIcon className="h-8 w-8 text-primary" />
+            <div className="text-left font-headline flex flex-col">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
+                AttendX
+              </h1>
+              <p className="text-[6px] sm:text-xs text-muted-foreground leading-tight">Attendance Management, Simplified.</p>
+            </div>
           </div>
         </div>
-      </div>
-      <p className="text-lg md:text-xl text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
-      
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {menuItems.map((item) => (
-          <Link href={item.href} key={item.href}>
-            <Card className="hover:bg-muted/50 hover:border-primary/50 transition-all transform hover:-translate-y-1 h-full flex flex-col">
-              <CardHeader className="flex-1 p-4">
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 p-3 rounded-md">
-                    <item.icon className="w-6 h-6 text-primary" />
+        <p className="text-lg md:text-xl text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
+        
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {menuItems.map((item) => (
+            <Link href={item.href} key={item.href}>
+              <Card className="hover:bg-muted/50 hover:border-primary/50 transition-all transform hover:-translate-y-1 h-full flex flex-col">
+                <CardHeader className="flex-1 p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary/10 p-3 rounded-md">
+                      <item.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
+                      <CardDescription className="text-xs md:text-sm">
+                        {getMenuItemDescription(item.description, role)}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
-                    <CardDescription className="text-xs md:text-sm">
-                      {getMenuItemDescription(item.description, role)}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
+                </CardHeader>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
+
+      <footer className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-2">
+        <div className="overflow-hidden whitespace-nowrap">
+          <p className="inline-block animate-marquee text-sm text-muted-foreground">
+            আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ। নির্দেশনাবলি পড়েও যদি কোনো বিষয় বুঝতে অসুবিধা হয় বা প্রযুক্তিগতভাবে কোনো ধরনের সমস্যার সম্মুখীন হন সেক্ষেত্রে তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সাধারণ সম্পাদক আরেফিন তানভীর অধীর ভাইকে অবগত করবেন, ধন্যবাদ।
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
