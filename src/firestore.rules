@@ -31,6 +31,10 @@ service cloud.firestore {
       allow read, write: if isAdmin();
       allow list: if isAdmin();
     }
+    
+    match /{path=**}/attendanceRecords/{recordId} {
+       allow list: if false; // Deny all list operations on subcollections for security
+    }
 
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
@@ -41,8 +45,7 @@ service cloud.firestore {
         // Allow a user to get their own attendance record, and admins to get any.
         allow get: if isAdmin() || isOwner(recordId);
         
-        // Deny all list operations by default on the subcollection path.
-        // A specific rule for collectionGroup queries will handle necessary list operations.
+        // Deny all list operations by default.
         allow list: if false;
         
         // Allow a user to create their own attendance record if they are signed in,
@@ -52,15 +55,6 @@ service cloud.firestore {
 
         allow update, delete: if isAdmin();
       }
-    }
-    
-    // Rule for the 'attendanceRecords' collection group query used in the profile page.
-    // This allows a signed-in user to list only their own attendance records across all sessions.
-    match /{path=**}/attendanceRecords/{recordId} {
-        allow read: if isSignedIn() && request.query.where.size() == 1 &&
-                       request.query.where[0].field == "userId" &&
-                       request.query.where[0].op == "==" &&
-                       request.query.where[0].value == request.auth.uid;
     }
   }
 }

@@ -8,9 +8,9 @@ import { Button } from '../ui/button';
 import { AttendXIcon } from '../icons';
 
 const adminNavItems = [
-    { href: '/admin', label: 'ড্যাশবোর্ড', icon: LayoutDashboard },
-    { href: '/admin/members', label: 'সদস্য', icon: Users },
-    { href: '/admin/reports', label: 'রিপোর্ট', icon: BarChart3 },
+    { href: '/orbitpanel', label: 'ড্যাশবোর্ড', icon: LayoutDashboard },
+    { href: '/orbitpanel/members', label: 'সদস্য', icon: Users },
+    { href: '/orbitpanel/reports', label: 'রিপোর্ট', icon: BarChart3 },
 ];
 
 export function AdminSidebar() {

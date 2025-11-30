@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Poppins } from 'next/font/google';
@@ -20,7 +21,7 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
-  const isAdminPage = pathname.startsWith('/admin');
+  const isOrbitPanelPage = pathname.startsWith('/orbitpanel');
 
   return (
      <html lang="en" suppressHydrationWarning>
@@ -32,7 +33,7 @@ export default function RootLayout({
       </head>
       <body className={`font-sans antialiased ${poppins.variable}`}>
         <FirebaseClientProvider>
-            {isAuthPage || isAdminPage ? (
+            {isAuthPage || isOrbitPanelPage ? (
               children
             ) : (
               <AppShell>

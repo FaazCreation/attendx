@@ -15,7 +15,7 @@ const allMenuItems = [
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/admin', label: 'অরবিট প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
+  { href: '/orbitpanel', label: 'অরবিট প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
 ];
 
 const getMenuItemDescription = (description: string, role: string) => {
@@ -38,9 +38,13 @@ export default function DashboardPage() {
   );
 
   const menuItems = useMemo(() => {
+    if (!user) return [];
+    if (user.email === 'fh7614@gmail.com') {
+      return allMenuItems.filter(item => item.roles.includes('Admin'));
+    }
     if (!userData) return [];
-    return allMenuItems.filter(item => item.roles.includes(userData.role));
-  }, [userData]);
+    return allMenuItems.filter(item => item.roles.includes(userData.role) && item.href !== '/orbitpanel');
+  }, [userData, user]);
 
   if (isProfileLoading) {
     return (
@@ -59,9 +63,13 @@ export default function DashboardPage() {
     )
   }
   
-  if (!userData) {
+  if (!userData && user?.email !== 'fh7614@gmail.com') {
       return null;
   }
+  
+  const role = user?.email === 'fh7614@gmail.com' ? 'Admin' : userData?.role;
+  if (!role) return null;
+
 
   return (
     <div className="flex flex-col flex-1 space-y-6">
@@ -90,7 +98,7 @@ export default function DashboardPage() {
                   <div>
                     <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
                     <CardDescription className="text-xs md:text-sm">
-                      {getMenuItemDescription(item.description, userData.role)}
+                      {getMenuItemDescription(item.description, role)}
                     </CardDescription>
                   </div>
                 </div>
