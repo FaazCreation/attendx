@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -122,6 +123,17 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
         if (!user) return false;
         return attendanceRecords.some(record => record.sessionId === session.id && record.userId === user.uid);
     }, [attendanceRecords, session.id, user]);
+
+    const isAttendanceOver = useMemo(() => {
+        const now = new Date();
+        const sessionDate = new Date(session.date);
+        
+        // Set session end time to 11 PM on the session date
+        const sessionEndTime = new Date(sessionDate);
+        sessionEndTime.setHours(23, 0, 0, 0);
+
+        return now > sessionEndTime;
+    }, [session.date]);
     
     const handleDelete = () => {
         if (!firestore) return;
@@ -170,8 +182,8 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
         {isGeneralMember && (
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
-                    <Button disabled={hasAttended} className="w-full">
-                        {hasAttended ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> : 'সেশনে যোগ দিন'}
+                    <Button disabled={hasAttended || isAttendanceOver} className="w-full">
+                        {hasAttended ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> : (isAttendanceOver ? 'সময় শেষ' : 'সেশনে যোগ দিন')}
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
