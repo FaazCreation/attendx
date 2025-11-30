@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
 import { useMemo, useState } from "react";
-import { useFirestore, useUser, useCollection } from "@/firebase";
+import { useFirestore, useUser, useDoc } from "@/firebase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { doc, deleteDoc, collection } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
@@ -48,8 +48,6 @@ type UserRole = 'Admin' | 'Executive Member' | 'General Member';
 interface SessionCardProps {
   session: Session;
   userRole: UserRole;
-  allAttendanceRecords: any[];
-  areAttendanceRecordsLoading: boolean;
 }
 
 const toBengaliNumerals = (numStr: string): string => {
@@ -100,21 +98,25 @@ const getSessionTypeInBangla = (type: string) => {
   }
 }
 
-export function SessionCard({ session, userRole, allAttendanceRecords, areAttendanceRecordsLoading }: SessionCardProps) {
+export function SessionCard({ session, userRole }: SessionCardProps) {
     const { user } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [isAttendOpen, setIsAttendOpen] = useState(false);
 
+    const { data: attendanceRecord, isLoading: isAttendanceRecordLoading } = useDoc(
+      () => {
+        if (!firestore || !user) return null;
+        return doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
+      },
+      [firestore, user?.uid, session.id]
+    );
+
+    const hasAttended = useMemo(() => !!attendanceRecord, [attendanceRecord]);
+
     const isAdmin = userRole === 'Admin';
     const isExecutive = userRole === 'Executive Member';
     const isGeneralMember = userRole === 'General Member';
-
-    const hasAttended = useMemo(() => {
-        if (!user || areAttendanceRecordsLoading) return false;
-        return allAttendanceRecords.some(record => record.sessionId === session.id && record.userId === user.uid);
-    }, [allAttendanceRecords, areAttendanceRecordsLoading, user, session.id]);
-
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
@@ -156,7 +158,7 @@ export function SessionCard({ session, userRole, allAttendanceRecords, areAttend
             });
     };
 
-    const isButtonDisabled = hasAttended || isAttendanceOver || areAttendanceRecordsLoading;
+    const isButtonDisabled = hasAttended || isAttendanceOver || isAttendanceRecordLoading;
 
   return (
     <Card className="flex flex-col">
@@ -181,7 +183,7 @@ export function SessionCard({ session, userRole, allAttendanceRecords, areAttend
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
                     <Button disabled={isButtonDisabled} className="w-full">
-                        {areAttendanceRecordsLoading 
+                        {isAttendanceRecordLoading 
                             ? 'লোড হচ্ছে...' 
                             : hasAttended 
                                 ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> 
