@@ -116,7 +116,7 @@ export function RegisterForm() {
         <div className='font-headline'>
           <CardTitle className="text-2xl font-bold">একটি অ্যাকাউন্ট তৈরি করুন</CardTitle>
           <CardDescription>
-            আপনার অ্যাটেনডেন্স পরিচালনা করতে AttendX-এ যোগ দিন
+            আপনার অ্যাটেনডেন্স পরিচালনা করতে <span className="font-headline">AttendX</span>-এ যোগ দিন
           </CardDescription>
         </div>
       </CardHeader>

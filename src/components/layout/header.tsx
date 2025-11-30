@@ -12,8 +12,8 @@ export default function Header() {
       <div className="hidden sm:flex items-center gap-3">
         <Link href="/dashboard" className="flex items-center gap-2">
             <AttendXIcon className="h-7 w-7 text-primary" />
-            <span className="text-lg font-semibold text-foreground">
-            AttendX
+            <span className="text-lg font-semibold text-foreground font-headline">
+              AttendX
             </span>
         </Link>
       </div>

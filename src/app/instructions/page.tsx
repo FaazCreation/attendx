@@ -14,14 +14,16 @@ export default function InstructionsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">AttendX সম্পর্কে কিছু কথা</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            <span className="font-headline">AttendX</span> সম্পর্কে কিছু কথা
+          </CardTitle>
           <CardDescription>
             তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের জন্য একটি আধুনিক অ্যাটেনডেন্স ম্যানেজমেন্ট সিস্টেম।
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
             <p>
-                AttendX হলো তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সদস্যদের উপস্থিতি ব্যবস্থাপনার জন্য একটি ডিজিটাল সমাধান। এই সিস্টেমের মাধ্যমে ক্লাবের সকল মিটিং, কর্মশালা এবং ইভেন্টের অ্যাটেনডেন্স সহজে এবং নির্ভুলভাবে রেকর্ড করা যায়।
+                <span className="font-headline font-semibold">AttendX</span> হলো তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সদস্যদের উপস্থিতি ব্যবস্থাপনার জন্য একটি ডিজিটাল সমাধান। এই সিস্টেমের মাধ্যমে ক্লাবের সকল মিটিং, কর্মশালা এবং ইভেন্টের অ্যাটেনডেন্স সহজে এবং নির্ভুলভাবে রেকর্ড করা যায়।
             </p>
             
             <div>
