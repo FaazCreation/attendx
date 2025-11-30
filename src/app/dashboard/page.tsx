@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, ShieldCheck, Info, BookUser } from 'lucide-react';
+import { User, CalendarClock, ShieldCheck, BookUser } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -67,15 +67,15 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center text-center sm:justify-start sm:text-left">
         <div className="flex items-center gap-3">
           <AttendXIcon className="h-8 w-8 text-primary" />
-          <div className="text-left">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-headline">
+          <div className="text-left font-headline">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
               AttendX
             </h1>
             <p className="text-[6px] sm:text-xs text-muted-foreground">Attendance Management, Simplified.</p>
           </div>
         </div>
       </div>
-      <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
+      <p className="text-lg md:text-xl text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
       
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {menuItems.map((item) => (
