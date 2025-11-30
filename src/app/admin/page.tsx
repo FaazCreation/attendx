@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -78,7 +79,7 @@ export default function AdminDashboardPage() {
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          অ্যাডমিন ড্যাশবোর্ড
+          অরবিট ড্যাশবোর্ড
         </h1>
       </div>
       <p className="text-sm text-muted-foreground">

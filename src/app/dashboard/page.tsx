@@ -15,7 +15,7 @@ const allMenuItems = [
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/admin', label: 'অ্যাডমিন প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
+  { href: '/admin', label: 'অরবিট প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
 ];
 
 const getMenuItemDescription = (description: string, role: string) => {

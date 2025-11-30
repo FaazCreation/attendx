@@ -1,3 +1,4 @@
+
 'use client';
 
 import { BarChart3, ChevronLeft, LayoutDashboard, Users, ShieldCheck } from 'lucide-react';
@@ -20,7 +21,7 @@ export function AdminSidebar() {
             <div className="flex h-16 items-center border-b px-6">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
                     <ShieldCheck className="h-6 w-6 text-primary" />
-                    <span>অ্যাডমিন প্যানেল</span>
+                    <span>অরবিট প্যানেল</span>
                 </Link>
             </div>
             <nav className="flex-1 overflow-y-auto py-4">
