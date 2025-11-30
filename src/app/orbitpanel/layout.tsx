@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useUser, useFirestore, useDoc, FirebaseClientProvider } from '@/firebase';
+import { useUser, FirebaseClientProvider } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
-import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import Header from '@/components/layout/header';
@@ -13,38 +12,23 @@ import { AlertTriangle } from 'lucide-react';
 
 function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
   const router = useRouter();
 
-  const { data: currentUserData, isLoading: isUserDocLoading } = useDoc(
-    () => {
-      if (!firestore || !user) return null;
-      return doc(firestore, 'users', user.uid);
-    },
-    [firestore, user]
-  );
-
   const hasPermission = useMemo(() => {
-    if (isUserLoading || isUserDocLoading) return undefined;
-    if (!currentUserData) return false;
-    const role = currentUserData.role;
-    return role === 'Admin' || role === 'Executive Member';
-  }, [currentUserData, isUserLoading, isUserDocLoading]);
+    if (isUserLoading) return undefined;
+    if (!user) return false;
+    return user.email === 'fh7614@gmail.com';
+  }, [user, isUserLoading]);
 
   useEffect(() => {
     if (hasPermission === undefined) {
       return; // Still loading, do nothing.
     }
 
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-
     if (hasPermission === false) {
       router.push('/dashboard');
     }
-  }, [hasPermission, user, router]);
+  }, [hasPermission, router]);
 
 
   if (hasPermission === undefined) {

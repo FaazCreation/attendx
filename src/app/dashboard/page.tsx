@@ -40,9 +40,10 @@ export default function DashboardPage() {
   const menuItems = useMemo(() => {
     if (!user) return [];
     if (user.email === 'fh7614@gmail.com') {
-      return allMenuItems.filter(item => item.roles.includes('Admin'));
+      return allMenuItems; // Admin email sees all items
     }
     if (!userData) return [];
+    // Filter items based on user role, excluding orbitpanel for non-admins
     return allMenuItems.filter(item => item.roles.includes(userData.role) && item.href !== '/orbitpanel');
   }, [userData, user]);
 
