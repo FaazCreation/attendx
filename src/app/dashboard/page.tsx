@@ -61,7 +61,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">শুরু করতে নিচের একটি বিকল্প নির্বাচন করুন।</p>
+      <p className="text-sm md:text-base text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
       
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {menuItems.map((item) => (
