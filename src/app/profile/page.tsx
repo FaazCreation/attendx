@@ -104,23 +104,6 @@ export default function ProfilePage() {
           <p className="text-md text-muted-foreground">{userData.email}</p>
           <p className="text-sm text-muted-foreground">{userData.department} - {userData.batch}</p>
         </div>
-        <Dialog open={isPhotoDialogOpen} onOpenChange={setIsPhotoDialogOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" />
-                    ছবি পরিবর্তন করুন
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>প্রোফাইল ছবি পরিবর্তন করুন</DialogTitle>
-                </DialogHeader>
-                <EditProfilePhoto 
-                    currentUser={userData} 
-                    onPhotoChanged={() => setIsPhotoDialogOpen(false)} 
-                />
-            </DialogContent>
-        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
