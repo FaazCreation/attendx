@@ -98,7 +98,7 @@
 
 @layer utilities {
   .animate-marquee {
-    animation: marquee 60s linear 5s infinite;
+    animation: marquee 60s linear infinite;
   }
   @keyframes marquee {
     from { transform: translateX(100%); }
