@@ -36,18 +36,26 @@ export default function DashboardPage() {
     },
     [firestore, user]
   );
+  
+  const { data: adminRoleDoc, isLoading: isAdminRoleLoading } = useDoc(
+    () => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'roles_admin', user.uid);
+    },
+    [firestore, user]
+  );
 
   const menuItems = useMemo(() => {
     if (!user) return [];
-    if (user.email === 'fh7614@gmail.com') {
-      return allMenuItems; // Admin email sees all items
+    if (adminRoleDoc) {
+      return allMenuItems; // Admins with role doc see all items
     }
     if (!userData) return [];
-    // Filter items based on user role, excluding orbitpanel for non-admins
+    // Filter items based on user role
     return allMenuItems.filter(item => item.roles.includes(userData.role) && item.href !== '/orbitpanel');
-  }, [userData, user]);
+  }, [userData, user, adminRoleDoc]);
 
-  if (isProfileLoading) {
+  if (isProfileLoading || isAdminRoleLoading) {
     return (
         <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between space-y-2">
@@ -64,11 +72,11 @@ export default function DashboardPage() {
     )
   }
   
-  if (!userData && user?.email !== 'fh7614@gmail.com') {
+  if (!userData) {
       return null;
   }
   
-  const role = user?.email === 'fh7614@gmail.com' ? 'Admin' : userData?.role;
+  const role = userData?.role;
   if (!role) return null;
 
 

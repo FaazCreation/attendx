@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -34,15 +35,15 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
   const { toast } = useToast();
   const userRoles: User['role'][] = ['Admin', 'Executive Member', 'General Member'];
 
-  const { data: currentUserData } = useDoc(
+  const { data: currentUserIsAdminDoc } = useDoc(
     () => {
       if (!firestore || !currentUser) return null;
-      return doc(firestore, 'users', currentUser.uid);
+      return doc(firestore, 'roles_admin', currentUser.uid);
     },
     [firestore, currentUser]
   );
   
-  const currentUserIsAdmin = currentUserData?.role === 'Admin';
+  const currentUserIsAdmin = !!currentUserIsAdminDoc;
   
   const handleChangeRole = (newRole: User['role']) => {
     if (!firestore) return;
@@ -97,7 +98,7 @@ const RoleChanger = ({ user: targetUser }: { user: User }) => {
         <Button 
             variant="ghost" 
             className="h-8 w-8 p-0" 
-            disabled={!currentUserIsAdmin || (targetUser.role === 'Admin' && currentUser?.uid !== targetUser.uid && !currentUserIsAdmin)}
+            disabled={!currentUserIsAdmin || (targetUser.role === 'Admin' && currentUser?.uid !== targetUser.uid)}
         >
           <span className="sr-only">মেনু খুলুন</span>
           <MoreHorizontal className="h-4 w-4" />
