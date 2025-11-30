@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
 
 const allMenuItems = [
-  { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার ব্যক্তিগত বিবরণ দেখুন এবং সম্পাদনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
+  { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার প্রোফাইলের বিবরণ দেখুন ও পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/admin', label: 'অ্যাডমিন প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
 ];
