@@ -39,7 +39,7 @@ service cloud.firestore {
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
-      allow create, update, delete: if isAdmin() || isExecutiveMember();
+      allow create, update: if isAdmin() || isExecutiveMember();
 
       match /attendanceRecords/{recordId} {
         allow get: if isAdmin() || isOwner(recordId);

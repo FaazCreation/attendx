@@ -4,7 +4,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Check, Clock, QrCode, Trash2 } from "lucide-react";
+import { Calendar, Check, Clock, QrCode } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,23 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useFirestore, useUser } from "@/firebase";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { doc, deleteDoc, getDoc } from "firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
+import { doc, getDoc } from "firebase/firestore";
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 
@@ -101,7 +87,6 @@ const getSessionTypeInBangla = (type: string) => {
 export function SessionCard({ session, userRole }: SessionCardProps) {
     const { user } = useUser();
     const firestore = useFirestore();
-    const { toast } = useToast();
     const [isAttendOpen, setIsAttendOpen] = useState(false);
     const [hasAttended, setHasAttended] = useState(false);
     const [isCheckingAttendance, setIsCheckingAttendance] = useState(true);
@@ -139,41 +124,8 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
     const formattedTime = formatTime(session.time);
     const formattedDate = toBengaliNumerals(format(new Date(session.date), 'EEEE, do MMMM yyyy', { locale: bn }));
     
-    const isAttendanceOver = useMemo(() => {
-        const now = new Date();
-        const sessionDate = new Date(session.date);
-        
-        const sessionEndTime = new Date(sessionDate);
-        sessionEndTime.setHours(23, 0, 0, 0);
-
-        return now > sessionEndTime;
-    }, [session.date]);
+    const isAttendanceOver = new Date(session.date) < new Date(new Date().setDate(new Date().getDate() - 1));
     
-    const handleDelete = () => {
-        if (!firestore) return;
-        const sessionDocRef = doc(firestore, 'attendanceSessions', session.id);
-        
-        deleteDoc(sessionDocRef)
-            .then(() => {
-                toast({
-                    title: "সেশন মুছে ফেলা হয়েছে",
-                    description: `"${session.title}" সেশনটি সরানো হয়েছে।`,
-                });
-            })
-            .catch((error) => {
-                const permissionError = new FirestorePermissionError({
-                    path: sessionDocRef.path,
-                    operation: 'delete',
-                });
-                errorEmitter.emit('permission-error', permissionError);
-                 toast({
-                    variant: 'destructive',
-                    title: 'মুছে ফেলতে ব্যর্থ',
-                    description: 'এই সেশনটি মুছে ফেলার অনুমতি আপনার নেই।',
-                });
-            });
-    };
-
     const isButtonDisabled = hasAttended || isAttendanceOver || isCheckingAttendance;
 
   return (
@@ -235,31 +187,6 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
                     </div>
                 </DialogContent>
             </Dialog>
-        )}
-
-        {isAdmin && (
-             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">সেশন মুছুন</span>
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                    <AlertDialogTitle>আপনি কি পুরোপুরি নিশ্চিত?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        এই কাজটি আর বাতিল করা যাবে না। এটি স্থায়ীভাবে
-                        <span className="font-semibold"> {session.title} </span> 
-                        সেশন এবং এর সমস্ত অ্যাটেনডেন্স রেকর্ড মুছে ফেলবে।
-                    </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                    <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>চালিয়ে যান</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         )}
       </CardFooter>
     </Card>
