@@ -79,7 +79,7 @@ export default function DashboardPage() {
                   <div className="bg-primary/10 p-3 rounded-md">
                     <item.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1">
                     <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
                     <CardDescription className="text-xs md:text-sm">
                       {getMenuItemDescription(item.description, userData.role)}
