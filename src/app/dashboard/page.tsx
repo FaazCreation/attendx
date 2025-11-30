@@ -17,7 +17,7 @@ const allMenuItems = [
 
 const getMenuItemDescription = (description: string, role: string) => {
   if (role === 'General Member') {
-    return description.replace(/ (ও|এবং) পরিচালনা করুন/g, ' দেখুন');
+    return description.replace(/ (ও|এবং) পরিচালনা করুন/g, '');
   }
   return description;
 }
