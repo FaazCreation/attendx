@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, ShieldCheck, BookUser } from 'lucide-react';
+import { User, CalendarClock, ShieldCheck, BookUser, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -14,6 +14,7 @@ const allMenuItems = [
   { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার প্রোফাইলের বিবরণ দেখুন ও পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
+  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
   { href: '/admin', label: 'অ্যাডমিন প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
 ];
 
