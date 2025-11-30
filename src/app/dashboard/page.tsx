@@ -73,7 +73,7 @@ export default function DashboardPage() {
                     <item.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg md:text-xl font-semibold">{item.label}</CardTitle>
+                    <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
                   </div>
                 </div>
               </CardHeader>

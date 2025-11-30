@@ -61,7 +61,7 @@ const toBengaliNumerals = (numStr: string): string => {
         '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
         '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
     };
-    return numStr.replace(/\d/g, (d) => bengaliNumerals[d]);
+    return String(numStr).replace(/\d/g, (d) => bengaliNumerals[d]);
 };
 
 const formatTime = (timeString: string) => {
@@ -86,7 +86,7 @@ const formatTime = (timeString: string) => {
     displayHours = h > 12 ? h - 12 : (h === 0 ? 12 : h);
   }
 
-  const bengaliHours = toBengaliNumerals(String(displayHours).padStart(2,'0'));
+  const bengaliHours = toBengaliNumerals(String(displayHours));
   const bengaliMinutes = toBengaliNumerals(String(m).padStart(2,'0'));
 
   return `${timeOfDay} ${bengaliHours}:${bengaliMinutes}`;
@@ -99,6 +99,7 @@ const getSessionTypeInBangla = (type: string) => {
     case 'AGM': return 'এজিএম';
     case 'Event': return 'ইভেন্ট';
     case 'Workshop': return 'কর্মশালা';
+    case 'Photowalk': return 'ফটোওয়াক';
     default: return type;
   }
 }

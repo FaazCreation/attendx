@@ -28,7 +28,7 @@ const sessionSchema = z.object({
     required_error: "একটি তারিখ আবশ্যক।",
   }),
   time: z.string().min(1, { message: "সময় আবশ্যক।" }),
-  type: z.enum(["General Meeting", "AGM", "Event", "Workshop"]),
+  type: z.enum(["General Meeting", "AGM", "Event", "Workshop", "Photowalk"]),
 });
 
 type SessionFormData = z.infer<typeof sessionSchema>;
@@ -189,6 +189,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
                     <SelectItem value="AGM">এজিএম</SelectItem>
                     <SelectItem value="Event">ইভেন্ট</SelectItem>
                     <SelectItem value="Workshop">কর্মশালা</SelectItem>
+                    <SelectItem value="Photowalk">ফটোওয়াক</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
