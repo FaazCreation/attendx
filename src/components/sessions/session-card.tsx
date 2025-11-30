@@ -79,9 +79,10 @@ const formatTime = (timeString: string) => {
   } else if (h >= 12 && h < 16) {
     timeOfDay = 'দুপুর';
     displayHours = h > 12 ? h - 12 : h;
+    if (displayHours === 0) displayHours = 12;
   } else if (h >= 16 && h < 18) {
     timeOfDay = 'বিকাল';
-    displayHours = h - 12;
+    displayHours = h > 12 ? h - 12 : h;
   } else {
     timeOfDay = 'রাত';
     displayHours = h > 12 ? h - 12 : (h === 0 ? 12 : h);
