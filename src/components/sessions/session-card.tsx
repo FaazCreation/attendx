@@ -112,10 +112,10 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
     // The document ID is the user's UID for efficient checking.
     const { data: attendanceRecord, isLoading: isAttendanceRecordLoading } = useDoc(
         () => {
-            if (!firestore || !user) return null;
+            if (!firestore || !user?.uid) return null;
             return doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
         },
-        [firestore, user, session.id]
+        [firestore, user?.uid, session.id]
     );
 
     const hasAttended = useMemo(() => !!attendanceRecord, [attendanceRecord]);
