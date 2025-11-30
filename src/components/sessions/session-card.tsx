@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useFirestore, useUser, useDoc } from "@/firebase";
 import {
   AlertDialog,
@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { doc, deleteDoc } from "firebase/firestore";
+import { doc, deleteDoc, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
@@ -103,16 +103,35 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [isAttendOpen, setIsAttendOpen] = useState(false);
+    const [hasAttended, setHasAttended] = useState(false);
+    const [isCheckingAttendance, setIsCheckingAttendance] = useState(true);
 
-    const { data: attendanceRecord, isLoading: isAttendanceRecordLoading } = useDoc(
-      () => {
-        if (!firestore || !user) return null;
-        return doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
-      },
-      [firestore, user?.uid, session.id]
-    );
 
-    const hasAttended = useMemo(() => !!attendanceRecord, [attendanceRecord]);
+    useEffect(() => {
+        const checkAttendance = async () => {
+            if (!firestore || !user) {
+                setIsCheckingAttendance(false);
+                return;
+            }
+
+            setIsCheckingAttendance(true);
+            try {
+                const recordRef = doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
+                const docSnap = await getDoc(recordRef);
+                setHasAttended(docSnap.exists());
+            } catch (error) {
+                console.error("Error checking attendance:", error);
+                // We don't block the UI for this, but we could show a toast.
+                setHasAttended(false); // Assume not attended on error
+            } finally {
+                setIsCheckingAttendance(false);
+            }
+        };
+
+        checkAttendance();
+    // We only want to re-run this effect if the user or session changes.
+    }, [firestore, user, session.id, isAttendOpen]);
+
 
     const isAdmin = userRole === 'Admin';
     const isExecutive = userRole === 'Executive Member';
@@ -158,7 +177,7 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
             });
     };
 
-    const isButtonDisabled = hasAttended || isAttendanceOver || isAttendanceRecordLoading;
+    const isButtonDisabled = hasAttended || isAttendanceOver || isCheckingAttendance;
 
   return (
     <Card className="flex flex-col">
@@ -183,7 +202,7 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
                     <Button disabled={isButtonDisabled} className="w-full">
-                        {isAttendanceRecordLoading 
+                        {isCheckingAttendance 
                             ? 'লোড হচ্ছে...' 
                             : hasAttended 
                                 ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> 
