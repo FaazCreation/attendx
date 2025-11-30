@@ -1,7 +1,7 @@
 'use client';
 
 import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
-import { collection, doc, collectionGroup, query, where } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -38,15 +38,7 @@ export default function SessionsPage() {
     [firestore, user]
   );
 
-  const { data: attendanceRecords, isLoading: isAttendanceLoading } = useCollection(
-    () => {
-      if (!firestore || !user?.uid) return null;
-      return query(collectionGroup(firestore, 'attendanceRecords'), where('userId', '==', user.uid));
-    },
-    [firestore, user?.uid]
-  );
-
-  const isLoading = areSessionsLoading || isUserLoading || isAttendanceLoading;
+  const isLoading = areSessionsLoading || isUserLoading;
 
   const canCreateSession = useMemo(() => {
     if (!userData) return false;
@@ -97,7 +89,6 @@ export default function SessionsPage() {
               key={session.id} 
               session={session} 
               userRole={userData.role}
-              attendanceRecords={attendanceRecords || []}
             />
           ))}
         </div>

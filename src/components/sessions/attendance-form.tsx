@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore, useUser } from '@/firebase';
-import { serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -53,7 +53,8 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         return;
     }
     
-    const attendanceRecordsColRef = collection(firestore, `attendanceSessions/${session.id}/attendanceRecords`);
+    // Set the document ID to the user's UID for efficient existence checks
+    const attendanceRecordRef = doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
 
     const recordData = {
         sessionId: session.id,
@@ -62,17 +63,17 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         geolocation: '', // Geolocation can be added in the future
     };
 
-    addDoc(attendanceRecordsColRef, recordData)
+    setDoc(attendanceRecordRef, recordData)
       .then(() => {
         toast({
-          title: "অ্যাটেনডেন্স চিহ্নিত!",
+          title: "অ্যাটেন্ডেন্স চিহ্নিত!",
           description: "আপনার অ্যাটেনডেন্স সফলভাবে রেকর্ড করা হয়েছে।",
         });
         onAttendanceMarked();
       })
       .catch((error: any) => {
         const permissionError = new FirestorePermissionError({
-            path: attendanceRecordsColRef.path,
+            path: attendanceRecordRef.path,
             operation: 'create',
             requestResourceData: recordData,
         });
@@ -81,7 +82,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         toast({
             variant: "destructive",
             title: "অ্যাটেনডেন্স চিহ্নিত করতে ব্যর্থ",
-            description: "অনুগ্রহ করে অনুমতি পরীক্ষা করুন বা পরে আবার চেষ্টা করুন।",
+            description: "আপনি হয়তো ইতিমধ্যে অ্যাটেন্ড করেছেন অথবা আপনার অনুমতি নেই।",
         });
       });
   };

@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import { AttendanceForm } from "./attendance-form";
 import { useMemo, useState } from "react";
-import { useFirestore, useUser } from "@/firebase";
+import { useFirestore, useUser, useDoc } from "@/firebase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,18 +43,11 @@ type Session = {
   attendanceCode: string;
 };
 
-type AttendanceRecord = {
-    id: string;
-    sessionId: string;
-    userId: string;
-}
-
 type UserRole = 'Admin' | 'Executive Member' | 'General Member';
 
 interface SessionCardProps {
   session: Session;
   userRole: UserRole;
-  attendanceRecords: AttendanceRecord[];
 }
 
 const toBengaliNumerals = (numStr: string): string => {
@@ -68,7 +61,7 @@ const toBengaliNumerals = (numStr: string): string => {
 const formatTime = (timeString: string) => {
   if (!timeString) return '';
   const [hours, minutes] = timeString.split(':');
-  const h = parseInt(hours, 10);
+  let h = parseInt(hours, 10);
   const m = parseInt(minutes, 10);
 
   let timeOfDay, displayHours;
@@ -78,8 +71,7 @@ const formatTime = (timeString: string) => {
     displayHours = h;
   } else if (h >= 12 && h < 16) {
     timeOfDay = 'দুপুর';
-    displayHours = h > 12 ? h - 12 : h;
-    if (displayHours === 0) displayHours = 12;
+    displayHours = h > 12 ? h - 12 : (h === 12 ? 12 : h);
   } else if (h >= 16 && h < 18) {
     timeOfDay = 'বিকাল';
     displayHours = h > 12 ? h - 12 : h;
@@ -106,7 +98,7 @@ const getSessionTypeInBangla = (type: string) => {
   }
 }
 
-export function SessionCard({ session, userRole, attendanceRecords }: SessionCardProps) {
+export function SessionCard({ session, userRole }: SessionCardProps) {
     const { user } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
@@ -116,15 +108,22 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
     const isExecutive = userRole === 'Executive Member';
     const isGeneralMember = userRole === 'General Member';
 
+    // Directly check if the attendance record document exists for this user and session.
+    // The document ID is the user's UID for efficient checking.
+    const { data: attendanceRecord, isLoading: isAttendanceRecordLoading } = useDoc(
+        () => {
+            if (!firestore || !user) return null;
+            return doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
+        },
+        [firestore, user, session.id]
+    );
+
+    const hasAttended = useMemo(() => !!attendanceRecord, [attendanceRecord]);
+
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
     const formattedDate = toBengaliNumerals(format(new Date(session.date), 'EEEE, do MMMM yyyy', { locale: bn }));
-
-    const hasAttended = useMemo(() => {
-        if (!user) return false;
-        return attendanceRecords.some(record => record.sessionId === session.id && record.userId === user.uid);
-    }, [attendanceRecords, session.id, user]);
-
+    
     const isAttendanceOver = useMemo(() => {
         const now = new Date();
         const sessionDate = new Date(session.date);
@@ -161,6 +160,8 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
             });
     };
 
+    const isButtonDisabled = hasAttended || isAttendanceOver || isAttendanceRecordLoading;
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -183,8 +184,12 @@ export function SessionCard({ session, userRole, attendanceRecords }: SessionCar
         {isGeneralMember && (
             <Dialog open={isAttendOpen} onOpenChange={setIsAttendOpen}>
                 <DialogTrigger asChild>
-                    <Button disabled={hasAttended || isAttendanceOver} className="w-full">
-                        {hasAttended ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> : (isAttendanceOver ? 'সময় শেষ' : 'সেশনে যোগ দিন')}
+                    <Button disabled={isButtonDisabled} className="w-full">
+                        {isAttendanceRecordLoading 
+                            ? 'লোড হচ্ছে...' 
+                            : hasAttended 
+                                ? <><Check className="mr-2 h-4 w-4" />অ্যাটেন্ডেড</> 
+                                : (isAttendanceOver ? 'সময় শেষ' : 'সেশনে যোগ দিন')}
                     </Button>
                 </DialogTrigger>
                 <DialogContent>

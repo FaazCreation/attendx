@@ -40,7 +40,7 @@ service cloud.firestore {
     }
     
     match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
+       allow list: if false; // Deny all list operations on subcollections for security
     }
 
     match /attendanceSessions/{sessionId} {
@@ -49,13 +49,16 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin() || isExecutiveMember();
 
       match /attendanceRecords/{recordId} {
-        allow get: if isAdmin() || (resource != null && isOwner(resource.data.userId));
+        // Allow a user to get their own attendance record, and admins to get any.
+        allow get: if isAdmin() || (isOwner(recordId));
         
-        allow list: if isAdmin();
+        // Deny all list operations by default.
+        allow list: if false;
         
-        allow create: if isSignedIn() 
-                      && request.resource.data.userId == request.auth.uid
-                      && !exists(/databases/$(database)/documents/attendanceSessions/$(sessionId)/attendanceRecords/$(request.auth.uid));
+        // Allow a user to create their own attendance record if they are signed in,
+        // the record ID matches their UID, and the record doesn't already exist.
+        allow create: if isOwner(recordId)
+                      && request.resource.data.userId == request.auth.uid;
 
         allow update, delete: if isAdmin();
       }
