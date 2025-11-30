@@ -1,4 +1,6 @@
+
 import type { SVGProps } from 'react';
+import { BookUser } from 'lucide-react';
 
 export function AttendXIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -37,3 +39,5 @@ export function Info(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export { BookUser };
