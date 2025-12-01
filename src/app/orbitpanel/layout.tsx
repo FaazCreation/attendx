@@ -3,7 +3,7 @@
 
 import { useUser, FirebaseClientProvider, useFirestore, useDoc } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import Header from '@/components/layout/header';
@@ -15,56 +15,25 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
-  const [permissionState, setPermissionState] = useState<'loading' | 'allowed' | 'denied'>('loading');
 
   const { data: userData, isLoading: isUserRoleLoading } = useDoc(
     () => {
-      // Only run this query if we have a user
       if (!firestore || !user) return null;
       return doc(firestore, 'users', user.uid);
     },
-    [firestore, user] // Dependencies
+    [firestore, user]
   );
-
+  
   useEffect(() => {
-    // Wait for initial user loading to finish
-    if (isUserLoading) {
-      return;
+    // If user is not logged in after check, redirect to login.
+    if (!isUserLoading && !user) {
+      router.push('/login');
     }
-
-    // If no user is logged in, deny access. The redirect will be handled by the effect below.
-    if (!user) {
-      setPermissionState('denied');
-      return; 
-    }
-    
-    // Now that we have a user, wait for their role data to load
-    if (isUserRoleLoading) {
-        return;
-    }
-
-    // Finally, check the role from the loaded user data
-    if (userData?.role === 'Admin') {
-      setPermissionState('allowed');
-    } else {
-      setPermissionState('denied');
-    }
-
-  }, [isUserLoading, user, isUserRoleLoading, userData, router]);
-
-  useEffect(() => {
-    if (permissionState === 'denied') {
-        // If no user is logged in, redirect to login page. Otherwise, redirect to dashboard.
-        if (!user) {
-            router.push('/login');
-        } else {
-            router.push('/dashboard');
-        }
-    }
-  }, [permissionState, user, router]);
+  }, [isUserLoading, user, router]);
 
 
-  if (permissionState === 'loading') {
+  // Show loading skeleton while user auth or role is being determined
+  if (isUserLoading || (user && isUserRoleLoading)) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <div className="flex items-center gap-4">
@@ -77,8 +46,11 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (permissionState === 'denied') {
-    // Show a message while redirecting
+  // After loading, if there's a logged-in user but their role is not Admin, deny access
+  if (user && userData?.role !== 'Admin') {
+     // Redirect to dashboard if not an admin
+    router.push('/dashboard');
+
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <Card className="w-full max-w-md border-destructive">
@@ -94,16 +66,21 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
     );
   }
   
-  // If permission is 'allowed', render the protected layout
-  return (
-    <div className="flex h-screen w-full bg-background">
-      <AdminSidebar />
-      <div className="flex flex-1 flex-col">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+  // If user is logged in and is an Admin, render the protected layout
+  if (user && userData?.role === 'Admin') {
+    return (
+      <div className="flex h-screen w-full bg-background">
+        <AdminSidebar />
+        <div className="flex flex-1 flex-col">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Fallback for the case where user is null after loading (handled by useEffect redirect)
+  return null;
 }
 
 
