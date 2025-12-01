@@ -29,7 +29,12 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
     if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [isUserLoading, user, router]);
+     // After loading, if there's a logged-in user but their role is not Admin, deny access
+    if (user && !isUserRoleLoading && userData?.role !== 'Admin') {
+        router.push('/dashboard');
+    }
+
+  }, [isUserLoading, user, isUserRoleLoading, userData, router]);
 
 
   // Show loading skeleton while user auth or role is being determined
@@ -48,9 +53,6 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
 
   // After loading, if there's a logged-in user but their role is not Admin, deny access
   if (user && userData?.role !== 'Admin') {
-     // Redirect to dashboard if not an admin
-    router.push('/dashboard');
-
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <Card className="w-full max-w-md border-destructive">
