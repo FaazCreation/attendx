@@ -28,19 +28,15 @@ service cloud.firestore {
     }
 
     match /roles_admin/{userId} {
-      allow read, write: if isAdmin();
+      allow read: if isOwner(userId);
+      allow write: if isAdmin();
       allow list: if isAdmin();
     }
-    
-    // This rule was too broad and has been replaced by a more specific rule below.
-    // match /{path=**}/attendanceRecords/{recordId} {
-    //    allow list: if false; // Deny all list operations on subcollections for security
-    // }
 
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
-      // Allow admins to create sessions. The client generates the ID.
+      // Allow admins to create sessions.
       allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if false;
