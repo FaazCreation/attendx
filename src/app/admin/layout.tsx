@@ -1,7 +1,7 @@
 'use client';
 import { FirebaseClientProvider } from '@/firebase';
 
-export default function AuthLayout({
+export default function AdminAuthLayout({
   children,
 }: {
   children: React.ReactNode;

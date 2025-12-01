@@ -58,7 +58,7 @@ export function LoginForm() {
         toast({
             variant: "destructive",
             title: "অ্যাডমিন লগইন",
-            description: "অ্যাডমিন হিসেবে লগইন করতে /admin পৃষ্ঠায় যান।",
+            description: "অ্যাডমিন হিসেবে লগইন করতে /admin/login পৃষ্ঠায় যান।",
         });
         return;
     }

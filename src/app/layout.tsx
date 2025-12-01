@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Poppins } from 'next/font/google';
@@ -20,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/admin');
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/admin/login');
 
   return (
      <html lang="en" suppressHydrationWarning>

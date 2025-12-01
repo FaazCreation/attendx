@@ -1,22 +1,59 @@
 'use client';
 
 import Header from '@/components/layout/header';
-import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { useUser, useFirestore, useDoc } from '@/firebase';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { doc } from 'firebase/firestore';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const { data: userData, isLoading: isUserRoleLoading } = useDoc(() => {
+      if (!user || !firestore) return null;
+      return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const isAdminPath = pathname.startsWith('/admin');
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
+    // 1. If auth is still loading, wait.
+    if (isUserLoading || isUserRoleLoading) return;
+    
+    // 2. If no user is logged in, redirect to the appropriate login page.
+    if (!user) {
+      if (isAdminPath) {
+        router.push('/admin/login');
+      } else {
+        router.push('/login');
+      }
+      return;
     }
-  }, [user, isUserLoading, router]);
+    
+    // 3. User is logged in, check role permissions.
+    const isAdmin = userData?.role === 'Admin';
+    
+    // If user is on an admin path but is not an admin, redirect to general dashboard.
+    if (isAdminPath && !isAdmin) {
+      router.push('/dashboard');
+      return;
+    }
+    
+    // If user is an admin but is on a general path, redirect to admin dashboard.
+    if (!isAdminPath && isAdmin) {
+        router.push('/admin/dashboard');
+        return;
+    }
 
-  if (isUserLoading || !user) {
+  }, [user, isUserLoading, userData, isUserRoleLoading, router, pathname, isAdminPath]);
+
+
+  // Show loading skeleton until auth and role are resolved.
+  if (isUserLoading || isUserRoleLoading || !user) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -26,6 +63,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Skeleton className="h-4 w-[200px]" />
             </div>
         </div>
+      </div>
+    );
+  }
+
+  // Final check to prevent content flash for mismatched roles during redirection.
+  const isAdmin = userData?.role === 'Admin';
+  if ((isAdminPath && !isAdmin) || (!isAdminPath && isAdmin)) {
+    // Still redirecting, show loading screen
+     return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <p>Redirecting...</p>
       </div>
     );
   }

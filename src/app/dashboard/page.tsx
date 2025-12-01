@@ -1,70 +1,19 @@
-
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, FileText, BarChart3, BookUser } from 'lucide-react';
+import { User, CalendarClock, FileText, BookUser, UserCheck, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import { useUser, useFirestore, useDoc } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
 
-const allMenuItems = [
-  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন" },
+const menuItems = [
+  { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন" },
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন" },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন" },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন" },
 ];
 
-const adminMenuItems = [
-    { href: '/sessions', label: 'সেশন পরিচালনা', icon: CalendarClock, description: "নতুন সেশন তৈরি ও পরিচালনা করুন" },
-    { href: '/orbitpanel/reports', label: 'রিপোর্ট', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন" },
-];
 
 export default function DashboardPage() {
-  const { user } = useUser();
-  const firestore = useFirestore();
-
-  const { data: userData, isLoading: isProfileLoading } = useDoc(
-    () => {
-      if (!firestore || !user) return null;
-      return doc(firestore, 'users', user.uid);
-    },
-    [firestore, user]
-  );
-  
-  const menuItems = useMemo(() => {
-    if (!user || !userData) return [];
-
-    if (userData.role === 'Admin') {
-      return adminMenuItems;
-    }
-    
-    return allMenuItems;
-    
-  }, [userData, user]);
-
-  if (isProfileLoading) {
-    return (
-        <div className="flex-1 space-y-6">
-            <div className="flex items-center justify-between space-y-2">
-                <Skeleton className="h-8 w-64" />
-            </div>
-            <Skeleton className="h-6 w-96" />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-            </div>
-        </div>
-    )
-  }
-  
-  if (!userData) {
-      return null;
-  }
-  
   return (
     <div className="flex flex-col flex-1 h-full">
       <div className="flex-grow space-y-6">

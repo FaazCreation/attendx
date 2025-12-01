@@ -24,7 +24,6 @@ import { doc, getDoc } from 'firebase/firestore';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 
-
 const adminLoginSchema = z.object({
   email: z.string().email({ message: "অবৈধ ইমেইল ঠিকানা।" }),
   password: z.string().min(1, { message: "পাসওয়ার্ড আবশ্যক।" }),
@@ -50,24 +49,27 @@ export function AdminLoginForm() {
   const { formState: { isSubmitting } } = form;
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-        // Check role after user is available
-        const checkAdminRole = async () => {
-            if (firestore && user) {
-                const userDocRef = doc(firestore, 'users', user.uid);
+    const checkAdminAndRedirect = async () => {
+        if (!isUserLoading && user && firestore) {
+            const userDocRef = doc(firestore, 'users', user.uid);
+            try {
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists() && userDoc.data().role === 'Admin') {
-                    router.push('/dashboard');
+                    router.push('/admin/dashboard');
                 }
+            } catch (e) {
+                // Ignore potential permission errors for non-admins, they'll be redirected by AppShell
             }
-        };
-        checkAdminRole();
-    }
-}, [user, isUserLoading, router, firestore]);
+        }
+    };
+    checkAdminAndRedirect();
+  }, [user, isUserLoading, firestore, router]);
+
 
   const onSubmit: SubmitHandler<AdminLoginFormData> = async (data) => {
     if (!auth || !firestore) return;
     
+    // Hardcoded check for admin credentials
     if (data.email.toLowerCase() !== 'fh7614@gmail.com' || data.password !== 'Forhad@2020') {
       toast({
         variant: "destructive",
@@ -94,6 +96,11 @@ export function AdminLoginForm() {
             operation: 'get',
         });
         errorEmitter.emit('permission-error', permissionError);
+        toast({
+            variant: "destructive",
+            title: "অনুমতি যাচাই ব্যর্থ",
+            description: "অ্যাডমিন হিসেবে আপনার ভূমিকা যাচাই করা যায়নি।",
+        });
         return;
       }
       
@@ -101,7 +108,7 @@ export function AdminLoginForm() {
         title: "অ্যাডমিন লগইন সফল",
         description: "অ্যাডমিন ড্যাশবোর্ডে আপনাকে স্বাগতম!",
       });
-      router.push('/dashboard');
+      router.push('/admin/dashboard');
 
     } catch (error: any) {
        toast({
