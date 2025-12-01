@@ -13,13 +13,17 @@ import { AttendXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Eye, EyeOff } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
+
 
 const adminLoginSchema = z.object({
   email: z.string().email({ message: "অবৈধ ইমেইল ঠিকানা।" }),
@@ -30,6 +34,7 @@ type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 
 export function AdminLoginForm() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
@@ -61,12 +66,31 @@ export function AdminLoginForm() {
     }
 
     try {
-      if(!auth) return;
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      if(!auth || !firestore) return;
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      const adminRoleRef = doc(firestore, 'roles_admin', userCredential.user.uid);
+      
+      try {
+        const adminDoc = await getDoc(adminRoleRef);
+        if (!adminDoc.exists()) {
+            throw new Error("User is not an admin.");
+        }
+      } catch (error) {
+         const permissionError = new FirestorePermissionError({
+            path: adminRoleRef.path,
+            operation: 'get',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        return;
+      }
+      
       toast({
         title: "অ্যাডমিন লগইন সফল",
         description: "অ্যাডমিন ড্যাশবোর্ডে আপনাকে স্বাগতম!",
       });
+      router.push('/dashboard');
+
     } catch (error: any) {
        toast({
         variant: "destructive",
