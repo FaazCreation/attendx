@@ -36,8 +36,8 @@ export default function DashboardPage() {
 
     let items;
     if (userData.role === 'Admin') {
-      // Admin sees everything except 'Instructions' and gets the 'Orbit Panel'
-      items = allMenuItems.filter(item => item.href !== '/instructions');
+      // Admin sees items except 'Instructions' and 'Profile', and gets the 'Orbit Panel'
+      items = allMenuItems.filter(item => item.href !== '/instructions' && item.href !== '/profile');
       items.push(adminMenuItem);
     } else {
       // General members see all standard items
