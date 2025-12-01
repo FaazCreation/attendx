@@ -79,6 +79,7 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         });
         errorEmitter.emit('permission-error', permissionError);
 
+        // Keep a user-friendly toast, but the developer overlay will have the details.
         toast({
             variant: "destructive",
             title: "অ্যাটেনডেন্স চিহ্নিত করতে ব্যর্থ",
