@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, ShieldCheck, BookUser, FileText, BarChart3 } from 'lucide-react';
+import { User, CalendarClock, FileText, BarChart3, BookUser } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
 
 const allMenuItems = [
-  { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার প্রোফাইলের বিবরণ দেখুন" },
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন" },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন" },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন" },
@@ -41,8 +40,7 @@ export default function DashboardPage() {
       return adminMenuItems;
     }
     
-    // Filter out profile for non-admin users
-    return allMenuItems.filter(item => item.href !== '/profile');
+    return allMenuItems;
     
   }, [userData, user]);
 
@@ -67,10 +65,6 @@ export default function DashboardPage() {
       return null;
   }
   
-  const role = userData?.role;
-  if (!role) return null;
-
-
   return (
     <div className="flex flex-col flex-1 h-full">
       <div className="flex-grow space-y-6">

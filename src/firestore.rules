@@ -28,12 +28,12 @@ service cloud.firestore {
     }
 
     match /roles_admin/{userId} {
-      allow get: if isOwner(userId);
-      allow list, create, update, delete: if isAdmin();
+      allow read, write: if isAdmin();
+      allow list: if isAdmin();
     }
     
     match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if false; 
+       allow list: if false; // Deny all list operations on subcollections for security
     }
 
     match /attendanceSessions/{sessionId} {
@@ -44,10 +44,14 @@ service cloud.firestore {
       allow delete: if false;
 
       match /attendanceRecords/{recordId} {
+        // Allow a user to get their own attendance record, and admins to get any.
         allow get: if isAdmin() || isOwner(recordId);
         
+        // Deny all list operations by default.
         allow list: if false;
         
+        // Allow a user to create their own attendance record if they are signed in,
+        // the record ID matches their UID, and the record doesn't already exist.
         allow create: if isOwner(recordId)
                       && request.resource.data.userId == request.auth.uid;
 

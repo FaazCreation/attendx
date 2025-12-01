@@ -4,13 +4,14 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, collectionGroup } from 'firebase/firestore';
+import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
+import { collection, collectionGroup, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useRouter } from 'next/navigation';
 
 interface User {
   uid: string;
@@ -32,7 +33,7 @@ interface AttendanceRecord {
   timestamp: any;
 }
 
-export default function ReportsPage() {
+function AdminReportPage() {
   const firestore = useFirestore();
 
   const { data: users, isLoading: usersLoading } = useCollection<User>(
@@ -97,70 +98,106 @@ export default function ReportsPage() {
 
     doc.save('attendance-report.pdf');
   };
-
   return (
     <div className="flex-1 space-y-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          অ্যাটেনডেন্স রিপোর্ট
-        </h1>
-        <Button onClick={exportToPDF} disabled={isLoading || !attendanceData.length}>
-          <Download className="mr-2 h-4 w-4" />
-          PDF এক্সপোর্ট করুন
-        </Button>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>সম্পূর্ণ অ্যাটেনডেন্সের বিবরণ</CardTitle>
-          <CardDescription>এখানে সকল সেশনে সদস্যদের উপস্থিতির রেকর্ড দেখানো হয়েছে।</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-             <div className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>সদস্যের নাম</TableHead>
-                            <TableHead>সেশনের নাম</TableHead>
-                            <TableHead>উপস্থিতির সময়</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {attendanceData.length > 0 ? (
-                            attendanceData.map((item, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>
-                                        <div className="font-medium">{item.userName}</div>
-                                        <div className="text-sm text-muted-foreground">{item.userEmail}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div>{item.sessionTitle}</div>
-                                        <div className="text-sm text-muted-foreground">{item.sessionDate}</div>
-                                    </TableCell>
-                                    <TableCell>{item.attendedAt}</TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
+        <div className="flex items-center justify-between space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            অ্যাটেনডেন্স রিপোর্ট
+            </h1>
+            <Button onClick={exportToPDF} disabled={isLoading || !attendanceData.length}>
+            <Download className="mr-2 h-4 w-4" />
+            PDF এক্সপোর্ট করুন
+            </Button>
+        </div>
+        
+        <Card>
+            <CardHeader>
+            <CardTitle>সম্পূর্ণ অ্যাটেনডেন্সের বিবরণ</CardTitle>
+            <CardDescription>এখানে সকল সেশনে সদস্যদের উপস্থিতির রেকর্ড দেখানো হয়েছে।</CardDescription>
+            </CardHeader>
+            <CardContent>
+            {isLoading ? (
+                <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                </div>
+            ) : (
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center">
-                                কোনো অ্যাটেনডেন্স রেকর্ড পাওয়া যায়নি।
-                                </TableCell>
+                                <TableHead>সদস্যের নাম</TableHead>
+                                <TableHead>সেশনের নাম</TableHead>
+                                <TableHead>উপস্থিতির সময়</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                        </TableHeader>
+                        <TableBody>
+                            {attendanceData.length > 0 ? (
+                                attendanceData.map((item, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            <div className="font-medium">{item.userName}</div>
+                                            <div className="text-sm text-muted-foreground">{item.userEmail}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div>{item.sessionTitle}</div>
+                                            <div className="text-sm text-muted-foreground">{item.sessionDate}</div>
+                                        </TableCell>
+                                        <TableCell>{item.attendedAt}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-24 text-center">
+                                    কোনো অ্যাটেনডেন্স রেকর্ড পাওয়া যায়নি।
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
+            </CardContent>
+        </Card>
     </div>
-  );
+  )
+}
+
+
+// This is a protected route for admins only.
+export default function ReportsPage() {
+    const { user, isUserLoading } = useUser();
+    const firestore = useFirestore();
+    const router = useRouter();
+
+    const { data: userData, isLoading: isUserRoleLoading } = useDoc(() => {
+        if (!user || !firestore) return null;
+        return doc(firestore, 'users', user.uid);
+    }, [user, firestore]);
+
+    useEffect(() => {
+        if (!isUserLoading && !user) {
+            router.push('/login');
+        }
+        if (!isUserRoleLoading && userData?.role !== 'Admin') {
+            router.push('/dashboard');
+        }
+    }, [isUserLoading, user, isUserRoleLoading, userData, router]);
+
+
+    if (isUserLoading || isUserRoleLoading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Skeleton className="h-32 w-full" />
+            </div>
+        )
+    }
+
+    if (userData?.role === 'Admin') {
+        return <AdminReportPage />;
+    }
+
+    return null;
 }
