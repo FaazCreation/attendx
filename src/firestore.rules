@@ -32,14 +32,16 @@ service cloud.firestore {
       allow list: if isAdmin();
     }
     
-    match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if false; // Deny all list operations on subcollections for security
-    }
+    // This rule was too broad and has been replaced by a more specific rule below.
+    // match /{path=**}/attendanceRecords/{recordId} {
+    //    allow list: if false; // Deny all list operations on subcollections for security
+    // }
 
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
-      allow create: if isAdmin() && request.resource.data.id == request.resource.id;
+      // Allow admins to create sessions. The client generates the ID.
+      allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if false;
 
@@ -47,8 +49,8 @@ service cloud.firestore {
         // Allow a user to get their own attendance record, and admins to get any.
         allow get: if isAdmin() || isOwner(recordId);
         
-        // Deny all list operations by default.
-        allow list: if false;
+        // Allow admins to list records for reports. Deny for others.
+        allow list: if isAdmin();
         
         // Allow a user to create their own attendance record if they are signed in,
         // the record ID matches their UID, and the record doesn't already exist.
