@@ -26,21 +26,25 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   
   const hasPermission = useMemo(() => {
     if (isUserLoading || isUserRoleLoading) return undefined; // loading state
-    if (!userData) return false;
+    if (!user) return false; // Not logged in
+    if (!userData) return false; // No user profile data
     return userData.role === 'Admin';
-  }, [isUserLoading, isUserRoleLoading, userData]);
+  }, [isUserLoading, isUserRoleLoading, user, userData]);
 
 
   useEffect(() => {
+    // Wait until loading is complete before doing anything
     if (hasPermission === undefined) {
-      return; // Still loading, do nothing.
+      return; 
     }
     
+    // If not logged in, redirect to login
     if (!user) {
         router.push('/login');
         return;
     }
 
+    // If logged in but doesn't have permission, redirect to dashboard
     if (hasPermission === false) {
       router.push('/dashboard');
     }
@@ -60,7 +64,9 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!hasPermission) {
+  if (hasPermission === false) {
+     // This part will briefly show while redirecting, which is acceptable.
+     // Or we can return a loading-like skeleton here as well.
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <Card className="w-full max-w-md border-destructive">
