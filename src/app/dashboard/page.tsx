@@ -31,25 +31,17 @@ export default function DashboardPage() {
     [firestore, user]
   );
   
-  const { data: adminRoleDoc, isLoading: isAdminRoleLoading } = useDoc(
-    () => {
-      if (!firestore || !user) return null;
-      return doc(firestore, 'roles_admin', user.uid);
-    },
-    [firestore, user]
-  );
-
   const menuItems = useMemo(() => {
     if (!user || !userData) return [];
     
     let items = [...allMenuItems];
-    if (adminRoleDoc) {
+    if (userData.role === 'Admin' || userData.role === 'Executive Member') {
       items.push(adminMenuItem);
     }
     return items;
-  }, [userData, user, adminRoleDoc]);
+  }, [userData, user]);
 
-  if (isProfileLoading || isAdminRoleLoading) {
+  if (isProfileLoading) {
     return (
         <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between space-y-2">
