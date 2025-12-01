@@ -55,12 +55,12 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     }
   });
 
-  const onSubmit: SubmitHandler<SessionFormData> = async (data) => {
+  const onSubmit: SubmitHandler<SessionFormData> = (data) => {
     if (!firestore) return;
     
     const sessionId = uuidv4();
     const attendanceCode = generateAttendanceCode();
-    const sessionDocRef = doc(collection(firestore, 'attendanceSessions'), sessionId);
+    const sessionDocRef = doc(firestore, 'attendanceSessions', sessionId);
 
     const sessionData = {
       ...data,
@@ -79,7 +79,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
         });
         onSessionCreated();
       })
-      .catch((error) => {
+      .catch((serverError) => {
         const permissionError = new FirestorePermissionError({
             path: sessionDocRef.path,
             operation: 'create',
