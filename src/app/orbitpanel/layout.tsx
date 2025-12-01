@@ -27,7 +27,7 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   const hasPermission = useMemo(() => {
     if (isUserLoading || isUserRoleLoading) return undefined; // loading state
     if (!userData) return false;
-    return userData.role === 'Admin' || userData.role === 'Executive Member';
+    return userData.role === 'Admin';
   }, [isUserLoading, isUserRoleLoading, userData]);
 
 

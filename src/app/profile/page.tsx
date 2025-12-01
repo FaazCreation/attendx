@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
@@ -15,7 +16,6 @@ import { EditProfilePhoto } from '@/components/profile/edit-profile-photo';
 const getRoleInBangla = (role: string) => {
     switch(role) {
         case 'Admin': return 'অ্যাডমিন';
-        case 'Executive Member': return 'কার্যনির্বাহী সদস্য';
         case 'General Member': return 'সাধারণ সদস্য';
         default: return role;
     }

@@ -26,14 +26,14 @@ export type User = {
   email: string;
   department: string;
   batch: string;
-  role: 'Admin' | 'Executive Member' | 'General Member';
+  role: 'Admin' | 'General Member';
 };
 
 const RoleChanger = ({ user: targetUser }: { user: User }) => {
   const firestore = useFirestore();
   const { user: currentUser } = useUser();
   const { toast } = useToast();
-  const userRoles: User['role'][] = ['Admin', 'Executive Member', 'General Member'];
+  const userRoles: User['role'][] = ['Admin', 'General Member'];
 
   const { data: currentUserIsAdminDoc } = useDoc(
     () => {

@@ -35,7 +35,7 @@ export default function DashboardPage() {
     if (!user || !userData) return [];
     
     let items = [...allMenuItems];
-    if (userData.role === 'Admin' || userData.role === 'Executive Member') {
+    if (userData.role === 'Admin') {
       items.push(adminMenuItem);
     }
     return items;

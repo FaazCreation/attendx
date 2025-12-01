@@ -43,7 +43,7 @@ export default function SessionsPage() {
 
   const canCreateSession = useMemo(() => {
     if (!userData) return false;
-    return userData.role === 'Admin' || userData.role === 'Executive Member';
+    return userData.role === 'Admin';
   }, [userData]);
 
 

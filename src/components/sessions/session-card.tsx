@@ -29,7 +29,7 @@ type Session = {
   attendanceCode: string;
 };
 
-type UserRole = 'Admin' | 'Executive Member' | 'General Member';
+type UserRole = 'Admin' | 'General Member';
 
 interface SessionCardProps {
   session: Session;
@@ -117,8 +117,7 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
 
 
     const isAdmin = userRole === 'Admin';
-    const isExecutive = userRole === 'Executive Member';
-    const canManageSession = isAdmin || isExecutive;
+    const canManageSession = isAdmin;
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${session.attendanceCode}`;
     const formattedTime = formatTime(session.time);
