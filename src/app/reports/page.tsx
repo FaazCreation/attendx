@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
-import { collection, collectionGroup, doc } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -34,44 +34,71 @@ interface AttendanceRecord {
   timestamp: any;
 }
 
+interface EnrichedAttendanceRecord {
+    userName: string;
+    userEmail: string;
+    sessionTitle: string;
+    sessionDate: string;
+    attendedAt: string;
+}
+
 function AdminReportPage() {
   const firestore = useFirestore();
-
-  const { data: users, isLoading: usersLoading } = useCollection<User>(
-    () => firestore ? collection(firestore, 'users') : null,
-    [firestore]
-  );
-
-  const { data: sessions, isLoading: sessionsLoading } = useCollection<Session>(
-    () => firestore ? collection(firestore, 'attendanceSessions') : null,
-    [firestore]
-  );
+  const [enrichedData, setEnrichedData] = useState<EnrichedAttendanceRecord[]>([]);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   const { data: attendanceRecords, isLoading: attendanceLoading } = useCollection<AttendanceRecord>(
     () => firestore ? collectionGroup(firestore, 'attendanceRecords') : null,
     [firestore]
   );
+  
+  useEffect(() => {
+    const processData = async () => {
+        if (!firestore || !attendanceRecords) {
+             if (!attendanceLoading) setIsProcessing(false);
+            return;
+        };
 
-  const isLoading = usersLoading || sessionsLoading || attendanceLoading;
+        setIsProcessing(true);
+        
+        const enrichedRecords = await Promise.all(
+            attendanceRecords.map(async (record) => {
+                let user: User | null = null;
+                let session: Session | null = null;
 
-  const attendanceData = useMemo(() => {
-    if (!users || !sessions || !attendanceRecords) return [];
+                try {
+                    const userDoc = await getDoc(doc(firestore, 'users', record.userId));
+                    if (userDoc.exists()) {
+                        user = userDoc.data() as User;
+                    }
 
-    const userMap = new Map(users.map(u => [u.uid, u]));
-    const sessionMap = new Map(sessions.map(s => [s.id, s]));
+                    const sessionDoc = await getDoc(doc(firestore, 'attendanceSessions', record.sessionId));
+                     if (sessionDoc.exists()) {
+                        session = sessionDoc.data() as Session;
+                    }
+                } catch(e) {
+                    console.error("Error fetching related doc: ", e);
+                }
 
-    return attendanceRecords.map(record => {
-      const user = userMap.get(record.userId);
-      const session = sessionMap.get(record.sessionId);
-      return {
-        userName: user?.name || 'Unknown User',
-        userEmail: user?.email || '-',
-        sessionTitle: session?.title || 'Unknown Session',
-        sessionDate: session ? new Date(session.date).toLocaleDateString() : '-',
-        attendedAt: record.timestamp ? new Date(record.timestamp.seconds * 1000).toLocaleString() : 'N/A',
-      };
-    }).sort((a, b) => new Date(b.attendedAt).getTime() - new Date(a.attendedAt).getTime());
-  }, [users, sessions, attendanceRecords]);
+                return {
+                    userName: user?.name || 'Unknown User',
+                    userEmail: user?.email || '-',
+                    sessionTitle: session?.title || 'Unknown Session',
+                    sessionDate: session ? new Date(session.date).toLocaleDateString() : '-',
+                    attendedAt: record.timestamp ? new Date(record.timestamp.seconds * 1000).toLocaleString() : 'N/A',
+                };
+            })
+        );
+        
+        setEnrichedData(enrichedRecords.sort((a, b) => new Date(b.attendedAt).getTime() - new Date(a.attendedAt).getTime()));
+        setIsProcessing(false);
+    };
+
+    processData();
+  }, [attendanceRecords, firestore, attendanceLoading]);
+
+
+  const isLoading = attendanceLoading || isProcessing;
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -80,7 +107,7 @@ function AdminReportPage() {
     const tableColumn = ["Member Name", "Email", "Session Title", "Session Date", "Attended At"];
     const tableRows: any[] = [];
 
-    attendanceData.forEach(item => {
+    enrichedData.forEach(item => {
       const row = [
         item.userName,
         item.userEmail,
@@ -109,7 +136,7 @@ function AdminReportPage() {
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 অ্যাটেনডেন্স রিপোর্ট
                 </h1>
-                <Button onClick={exportToPDF} disabled={isLoading || !attendanceData.length}>
+                <Button onClick={exportToPDF} disabled={isLoading || !enrichedData.length}>
                 <Download className="mr-2 h-4 w-4" />
                 PDF এক্সপোর্ট করুন
                 </Button>
@@ -139,8 +166,8 @@ function AdminReportPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {attendanceData.length > 0 ? (
-                                    attendanceData.map((item, index) => (
+                                {enrichedData.length > 0 ? (
+                                    enrichedData.map((item, index) => (
                                         <TableRow key={index}>
                                             <TableCell>
                                                 <div className="font-medium">{item.userName}</div>
