@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, ShieldCheck, BookUser, FileText } from 'lucide-react';
+import { User, CalendarClock, ShieldCheck, BookUser, FileText, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -17,7 +17,10 @@ const allMenuItems = [
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন" },
 ];
 
-const adminMenuItem = { href: '/orbitpanel', label: 'অরবিট প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন" };
+const adminMenuItems = [
+    { href: '/sessions', label: 'সেশন পরিচালনা', icon: CalendarClock, description: "নতুন সেশন তৈরি ও পরিচালনা করুন" },
+    { href: '/orbitpanel/reports', label: 'রিপোর্ট', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন" },
+];
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -34,17 +37,13 @@ export default function DashboardPage() {
   const menuItems = useMemo(() => {
     if (!user || !userData) return [];
 
-    let items;
     if (userData.role === 'Admin') {
-      // Admin sees items except 'Instructions' and 'Profile', and gets the 'Orbit Panel'
-      items = allMenuItems.filter(item => item.href !== '/instructions' && item.href !== '/profile');
-      items.push(adminMenuItem);
-    } else {
-      // General members see all standard items
-      items = [...allMenuItems];
+      return adminMenuItems;
     }
     
-    return items;
+    // Filter out profile for non-admin users
+    return allMenuItems.filter(item => item.href !== '/profile');
+    
   }, [userData, user]);
 
   if (isProfileLoading) {
@@ -111,15 +110,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {userData.role !== 'Admin' && (
-        <footer className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-2">
-            <div className="overflow-hidden whitespace-nowrap">
-            <p className="inline-block animate-marquee text-sm text-muted-foreground">
-                আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ। নির্দেশনাবলি পড়েও যদি কোনো বিষয় বুঝতে অসুবিধা হয় বা প্রযুক্তিগতভাবে কোনো ধরনের সমস্যার সম্মুখীন হন সেক্ষেত্রে তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সাধারণ সম্পাদক আরেফিন তানভীর অধীর ভাইকে অবগত করবেন, ধন্যবাদ।
-            </p>
-            </div>
-        </footer>
-      )}
     </div>
   );
 }
