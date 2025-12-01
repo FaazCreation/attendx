@@ -1,16 +1,17 @@
 'use client';
 import { FirebaseClientProvider } from '@/firebase';
+import AppShell from '@/components/layout/app-shell';
 
-export default function AdminAuthLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <FirebaseClientProvider>
-        <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-            {children}
-        </main>
+      <AppShell>
+        {children}
+      </AppShell>
     </FirebaseClientProvider>
   );
 }

@@ -24,13 +24,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     // 1. If auth is still loading, wait.
     if (isUserLoading || isUserRoleLoading) return;
     
-    // 2. If no user is logged in, redirect to the appropriate login page.
+    // 2. If no user is logged in, redirect to login page.
     if (!user) {
-      if (isAdminPath) {
-        router.push('/admin/login');
-      } else {
-        router.push('/login');
-      }
+      router.push('/login');
       return;
     }
     
@@ -53,7 +49,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
 
   // Show loading skeleton until auth and role are resolved.
-  if (isUserLoading || isUserRoleLoading || !user) {
+  if (isUserLoading || isUserRoleLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -69,7 +65,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   // Final check to prevent content flash for mismatched roles during redirection.
   const isAdmin = userData?.role === 'Admin';
-  if ((isAdminPath && !isAdmin) || (!isAdminPath && isAdmin)) {
+  if ((isAdminPath && !isAdmin) || (!isAdminPath && isAdmin) || !user) {
     // Still redirecting, show loading screen
      return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">

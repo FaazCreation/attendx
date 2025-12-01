@@ -1,8 +1,9 @@
 'use client';
 import { FirebaseClientProvider } from '@/firebase';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useDoc } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { doc } from 'firebase/firestore';
 
 export default function AuthLayout({
   children,
@@ -10,14 +11,23 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const router = useRouter();
 
+  const { data: userData, isLoading: isUserRoleLoading } = useDoc(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
   useEffect(() => {
-    if (!isUserLoading && user) {
-        // If user is already logged in, redirect them away from auth pages
-        router.push('/dashboard');
+    if (!isUserLoading && !isUserRoleLoading && user) {
+        if (userData?.role === 'Admin') {
+            router.push('/admin/dashboard');
+        } else {
+            router.push('/dashboard');
+        }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, userData, isUserRoleLoading, router]);
 
   return (
     <FirebaseClientProvider>

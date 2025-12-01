@@ -45,24 +45,19 @@ export function LoginForm() {
   });
   const {formState: { isSubmitting }} = form;
 
+  // The redirection logic is now handled by AppShell
+  // This useEffect is no longer necessary for role-based redirection
+  // It can be kept to redirect already logged-in users away from the login page
   useEffect(() => {
     if (!isUserLoading && user) {
-        // Redirect to dashboard page after login.
+        // Redirection will be handled by AppShell based on role.
+        // We can push to a neutral page and let AppShell decide.
         router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-    if (data.email.toLowerCase() === 'fh7614@gmail.com') {
-        toast({
-            variant: "destructive",
-            title: "অ্যাডমিন লগইন",
-            description: "অ্যাডমিন হিসেবে লগইন করতে /admin/login পৃষ্ঠায় যান।",
-        });
-        return;
-    }
-
     try {
       if(!auth) return;
       await signInWithEmailAndPassword(auth, data.email, data.password);
@@ -70,7 +65,10 @@ export function LoginForm() {
         title: "লগইন সফল হয়েছে",
         description: "আপনাকে স্বাগতম!",
       });
-      // The useEffect will handle the redirection.
+      // After successful login, AppShell will handle redirection.
+      // We push to a default path, and the AppShell will intercept and redirect if needed.
+      router.push('/dashboard'); 
+
     } catch (error: any) {
       toast({
         variant: "destructive",
