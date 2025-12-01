@@ -17,13 +17,7 @@ import {
 import { CreateSessionForm } from '@/components/sessions/create-session-form';
 import { useMemo, useState } from 'react';
 import { SessionCard } from '@/components/sessions/session-card';
-import type { Metadata } from 'next';
 import Head from 'next/head';
-
-// export const metadata: Metadata = {
-//   title: 'অ্যাটেনডেন্স সেশন | AttendX',
-// };
-
 
 export default function SessionsPage() {
   const firestore = useFirestore();
@@ -94,7 +88,7 @@ export default function SessionsPage() {
           </div>
         )}
 
-        {sessions && userData && (
+        {sessions && sessions.length > 0 && userData && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {sessions.map((session: any) => (
               <SessionCard 
@@ -105,7 +99,13 @@ export default function SessionsPage() {
             ))}
           </div>
         )}
-        {!sessions && !isLoading && <p>কোনো সেশন পাওয়া যায়নি।</p>}
+        
+        {(!sessions || sessions.length === 0) && !isLoading && (
+            <div className="flex flex-col items-center justify-center text-center py-12">
+                <p className="text-lg text-muted-foreground">কোনো সেশন পাওয়া যায়নি।</p>
+                {canCreateSession && <p className="text-sm text-muted-foreground mt-2">একটি নতুন সেশন তৈরি করে শুরু করুন।</p>}
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc, serverTimestamp, collection, runTransaction, increment } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, runTransaction, increment } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -63,15 +64,25 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     const sessionDocRef = doc(firestore, 'attendanceSessions', sessionId);
     const countDocRef = doc(firestore, 'counts', 'sessions');
 
+    // Combine date and time before storing
+    const sessionDateTime = new Date(data.date);
+    const [hours, minutes] = data.time.split(':');
+    sessionDateTime.setHours(parseInt(hours), parseInt(minutes));
 
     const sessionData = {
       ...data,
       id: sessionId,
       attendanceCode,
-      date: format(data.date, "yyyy-MM-dd'T'00:00:00"), 
+      date: sessionDateTime.toISOString(), // Store as ISO string
+      time: data.time, // Keep original time for display if needed
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: serverTimestamp(),
     };
+    
+    // Remove the original date object from sessionData to avoid Firestore issues
+    delete (sessionData as any).date;
+    sessionData.date = sessionDateTime.toISOString();
+
 
     try {
         await runTransaction(firestore, async (transaction) => {
@@ -96,7 +107,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
          toast({
           variant: 'destructive',
           title: "সেশন তৈরিতে ব্যর্থ",
-          description: "সেশন তৈরি করার সময় একটি ত্রুটি হয়েছে৷",
+          description: "সেশন তৈরি করার সময় একটি ত্রুটি হয়েছে৷ আপনার অনুমতি আছে কিনা তা পরীক্ষা করুন।",
         });
     }
 

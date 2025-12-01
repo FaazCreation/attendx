@@ -3,6 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- Helper Functions ---
     function isSignedIn() {
       return request.auth != null;
     }
@@ -10,57 +11,75 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-
+    
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
+    // --- Collection: users ---
     match /users/{userId} {
+      // Admins can get any user, users can get their own profile.
       allow get: if isAdmin() || isOwner(userId);
+      // Only admins can list all users (for reports).
       allow list: if isAdmin();
       
+      // A user can create their own user document.
       allow create: if isOwner(userId)
                     && request.resource.data.uid == userId;
 
+      // Admins can update any user profile.
+      // Users can update their own profile, but cannot change their role.
       allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
 
+      // Only admins can delete users.
       allow delete: if isAdmin();
     }
 
+    // --- Collection: roles_admin ---
+    // Only admins can read or write to the admin roles collection.
+    // This prevents non-admins from discovering who other admins are.
     match /roles_admin/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isAdmin();
-      allow list: if isAdmin();
+      allow read, write: if isAdmin();
     }
     
+    // --- Sub-Collection: attendanceRecords (globally) ---
+    // Deny all list operations on this subcollection for security.
     match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if false; // Deny all list operations on subcollections for security
+       allow list: if false; 
     }
 
+    // --- Collection: attendanceSessions ---
     match /attendanceSessions/{sessionId} {
+      // Any signed-in user can view session details.
       allow get, list: if isSignedIn();
       
+      // Only admins can create, update, or delete sessions.
       allow create, update, delete: if isAdmin();
 
+      // --- Sub-Collection: attendanceRecords (within a session) ---
       match /attendanceRecords/{recordId} {
-        // Allow a user to get their own attendance record, and admins to get any.
+        // Admins can get any record, users can get their own.
         allow get: if isAdmin() || isOwner(recordId);
         
-        // Deny all list operations by default.
+        // Deny listing records directly (use reports page for admins).
         allow list: if false;
         
-        // Allow a user to create their own attendance record if they are signed in,
-        // the record ID matches their UID, and the record doesn't already exist.
+        // A user can create their own attendance record if the doc ID is their UID.
         allow create: if isOwner(recordId)
                       && request.resource.data.userId == request.auth.uid;
 
+        // Only admins can update or delete specific attendance records.
         allow update, delete: if isAdmin();
       }
     }
     
-    match /counts/sessions {
-        allow get: if isSignedIn();
-        allow update: if isAdmin();
+    // --- Collection: counts ---
+    // Used for storing aggregated data like total session count.
+    match /counts/{countId} {
+      // Any signed-in user can read counts (e.g., for profile stats).
+      allow get: if isSignedIn();
+      // Only admins can update counts (e.g., when creating a session).
+      allow write: if isAdmin(); // 'write' covers create, update, delete
     }
   }
 }
