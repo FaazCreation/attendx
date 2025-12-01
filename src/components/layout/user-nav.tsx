@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,15 +14,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useUser, useFirestore, useDoc } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
+import { doc } from 'firebase/firestore';
 
 export function UserNav() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
+
+  const { data: userData, isLoading: isUserRoleLoading } = useDoc(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
 
   const handleLogout = async () => {
     if(!auth) return;
@@ -29,7 +38,7 @@ export function UserNav() {
     router.push('/login');
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isUserRoleLoading) {
     return <Skeleton className="h-10 w-10 rounded-full" />;
   }
   
@@ -37,6 +46,7 @@ export function UserNav() {
     return null;
   }
 
+  const isAdmin = userData?.role === 'Admin';
   const initials = user.displayName?.split(' ').map(n => n[0]).join('').toUpperCase() || user.email?.charAt(0).toUpperCase();
 
   return (
@@ -59,14 +69,16 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/profile">
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span>প্রোফাইল</span>
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        {!isAdmin && (
+            <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                    <Link href="/profile">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>প্রোফাইল</span>
+                    </Link>
+                </DropdownMenuItem>
+            </DropdownMenuGroup>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />

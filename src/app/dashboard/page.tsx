@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -13,14 +14,11 @@ import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const menuItems = [
-  { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন" },
-  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন" },
-  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন" },
-  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন" },
-];
-
-const adminMenuItems = [
-    { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন" },
+  { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন", adminOnly: false },
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false },
+  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false },
+  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false },
+  { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true },
 ];
 
 
@@ -49,6 +47,17 @@ export default function DashboardPage() {
         </div>
     );
   }
+  
+  const visibleMenuItems = menuItems.filter(item => {
+    if (isAdmin) {
+      // Admins see everything except the profile link
+      return item.href !== '/profile';
+    } else {
+      // Non-admins only see non-adminOnly items
+      return !item.adminOnly;
+    }
+  });
+
 
   return (
     <div className="flex flex-col flex-1 h-full">
@@ -89,7 +98,7 @@ export default function DashboardPage() {
         <p className="text-lg md:text-xl text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
         
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(isAdmin ? [...menuItems, ...adminMenuItems] : menuItems).map((item) => (
+          {visibleMenuItems.map((item) => (
             <Link href={item.href} key={item.href}>
               <Card className="hover:bg-muted/50 hover:border-primary/50 transition-all transform hover:-translate-y-1 h-full flex flex-col">
                 <CardHeader className="flex-1 p-4">
