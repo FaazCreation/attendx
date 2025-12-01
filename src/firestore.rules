@@ -20,7 +20,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow get: if isSignedIn();
+      allow get: if isAdmin() || isOwner(userId);
       allow list: if isAdmin();
       
       allow create: if isOwner(userId)
@@ -39,7 +39,7 @@ service cloud.firestore {
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
-      allow create, update: if isSuperAdmin();
+      allow create, update: if request.auth.uid == '90e685nyfFNSSRsEEvgjhGsdl063';
       allow delete: if false;
 
       match /attendanceRecords/{recordId} {
