@@ -33,11 +33,17 @@ export default function DashboardPage() {
   
   const menuItems = useMemo(() => {
     if (!user || !userData) return [];
-    
-    let items = [...allMenuItems];
+
+    let items;
     if (userData.role === 'Admin') {
+      // Admin sees everything except 'Instructions' and gets the 'Orbit Panel'
+      items = allMenuItems.filter(item => item.href !== '/instructions');
       items.push(adminMenuItem);
+    } else {
+      // General members see all standard items
+      items = [...allMenuItems];
     }
+    
     return items;
   }, [userData, user]);
 
@@ -105,13 +111,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <footer className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-2">
-        <div className="overflow-hidden whitespace-nowrap">
-          <p className="inline-block animate-marquee text-sm text-muted-foreground">
-            আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ। নির্দেশনাবলি পড়েও যদি কোনো বিষয় বুঝতে অসুবিধা হয় বা প্রযুক্তিগতভাবে কোনো ধরনের সমস্যার সম্মুখীন হন সেক্ষেত্রে তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সাধারণ সম্পাদক আরেফিন তানভীর অধীর ভাইকে অবগত করবেন, ধন্যবাদ।
-          </p>
-        </div>
-      </footer>
+      {userData.role !== 'Admin' && (
+        <footer className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-2">
+            <div className="overflow-hidden whitespace-nowrap">
+            <p className="inline-block animate-marquee text-sm text-muted-foreground">
+                আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ। নির্দেশনাবলি পড়েও যদি কোনো বিষয় বুঝতে অসুবিধা হয় বা প্রযুক্তিগতভাবে কোনো ধরনের সমস্যার সম্মুখীন হন সেক্ষেত্রে তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সাধারণ সম্পাদক আরেফিন তানভীর অধীর ভাইকে অবগত করবেন, ধন্যবাদ।
+            </p>
+            </div>
+        </footer>
+      )}
     </div>
   );
 }
