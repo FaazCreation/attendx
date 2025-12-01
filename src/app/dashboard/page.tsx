@@ -11,19 +11,13 @@ import { useMemo } from 'react';
 import { AttendXIcon } from '@/components/icons';
 
 const allMenuItems = [
-  { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার প্রোফাইলের বিবরণ দেখুন ও পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", roles: ['Admin', 'Executive Member', 'General Member'] },
-  { href: '/orbitpanel', label: 'অরবিট প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন", roles: ['Admin', 'Executive Member'] },
+  { href: '/profile', label: 'আমার প্রোফাইল', icon: User, description: "আপনার প্রোফাইলের বিবরণ দেখুন ও পরিচালনা করুন" },
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং পরিচালনা করুন" },
+  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন" },
+  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন" },
 ];
 
-const getMenuItemDescription = (description: string, role: string) => {
-  if (role === 'General Member') {
-    return description.replace(/ (ও|এবং) পরিচালনা করুন/g, '');
-  }
-  return description;
-}
+const adminMenuItem = { href: '/orbitpanel', label: 'অরবিট প্যানেল', icon: ShieldCheck, description: "সদস্য, রিপোর্ট এবং অন্যান্য কার্যক্রম পরিচালনা করুন" };
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -37,13 +31,25 @@ export default function DashboardPage() {
     [firestore, user]
   );
   
+  const { data: adminRoleDoc, isLoading: isAdminRoleLoading } = useDoc(
+    () => {
+      if (!firestore || !user) return null;
+      return doc(firestore, 'roles_admin', user.uid);
+    },
+    [firestore, user]
+  );
+
   const menuItems = useMemo(() => {
     if (!user || !userData) return [];
-    // Filter items based on user role
-    return allMenuItems.filter(item => item.roles.includes(userData.role));
-  }, [userData, user]);
+    
+    let items = [...allMenuItems];
+    if (adminRoleDoc) {
+      items.push(adminMenuItem);
+    }
+    return items;
+  }, [userData, user, adminRoleDoc]);
 
-  if (isProfileLoading) {
+  if (isProfileLoading || isAdminRoleLoading) {
     return (
         <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between space-y-2">
@@ -54,7 +60,7 @@ export default function DashboardPage() {
                 <Skeleton className="h-32" />
                 <Skeleton className="h-32" />
                 <Skeleton className="h-32" />
-                 <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
             </div>
         </div>
     )
@@ -96,7 +102,7 @@ export default function DashboardPage() {
                     <div>
                       <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
                       <CardDescription className="text-xs md:text-sm">
-                        {getMenuItemDescription(item.description, role)}
+                        {item.description}
                       </CardDescription>
                     </div>
                   </div>

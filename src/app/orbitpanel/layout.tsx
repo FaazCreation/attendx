@@ -16,6 +16,7 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const router = useRouter();
 
+  // Check for the existence of a document in roles_admin collection for the current user
   const { data: adminRoleDoc, isLoading: isAdminRoleLoading } = useDoc(
     () => {
       if (!firestore || !user) return null;
@@ -25,20 +26,25 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   );
   
   const hasPermission = useMemo(() => {
-    if (isUserLoading || isAdminRoleLoading) return undefined;
-    return !!adminRoleDoc;
-  }, [user, isUserLoading, adminRoleDoc, isAdminRoleLoading]);
+    if (isUserLoading || isAdminRoleLoading) return undefined; // loading state
+    return !!adminRoleDoc; // true if the admin document exists
+  }, [isUserLoading, isAdminRoleLoading, adminRoleDoc]);
 
 
   useEffect(() => {
     if (hasPermission === undefined) {
       return; // Still loading, do nothing.
     }
+    
+    if (!user) {
+        router.push('/login');
+        return;
+    }
 
     if (hasPermission === false) {
       router.push('/dashboard');
     }
-  }, [hasPermission, router]);
+  }, [hasPermission, user, router]);
 
 
   if (hasPermission === undefined) {

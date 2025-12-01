@@ -40,8 +40,8 @@ export default function RootLayout({
                 {children}
               </AppShell>
             )}
+            <Toaster />
         </FirebaseClientProvider>
-        <Toaster />
       </body>
     </html>
   );

@@ -15,41 +15,54 @@ service cloud.firestore {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    function isSuperAdmin() {
-      return request.auth.token.email == 'fh7614@gmail.com';
-    }
-
     match /users/{userId} {
-      allow get: if isAdmin() || isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       
       allow create: if isOwner(userId)
                     && request.resource.data.uid == userId;
 
-      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+      // Allow owner to update their own profile, but not change their role.
+      // Admins can update any profile, including roles.
+      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
 
       allow delete: if isAdmin();
     }
 
     match /roles_admin/{userId} {
+      // An owner can read their own admin status document. This breaks the circular dependency.
       allow get: if isOwner(userId);
+      // Only existing admins can list, create, update, or delete admin roles.
       allow list, create, update, delete: if isAdmin();
     }
     
+    match /{path=**}/attendanceRecords/{recordId} {
+       // Deny all list operations on subcollections for security and cost reasons.
+       allow list: if false; 
+    }
+
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
-      allow create, update: if request.auth.uid == '90e685nyfFNSSRsEEvgjhGsdl063';
+      // Only admins can create or update sessions.
+      allow create, update: if isAdmin();
+
+      // Deleting sessions is disallowed.
       allow delete: if false;
 
       match /attendanceRecords/{recordId} {
+        // Allow a user to get their own attendance record, and admins to get any.
         allow get: if isAdmin() || isOwner(recordId);
         
+        // Explicitly deny listing records in a subcollection.
         allow list: if false;
         
+        // Allow a user to create their own attendance record if they are signed in,
+        // the record ID matches their UID, and the record doesn't already exist.
         allow create: if isOwner(recordId)
                       && request.resource.data.userId == request.auth.uid;
 
+        // Only admins can update or delete specific attendance records.
         allow update, delete: if isAdmin();
       }
     }
