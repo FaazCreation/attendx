@@ -86,7 +86,7 @@ export function LoginForm() {
         <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
         <div className="font-headline">
           <CardTitle className="text-2xl font-bold">AttendX</CardTitle>
-          <CardDescription>
+          <CardDescription className="font-sans">
             অ্যাটেনডেন্স এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
           </CardDescription>
         </div>
