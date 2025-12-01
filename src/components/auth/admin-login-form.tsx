@@ -51,11 +51,23 @@ export function AdminLoginForm() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-      router.push('/dashboard');
+        // Check role after user is available
+        const checkAdminRole = async () => {
+            if (firestore && user) {
+                const userDocRef = doc(firestore, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists() && userDoc.data().role === 'Admin') {
+                    router.push('/dashboard');
+                }
+            }
+        };
+        checkAdminRole();
     }
-  }, [user, isUserLoading, router]);
+}, [user, isUserLoading, router, firestore]);
 
   const onSubmit: SubmitHandler<AdminLoginFormData> = async (data) => {
+    if (!auth || !firestore) return;
+    
     if (data.email.toLowerCase() !== 'fh7614@gmail.com' || data.password !== 'Forhad@2020') {
       toast({
         variant: "destructive",
@@ -66,10 +78,10 @@ export function AdminLoginForm() {
     }
 
     try {
-      if(!auth || !firestore) return;
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      const loggedInUser = userCredential.user;
       
-      const adminRoleRef = doc(firestore, 'roles_admin', userCredential.user.uid);
+      const adminRoleRef = doc(firestore, 'roles_admin', loggedInUser.uid);
       
       try {
         const adminDoc = await getDoc(adminRoleRef);
