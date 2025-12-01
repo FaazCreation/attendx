@@ -26,23 +26,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     
     // 2. If no user is logged in, redirect to login page.
     if (!user) {
-      router.push('/login');
+      if (pathname !== '/login') {
+        router.push('/login');
+      }
       return;
     }
     
-    // 3. User is logged in, check role permissions.
+    // 3. User is logged in, check role permissions for admin-only paths.
     const isAdmin = userData?.role === 'Admin';
     
     // If user is on an admin path but is not an admin, redirect to general dashboard.
     if (isAdminPath && !isAdmin) {
       router.push('/dashboard');
       return;
-    }
-    
-    // If user is an admin but is on a general path, redirect to admin dashboard.
-    if (!isAdminPath && isAdmin) {
-        router.push('/admin/dashboard');
-        return;
     }
 
   }, [user, isUserLoading, userData, isUserRoleLoading, router, pathname, isAdminPath]);
@@ -63,9 +59,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Final check to prevent content flash for mismatched roles during redirection.
+  // Prevent content flash for mismatched roles during redirection.
   const isAdmin = userData?.role === 'Admin';
-  if ((isAdminPath && !isAdmin) || (!isAdminPath && isAdmin) || !user) {
+  if ((isAdminPath && !isAdmin) && pathname !== '/dashboard') {
     // Still redirecting, show loading screen
      return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
