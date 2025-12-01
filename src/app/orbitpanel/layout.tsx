@@ -32,10 +32,10 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // If no user is logged in, deny access and redirect
+    // If no user is logged in, deny access. The redirect will be handled by the effect below.
     if (!user) {
-      router.push('/login');
-      return; // No need to proceed further
+      setPermissionState('denied');
+      return; 
     }
     
     // Now that we have a user, wait for their role data to load
@@ -52,6 +52,17 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
 
   }, [isUserLoading, user, isUserRoleLoading, userData, router]);
 
+  useEffect(() => {
+    if (permissionState === 'denied') {
+        // If no user is logged in, redirect to login page. Otherwise, redirect to dashboard.
+        if (!user) {
+            router.push('/login');
+        } else {
+            router.push('/dashboard');
+        }
+    }
+  }, [permissionState, user, router]);
+
 
   if (permissionState === 'loading') {
     return (
@@ -67,9 +78,6 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (permissionState === 'denied') {
-    // Redirect if denied
-    router.push('/dashboard');
-    
     // Show a message while redirecting
     return (
       <div className="flex items-center justify-center h-screen bg-background">
@@ -79,7 +87,7 @@ function ProtectedOrbitLayout({ children }: { children: React.ReactNode }) {
             <CardTitle>প্রবেশাধিকার নেই</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>এই পৃষ্ঠাটি দেখার জন্য আপনার অনুমতি নেই। আপনাকে ড্যাশবোর্ডে ফেরত পাঠানো হচ্ছে...</p>
+            <p>এই পৃষ্ঠাটি দেখার জন্য আপনার অনুমতি নেই। আপনাকে ফেরত পাঠানো হচ্ছে...</p>
           </CardContent>
         </Card>
       </div>
