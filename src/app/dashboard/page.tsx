@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, FileText, BookUser, UserCheck, BarChart3, PlusCircle } from 'lucide-react';
+import { User, CalendarClock, FileText, BookUser, UserCheck, BarChart3, PlusCircle, Users } from 'lucide-react';
 import Link from 'next/link';
 import { AttendXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
@@ -19,6 +19,7 @@ const menuItems = [
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true },
+  { href: '/members', label: 'সদস্য তালিকা', icon: Users, description: "সকল সদস্যদের তালিকা দেখুন", adminOnly: true },
 ];
 
 
@@ -50,8 +51,8 @@ export default function DashboardPage() {
   
   const visibleMenuItems = menuItems.filter(item => {
     if (isAdmin) {
-      // Admins see everything except the profile link
-      return item.href !== '/profile';
+      // Admins see everything except 'আমার প্রোফাইল' and 'নির্দেশনাবলি'
+      return item.href !== '/profile' && item.href !== '/instructions';
     } else {
       // Non-admins only see non-adminOnly items
       return !item.adminOnly;
