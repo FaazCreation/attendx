@@ -20,8 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
-  const isOrbitPanelPage = pathname.startsWith('/orbitpanel');
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/admin');
 
   return (
      <html lang="en" suppressHydrationWarning>
@@ -33,7 +32,7 @@ export default function RootLayout({
       </head>
       <body className={`font-sans antialiased ${poppins.variable}`}>
         <FirebaseClientProvider>
-            {isAuthPage || isOrbitPanelPage ? (
+            {isAuthPage ? (
               children
             ) : (
               <AppShell>

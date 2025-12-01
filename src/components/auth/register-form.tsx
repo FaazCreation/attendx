@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -59,17 +59,21 @@ export function RegisterForm() {
       toast({ variant: "destructive", title: "নিবন্ধন ব্যর্থ হয়েছে", description: "Firebase প্রস্তুত নয়।" });
       return;
     }
+    
+    if (data.email.toLowerCase() === 'fh7614@gmail.com') {
+      toast({
+        variant: 'destructive',
+        title: 'অ্যাডমিন নিবন্ধন',
+        description: 'এই ইমেলটি নিবন্ধনের জন্য অনুমোদিত নয়।',
+      });
+      return;
+    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: data.name });
-
-      const batch = writeBatch(firestore);
-
-      const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
-      const userRole = isAdmin ? 'Admin' : 'General Member';
 
       const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
@@ -79,18 +83,11 @@ export function RegisterForm() {
         email: data.email,
         department: data.department,
         batch: data.session,
-        role: userRole,
+        role: 'General Member',
         photoURL: '',
         eventParticipationScore: 0
       };
-      batch.set(userDocRef, userData);
-
-      if (isAdmin) {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        batch.set(adminRoleRef, { uid: user.uid, role: "Admin" });
-      }
-
-      await batch.commit();
+      await setDoc(userDocRef, userData);
 
       toast({
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -22,57 +21,54 @@ import { useEffect, useState } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Eye, EyeOff } from 'lucide-react';
 
-const loginSchema = z.object({
+const adminLoginSchema = z.object({
   email: z.string().email({ message: "অবৈধ ইমেইল ঠিকানা।" }),
-  password: z.string().min(6, { message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" }),
+  password: z.string().min(1, { message: "পাসওয়ার্ড আবশ্যক।" }),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 
-export function LoginForm() {
+export function AdminLoginForm() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<AdminLoginFormData>({
+    resolver: zodResolver(adminLoginSchema),
     defaultValues: {
-      email: '',
+      email: 'fh7614@gmail.com',
       password: ''
     }
   });
-  const {formState: { isSubmitting }} = form;
+  const { formState: { isSubmitting } } = form;
 
   useEffect(() => {
     if (!isUserLoading && user) {
-        // Redirect to dashboard page after login.
-        router.push('/dashboard');
+      router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
-
-  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-    if (data.email.toLowerCase() === 'fh7614@gmail.com') {
-        toast({
-            variant: "destructive",
-            title: "অ্যাডমিন লগইন",
-            description: "অ্যাডমিন হিসেবে লগইন করতে /admin পৃষ্ঠায় যান।",
-        });
-        return;
+  const onSubmit: SubmitHandler<AdminLoginFormData> = async (data) => {
+    if (data.email.toLowerCase() !== 'fh7614@gmail.com' || data.password !== 'Forhad@2020') {
+      toast({
+        variant: "destructive",
+        title: "সাইন ইন ব্যর্থ হয়েছে",
+        description: "আপনার ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।",
+      });
+      return;
     }
 
     try {
       if(!auth) return;
       await signInWithEmailAndPassword(auth, data.email, data.password);
       toast({
-        title: "লগইন সফল হয়েছে",
-        description: "আপনাকে স্বাগতম!",
+        title: "অ্যাডমিন লগইন সফল",
+        description: "অ্যাডমিন ড্যাশবোর্ডে আপনাকে স্বাগতম!",
       });
-      // The useEffect will handle the redirection.
     } catch (error: any) {
-      toast({
+       toast({
         variant: "destructive",
         title: "সাইন ইন ব্যর্থ হয়েছে",
         description: "আপনার ইমেইল এবং পাসওয়ার্ড চেক করুন।",
@@ -85,9 +81,9 @@ export function LoginForm() {
       <CardHeader className="space-y-1 text-center">
         <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
         <div className="font-headline">
-          <CardTitle className="text-2xl font-bold">AttendX</CardTitle>
+          <CardTitle className="text-2xl font-bold">অ্যাডমিন প্যানেল</CardTitle>
           <CardDescription>
-            অ্যাটেনডেন্স এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
+            অ্যাডমিন হিসেবে লগইন করুন
           </CardDescription>
         </div>
       </CardHeader>
@@ -99,9 +95,9 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ইমেইল</FormLabel>
+                  <FormLabel>অ্যাডমিন ইমেইল</FormLabel>
                   <FormControl>
-                    <Input placeholder="member@tcpc.com" {...field} />
+                    <Input {...field} readOnly />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,7 +111,7 @@ export function LoginForm() {
                   <FormLabel>পাসওয়ার্ড</FormLabel>
                   <div className="relative">
                     <FormControl>
-                      <Input type={showPassword ? "text" : "password"} {...field} />
+                      <Input type={showPassword ? "text" : "password"} {...field} placeholder="আপনার পাসওয়ার্ড দিন" />
                     </FormControl>
                     <button
                       type="button"
@@ -130,17 +126,10 @@ export function LoginForm() {
               )}
             />
             <Button type="submit" className="w-full" disabled={isSubmitting || isUserLoading}>
-              {isSubmitting || isUserLoading ? 'সাইন ইন করা হচ্ছে...' : 'সাইন ইন করুন'}
+              {isSubmitting || isUserLoading ? 'লগইন করা হচ্ছে...' : 'লগইন করুন'}
             </Button>
           </form>
         </Form>
-        
-        <div className="mt-4 text-center text-sm">
-          আপনার কি অ্যাকাউন্ট নেই?{' '}
-          <Link href="/register" className="underline hover:text-primary">
-            সাইন আপ করুন
-          </Link>
-        </div>
       </CardContent>
     </Card>
   );
