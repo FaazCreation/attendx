@@ -24,6 +24,7 @@ export default function RootLayout({
   return (
      <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>AttendX</title>
         <meta name="description" content="তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব অ্যাটেনডেন্স ম্যানেজমেন্ট সিস্টেম" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

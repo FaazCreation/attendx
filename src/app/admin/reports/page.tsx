@@ -11,6 +11,13 @@ import { useMemo } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { Metadata } from 'next';
+
+// This is not a page component, so we can't export metadata
+// export const metadata: Metadata = {
+//   title: 'অ্যাটেনডেন্স রিপোর্ট | AttendX',
+// };
+
 
 interface User {
   uid: string;

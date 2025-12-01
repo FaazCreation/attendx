@@ -28,25 +28,28 @@ service cloud.firestore {
     }
 
     match /roles_admin/{userId} {
-      allow read, write: if isAdmin();
+      allow read: if isOwner(userId);
+      allow write: if isAdmin();
       allow list: if isAdmin();
     }
-    
+
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
-      
-      allow create, update: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
       allow delete: if false;
 
       match /attendanceRecords/{recordId} {
         allow get: if isAdmin() || isOwner(recordId);
         allow list: if isAdmin();
-        
-        allow create: if isOwner(recordId)
-                      && request.resource.data.userId == request.auth.uid;
-
+        allow create: if isOwner(recordId) && request.resource.data.userId == request.auth.uid;
         allow update, delete: if isAdmin();
       }
+    }
+    
+    match /counts/sessions {
+        allow get: if isSignedIn();
+        allow update: if isAdmin();
     }
   }
 }

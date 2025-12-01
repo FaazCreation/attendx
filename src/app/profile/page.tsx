@@ -9,9 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Award, BarChart, Calendar, CheckSquare, Edit } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { EditProfilePhoto } from '@/components/profile/edit-profile-photo';
+import type { Metadata } from 'next';
+import Head from 'next/head';
 
 const getRoleInBangla = (role: string) => {
     switch(role) {
@@ -32,11 +31,11 @@ export default function ProfilePage() {
     },
     [firestore, user]
   );
-
-  const { data: sessions, isLoading: areSessionsLoading } = useCollection(
+  
+  const { data: countsData, isLoading: areCountsLoading } = useDoc(
     () => {
       if (!firestore) return null;
-      return collection(firestore, 'attendanceSessions');
+      return doc(firestore, 'counts', 'sessions');
     },
     [firestore]
   );
@@ -50,13 +49,16 @@ export default function ProfilePage() {
   );
 
 
-  const isLoading = isUserLoading || isProfileLoading || areSessionsLoading || isAttendanceLoading;
+  const isLoading = isUserLoading || isProfileLoading || areCountsLoading || isAttendanceLoading;
 
   const initials = userData?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || user?.email?.charAt(0).toUpperCase();
 
   const attendedCount = attendanceRecords?.length || 0;
-  const totalSessions = sessions?.length || 0;
+  const totalSessions = countsData?.sessions_count || 0;
   const attendanceRate = totalSessions > 0 ? Math.round((attendedCount / totalSessions) * 100) : 0;
+  
+  const pageTitle = userData ? `${userData.name} | AttendX` : 'আমার প্রোফাইল | AttendX';
+
 
   if (isLoading) {
     return (
@@ -87,67 +89,72 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex-1 space-y-6">
-       <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          আমার প্রোফাইল
-        </h1>
-      </div>
-      <div className="flex flex-col items-center space-y-4 pt-4 md:flex-row md:space-y-0 md:space-x-6">
-        <Avatar className="h-24 w-24 border-2 border-primary">
-          <AvatarImage src={userData.photoURL || user?.photoURL || '/placeholder.png'} alt={userData.name || ''} />
-          <AvatarFallback className="text-3xl font-headline">{initials}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1 space-y-1 text-center md:text-left">
-          <h2 className="text-3xl font-bold font-headline">{userData.name}</h2>
-          <p className="text-md text-muted-foreground font-headline">{userData.email}</p>
-          <p className="text-sm text-muted-foreground font-headline">{userData.department} - {userData.batch}</p>
+    <>
+      <Head>
+        <title>{pageTitle}</title>
+      </Head>
+      <div className="flex-1 space-y-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            আমার প্রোফাইল
+          </h1>
         </div>
-      </div>
+        <div className="flex flex-col items-center space-y-4 pt-4 md:flex-row md:space-y-0 md:space-x-6">
+          <Avatar className="h-24 w-24 border-2 border-primary">
+            <AvatarImage src={userData.photoURL || user?.photoURL || '/placeholder.png'} alt={userData.name || ''} />
+            <AvatarFallback className="text-3xl font-headline">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 space-y-1 text-center md:text-left">
+            <h2 className="text-3xl font-bold font-headline">{userData.name}</h2>
+            <p className="text-md text-muted-foreground font-headline">{userData.email}</p>
+            <p className="text-sm text-muted-foreground font-headline">{userData.department} - {userData.batch}</p>
+          </div>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ভূমিকা</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{getRoleInBangla(userData.role)}</div>
-                <p className="text-xs text-muted-foreground">ক্লাবে আপনার বর্তমান ভূমিকা</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">উপস্থিত সেশন</CardTitle>
-                <CheckSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{attendedCount}</div>
-                <p className="text-xs text-muted-foreground">মোট {totalSessions}টি সেশনের মধ্যে</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">অংশগ্রহণের স্কোর</CardTitle>
-                <BarChart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{userData.eventParticipationScore || 0}</div>
-                <p className="text-xs text-muted-foreground">ইভেন্ট এবং কর্মশালা থেকে পয়েন্ট</p>
-            </CardContent>
-        </Card>
-         <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">উপস্থিতির হার</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold mb-2">{attendanceRate}%</div>
-                <Progress value={attendanceRate} className="h-2" />
-            </CardContent>
-        </Card>
-      </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">ভূমিকা</CardTitle>
+                  <Award className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{getRoleInBangla(userData.role)}</div>
+                  <p className="text-xs text-muted-foreground">ক্লাবে আপনার বর্তমান ভূমিকা</p>
+              </CardContent>
+          </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">উপস্থিত সেশন</CardTitle>
+                  <CheckSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{attendedCount}</div>
+                  <p className="text-xs text-muted-foreground">মোট {totalSessions}টি সেশনের মধ্যে</p>
+              </CardContent>
+          </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">অংশগ্রহণের স্কোর</CardTitle>
+                  <BarChart className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{userData.eventParticipationScore || 0}</div>
+                  <p className="text-xs text-muted-foreground">ইভেন্ট এবং কর্মশালা থেকে পয়েন্ট</p>
+              </CardContent>
+          </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">উপস্থিতির হার</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold mb-2">{attendanceRate}%</div>
+                  <Progress value={attendanceRate} className="h-2" />
+              </CardContent>
+          </Card>
+        </div>
 
-    </div>
+      </div>
+    </>
   );
 }

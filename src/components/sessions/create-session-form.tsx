@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore } from '@/firebase';
-import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, runTransaction, increment } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -55,12 +55,14 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     }
   });
 
-  const onSubmit: SubmitHandler<SessionFormData> = (data) => {
+  const onSubmit: SubmitHandler<SessionFormData> = async (data) => {
     if (!firestore) return;
     
     const sessionId = uuidv4();
     const attendanceCode = generateAttendanceCode();
     const sessionDocRef = doc(firestore, 'attendanceSessions', sessionId);
+    const countDocRef = doc(firestore, 'counts', 'sessions');
+
 
     const sessionData = {
       ...data,
@@ -71,22 +73,33 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       createdAt: serverTimestamp(),
     };
 
-    setDoc(sessionDocRef, sessionData)
-      .then(() => {
+    try {
+        await runTransaction(firestore, async (transaction) => {
+            transaction.set(sessionDocRef, sessionData);
+            transaction.set(countDocRef, { sessions_count: increment(1) }, { merge: true });
+        });
+
         toast({
           title: "সেশন তৈরি হয়েছে",
           description: `"${data.title}" সেশনটি সফলভাবে তৈরি করা হয়েছে।`,
         });
         onSessionCreated();
-      })
-      .catch((serverError) => {
+
+    } catch (e: any) {
+        console.error("Transaction failed: ", e);
         const permissionError = new FirestorePermissionError({
             path: sessionDocRef.path,
             operation: 'create',
             requestResourceData: sessionData,
         });
         errorEmitter.emit('permission-error', permissionError);
-      });
+         toast({
+          variant: 'destructive',
+          title: "সেশন তৈরিতে ব্যর্থ",
+          description: "সেশন তৈরি করার সময় একটি ত্রুটি হয়েছে৷",
+        });
+    }
+
   };
 
   return (
