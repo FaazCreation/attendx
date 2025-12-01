@@ -9,7 +9,6 @@ import { AttendXIcon } from '../icons';
 
 const adminNavItems = [
     { href: '/orbitpanel', label: 'ড্যাশবোর্ড', icon: LayoutDashboard },
-    { href: '/orbitpanel/members', label: 'সদস্য', icon: Users },
     { href: '/orbitpanel/reports', label: 'রিপোর্ট', icon: BarChart3 },
 ];
 
