@@ -22,15 +22,13 @@ service cloud.firestore {
       allow create: if isOwner(userId)
                     && request.resource.data.uid == userId;
 
-      // Users can update their own data, but cannot change their role.
-      // Admins can update any data, including the role.
       allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
 
       allow delete: if isAdmin();
     }
     
     match /counts/sessions {
-        allow get: if isSignedIn();
+        allow get: if isAdmin() || exists(/databases/$(database)/documents/users/$(request.auth.uid));
         allow write: if isAdmin();
     }
 
