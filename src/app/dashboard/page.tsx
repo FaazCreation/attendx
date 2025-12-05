@@ -16,9 +16,9 @@ import { MembersTable } from '@/components/admin/members-table';
 
 const menuItems = [
   { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন", adminOnly: false },
-  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false },
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false, public: true },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false },
-  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false },
+  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, public: true },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true },
   { href: '/members', label: 'সদস্য তালিকা', icon: Users, description: "সকল সদস্যদের তালিকা দেখুন", adminOnly: true },
 ];
@@ -56,10 +56,10 @@ export default function DashboardPage() {
   
   const visibleMenuItems = menuItems.filter(item => {
     if (isAdmin) {
-      // Admins don't see 'আমার প্রোফাইল' and 'নির্দেশনাবলি'
-      return item.href !== '/profile' && item.href !== '/instructions';
+      // Admins see admin-only and public items
+      return item.adminOnly || item.public;
     } else {
-      // Non-admins only see non-adminOnly items
+      // Non-admins see non-admin-only items
       return !item.adminOnly;
     }
   });
