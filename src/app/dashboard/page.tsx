@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { UserCheck, CalendarClock, FileText, BookUser, BarChart3, PlusCircle, Users } from 'lucide-react';
+import { UserCheck, CalendarClock, FileText, BookUser, BarChart3, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { AttendXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { CreateSessionForm } from '@/components/sessions/create-session-form';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MembersTable } from '@/components/admin/members-table';
 
 const menuItems = [
   { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন", adminOnly: false },
@@ -20,7 +19,6 @@ const menuItems = [
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, public: true },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true },
-  { href: '/members', label: 'সদস্য তালিকা', icon: Users, description: "সকল সদস্যদের তালিকা দেখুন", adminOnly: true },
 ];
 
 
@@ -49,14 +47,13 @@ export default function DashboardPage() {
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
             </div>
-            {isAdmin && <Skeleton className="h-64 w-full" />}
         </div>
     );
   }
   
   const visibleMenuItems = menuItems.filter(item => {
     if (isAdmin) {
-      // Admins see admin-only and public items
+      // Admins see admin-only and public items, but not non-admin specific items
       return item.adminOnly || item.public;
     } else {
       // Non-admins see non-admin-only items
@@ -124,13 +121,6 @@ export default function DashboardPage() {
             </Link>
           ))}
         </div>
-
-        {isAdmin && (
-            <div className="mt-8">
-                <MembersTable />
-            </div>
-        )}
-
       </div>
 
     </div>
