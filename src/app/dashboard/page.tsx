@@ -14,9 +14,8 @@ import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const menuItems = [
-  { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন", adminOnly: false },
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false, public: true },
-  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false },
+  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, public: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, public: true },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true },
 ];
@@ -53,11 +52,11 @@ export default function DashboardPage() {
   
   const visibleMenuItems = menuItems.filter(item => {
     if (isAdmin) {
-      // Admins see admin-only and public items, but not non-admin specific items
+      // Admins see admin-only and public items
       return item.adminOnly || item.public;
     } else {
-      // Non-admins see non-admin-only items
-      return !item.adminOnly;
+      // Non-admins see non-admin-only and public items
+      return !item.adminOnly || item.public;
     }
   });
 

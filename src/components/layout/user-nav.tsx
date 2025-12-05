@@ -12,8 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, User as UserIcon } from "lucide-react";
-import Link from "next/link";
+import { LogOut } from "lucide-react";
 import { useAuth, useUser, useFirestore, useDoc } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -46,7 +45,6 @@ export function UserNav() {
     return null;
   }
 
-  const isAdmin = userData?.role === 'Admin';
   const initials = user.displayName?.split(' ').map(n => n[0]).join('').toUpperCase() || user.email?.charAt(0).toUpperCase();
 
   return (
@@ -68,17 +66,6 @@ export function UserNav() {
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {!isAdmin && (
-            <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                    <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>প্রোফাইল</span>
-                    </Link>
-                </DropdownMenuItem>
-            </DropdownMenuGroup>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
