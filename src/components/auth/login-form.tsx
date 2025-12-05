@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -14,8 +15,9 @@ import { AttendXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useFirestore, useUser } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
@@ -31,6 +33,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
@@ -45,16 +48,26 @@ export function LoginForm() {
   });
   const {formState: { isSubmitting }} = form;
 
-  // The redirection logic is now handled by AppShell
-  // This useEffect is no longer necessary for role-based redirection
-  // It can be kept to redirect already logged-in users away from the login page
   useEffect(() => {
-    if (!isUserLoading && user) {
-        // Redirection will be handled by AppShell based on role.
-        // We can push to a neutral page and let AppShell decide.
-        router.push('/dashboard');
-    }
-  }, [user, isUserLoading, router]);
+    const checkUserRoleAndRedirect = async () => {
+      if (!isUserLoading && user && firestore) {
+        const userDocRef = doc(firestore, 'users', user.uid);
+        try {
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists() && userDoc.data().role === 'Admin') {
+            router.push('/admin/dashboard');
+          } else {
+            router.push('/dashboard');
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+          // Default to general dashboard on error
+          router.push('/dashboard');
+        }
+      }
+    };
+    checkUserRoleAndRedirect();
+  }, [user, isUserLoading, firestore, router]);
 
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
@@ -65,10 +78,7 @@ export function LoginForm() {
         title: "লগইন সফল হয়েছে",
         description: "আপনাকে স্বাগতম!",
       });
-      // After successful login, AppShell will handle redirection.
-      // We push to a default path, and the AppShell will intercept and redirect if needed.
-      router.push('/dashboard'); 
-
+      // Redirection is handled by the useEffect hook
     } catch (error: any) {
       toast({
         variant: "destructive",
