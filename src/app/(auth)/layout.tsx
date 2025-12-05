@@ -1,9 +1,11 @@
+
 'use client';
 import { FirebaseClientProvider } from '@/firebase';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { doc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AuthLayout({
   children,
@@ -20,14 +22,28 @@ export default function AuthLayout({
   }, [user, firestore]);
 
   useEffect(() => {
-    if (!isUserLoading && !isUserRoleLoading && user) {
-        if (userData?.role === 'Admin') {
-            router.push('/admin/dashboard');
+    if (!isUserLoading && !isUserRoleLoading && user && userData) {
+        if (userData.role === 'Admin') {
+            router.replace('/dashboard');
         } else {
-            router.push('/dashboard');
+            router.replace('/dashboard');
         }
     }
   }, [user, isUserLoading, userData, isUserRoleLoading, router]);
+  
+  if (isUserLoading || isUserRoleLoading || user) {
+     return (
+        <div className="flex h-screen w-screen items-center justify-center bg-background">
+            <div className="flex flex-col items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
+                </div>
+            </div>
+      </div>
+    );
+  }
 
   return (
     <FirebaseClientProvider>
@@ -37,3 +53,5 @@ export default function AuthLayout({
     </FirebaseClientProvider>
   );
 }
+
+    

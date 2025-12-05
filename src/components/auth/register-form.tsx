@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -23,6 +24,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 const registerSchema = z.object({
   memberId: z.string().min(1, { message: "সদস্য আইডি আবশ্যক।" }),
@@ -59,15 +62,6 @@ export function RegisterForm() {
       toast({ variant: "destructive", title: "নিবন্ধন ব্যর্থ হয়েছে", description: "Firebase প্রস্তুত নয়।" });
       return;
     }
-    
-    if (data.email.toLowerCase() === 'fh7614@gmail.com') {
-      toast({
-        variant: 'destructive',
-        title: 'অ্যাডমিন নিবন্ধন',
-        description: 'এই ইমেলটি নিবন্ধনের জন্য অনুমোদিত নয়।',
-      });
-      return;
-    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
@@ -76,6 +70,9 @@ export function RegisterForm() {
       await updateProfile(user, { displayName: data.name });
 
       const userDocRef = doc(firestore, 'users', user.uid);
+      
+      const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
+
       const userData = {
         id: data.memberId,
         uid: user.uid,
@@ -83,11 +80,26 @@ export function RegisterForm() {
         email: data.email,
         department: data.department,
         batch: data.session,
-        role: 'General Member',
+        role: isAdmin ? 'Admin' : 'General Member',
         photoURL: '',
         eventParticipationScore: 0
       };
-      await setDoc(userDocRef, userData);
+      
+      // Use a `catch` block to handle potential permission errors gracefully
+      setDoc(userDocRef, userData).catch(error => {
+          const permissionError = new FirestorePermissionError({
+              path: userDocRef.path,
+              operation: 'create',
+              requestResourceData: userData
+          });
+          errorEmitter.emit('permission-error', permissionError);
+          // The global listener will throw, but we also show a toast
+           toast({
+                variant: "destructive",
+                title: "প্রোফাইল তৈরি ব্যর্থ হয়েছে",
+                description: "আপনার ব্যবহারকারী প্রোফাইল তৈরি করার অনুমতি নেই।",
+            });
+      });
 
       toast({
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",
@@ -100,7 +112,9 @@ export function RegisterForm() {
       toast({
         variant: "destructive",
         title: "নিবন্ধন ব্যর্থ হয়েছে",
-        description: error.message || "একটি অজানা ত্রুটি ঘটেছে। অনুগ্রহ করে বিবরণ পরীক্ষা করে আবার চেষ্টা করুন।",
+        description: error.code === 'auth/email-already-in-use' 
+            ? 'এই ইমেলটি ইতিমধ্যে নিবন্ধিত রয়েছে।'
+            : 'একটি অজানা ত্রুটি ঘটেছে।',
       });
     }
   };
@@ -283,3 +297,5 @@ export function RegisterForm() {
     </Card>
   );
 }
+
+    

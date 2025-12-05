@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { User, CalendarClock, FileText, BookUser, UserCheck, BarChart3, PlusCircle, Users } from 'lucide-react';
+import { UserCheck, CalendarClock, FileText, BookUser, BarChart3, PlusCircle, Users } from 'lucide-react';
 import Link from 'next/link';
 import { AttendXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { CreateSessionForm } from '@/components/sessions/create-session-form';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MembersTable } from '@/components/admin/members-table';
 
 const menuItems = [
   { href: '/profile', label: 'আমার প্রোফাইল', icon: UserCheck, description: "আপনার প্রোফাইল এবং কার্যক্রম দেখুন", adminOnly: false },
@@ -38,20 +39,24 @@ export default function DashboardPage() {
   if (isUserRoleLoading) {
     return (
         <div className="space-y-6">
-            <Skeleton className="h-12 w-1/2" />
+            <div className="flex items-center justify-between">
+                <Skeleton className="h-12 w-1/2" />
+                <Skeleton className="h-10 w-32" />
+            </div>
             <Skeleton className="h-8 w-1/3" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
             </div>
+            {isAdmin && <Skeleton className="h-64 w-full" />}
         </div>
     );
   }
   
   const visibleMenuItems = menuItems.filter(item => {
     if (isAdmin) {
-      // Admins see everything except 'আমার প্রোফাইল' and 'নির্দেশনাবলি'
+      // Admins don't see 'আমার প্রোফাইল' and 'নির্দেশনাবলি'
       return item.href !== '/profile' && item.href !== '/instructions';
     } else {
       // Non-admins only see non-adminOnly items
@@ -119,8 +124,17 @@ export default function DashboardPage() {
             </Link>
           ))}
         </div>
+
+        {isAdmin && (
+            <div className="mt-8">
+                <MembersTable />
+            </div>
+        )}
+
       </div>
 
     </div>
   );
 }
+
+    

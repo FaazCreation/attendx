@@ -3,7 +3,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Helper Functions ---
     function isSignedIn() {
       return request.auth != null;
     }
@@ -11,75 +10,60 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
+
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      // Check the incoming resource data on create, or the existing resource on update/delete
+      // This is a common pattern to check a role without a separate `get` call.
+      // For reads, we check the existing data in the user's document.
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
     }
 
-    // --- Collection: users ---
+    function isNewUserRoleUnchanged() {
+      return request.resource.data.role == 'General Member';
+    }
+
+    function isExistingUserRoleUnchanged() {
+        return request.resource.data.role == resource.data.role;
+    }
+
+
     match /users/{userId} {
-      // Admins can get any user, users can get their own profile.
-      allow get: if isAdmin() || isOwner(userId);
-      // Only admins can list all users (for reports).
+      allow get: if isSignedIn();
       allow list: if isAdmin();
       
-      // A user can create their own user document.
-      allow create: if isOwner(userId)
-                    && request.resource.data.uid == userId;
+      allow create: if isOwner(userId) && isNewUserRoleUnchanged();
 
-      // Admins can update any user profile.
-      // Users can update their own profile, but cannot change their role.
-      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+      allow update: if (isOwner(userId) && isExistingUserRoleUnchanged()) || isAdmin();
 
-      // Only admins can delete users.
       allow delete: if isAdmin();
     }
-
-    // --- Collection: roles_admin ---
-    // Only admins can read or write to the admin roles collection.
-    // This prevents non-admins from discovering who other admins are.
-    match /roles_admin/{userId} {
-      allow read, write: if isAdmin();
-    }
     
-    // --- Sub-Collection: attendanceRecords (globally) ---
-    // Deny all list operations on this subcollection for security.
     match /{path=**}/attendanceRecords/{recordId} {
        allow list: if false; 
     }
 
-    // --- Collection: attendanceSessions ---
     match /attendanceSessions/{sessionId} {
-      // Any signed-in user can view session details.
       allow get, list: if isSignedIn();
       
-      // Only admins can create, update, or delete sessions.
       allow create, update, delete: if isAdmin();
 
-      // --- Sub-Collection: attendanceRecords (within a session) ---
       match /attendanceRecords/{recordId} {
-        // Admins can get any record, users can get their own.
         allow get: if isAdmin() || isOwner(recordId);
         
-        // Deny listing records directly (use reports page for admins).
         allow list: if false;
         
-        // A user can create their own attendance record if the doc ID is their UID.
         allow create: if isOwner(recordId)
                       && request.resource.data.userId == request.auth.uid;
 
-        // Only admins can update or delete specific attendance records.
         allow update, delete: if isAdmin();
       }
     }
     
-    // --- Collection: counts ---
-    // Used for storing aggregated data like total session count.
     match /counts/{countId} {
-      // Any signed-in user can read counts (e.g., for profile stats).
       allow get: if isSignedIn();
-      // Only admins can update counts (e.g., when creating a session).
-      allow write: if isAdmin(); // 'write' covers create, update, delete
+      allow write: if isAdmin();
     }
   }
 }
+
+    

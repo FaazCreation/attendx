@@ -1,3 +1,4 @@
+
 'use client';
 
 import Header from '@/components/layout/header';
@@ -6,6 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { doc } from 'firebase/firestore';
+import { AttendXIcon } from '../icons';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -22,17 +24,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // 1. If auth is still loading, wait.
-    if (isUserLoading || isUserRoleLoading) return;
+    if (isUserLoading) return;
     
     // 2. If no user is logged in, redirect to login page.
     if (!user) {
-      if (pathname !== '/login') {
+      if (pathname !== '/login' && pathname !== '/register') {
         router.push('/login');
       }
       return;
     }
-    
-    // 3. User is logged in, check role permissions for admin-only paths.
+
+    // 3. User is logged in, but role is not determined yet. Wait.
+    if (isUserRoleLoading) return;
+
+    // 4. User and role are loaded. Check role permissions.
     const isAdmin = userData?.role === 'Admin';
     
     // If user is on an admin path but is not an admin, redirect to general dashboard.
@@ -45,27 +50,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
 
   // Show loading skeleton until auth and role are resolved.
-  if (isUserLoading || isUserRoleLoading) {
+  if (isUserLoading || (user && isUserRoleLoading)) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-            </div>
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+            <AttendXIcon className="h-12 w-12 text-primary" />
+            <p className="text-muted-foreground">লোড হচ্ছে...</p>
         </div>
-      </div>
-    );
-  }
-
-  // Prevent content flash for mismatched roles during redirection.
-  const isAdmin = userData?.role === 'Admin';
-  if ((isAdminPath && !isAdmin) && pathname !== '/dashboard') {
-    // Still redirecting, show loading screen
-     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <p>Redirecting...</p>
       </div>
     );
   }
@@ -83,3 +74,5 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
   );
 }
+
+    
