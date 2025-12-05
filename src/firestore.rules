@@ -17,13 +17,21 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow get: if isAdmin() || isOwner(userId);
+      allow list: if isAdmin();
       
       allow create: if isOwner(userId)
                     && request.resource.data.uid == userId;
 
+      // Users can update their own data, but cannot change their role.
+      // Admins can update any data, including the role.
       allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
 
       allow delete: if isAdmin();
+    }
+    
+    match /counts/sessions {
+        allow get: if isSignedIn();
+        allow write: if isAdmin();
     }
 
     match /roles_admin/{userId} {
@@ -32,20 +40,22 @@ service cloud.firestore {
     }
     
     match /{path=**}/attendanceRecords/{recordId} {
-       allow list: if false; // Deny all list operations on subcollections for security
+       // Deny all cross-session list operations on subcollections for security
+       allow list: if false; 
     }
 
     match /attendanceSessions/{sessionId} {
       allow get, list: if isSignedIn();
       
       allow create, update: if isAdmin();
-      allow delete: if false;
+      allow delete: if false; // Deleting sessions could lead to orphaned records
 
       match /attendanceRecords/{recordId} {
         // Allow a user to get their own attendance record, and admins to get any.
         allow get: if isAdmin() || isOwner(recordId);
         
-        // Deny all list operations by default.
+        // Explicitly deny listing records of a session to non-admins.
+        // Admins can get all records via backend functions if needed (e.g., reports).
         allow list: if false;
         
         // Allow a user to create their own attendance record if they are signed in,
@@ -53,6 +63,7 @@ service cloud.firestore {
         allow create: if isOwner(recordId)
                       && request.resource.data.userId == request.auth.uid;
 
+        // Only admins can modify or delete an attendance record.
         allow update, delete: if isAdmin();
       }
     }
