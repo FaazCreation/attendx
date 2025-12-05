@@ -17,7 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -69,10 +69,10 @@ export function RegisterForm() {
 
       await updateProfile(user, { displayName: data.name });
 
-      const userDocRef = doc(firestore, 'users', user.uid);
-      
       const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
+      const userRole = isAdmin ? 'Admin' : 'General Member';
 
+      const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
         id: data.memberId,
         uid: user.uid,
@@ -80,26 +80,20 @@ export function RegisterForm() {
         email: data.email,
         department: data.department,
         batch: data.session,
-        role: isAdmin ? 'Admin' : 'General Member',
+        role: userRole,
         photoURL: '',
         eventParticipationScore: 0
       };
+
+      const batch = writeBatch(firestore);
+      batch.set(userDocRef, userData);
+
+      if (isAdmin) {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        batch.set(adminRoleRef, { role: 'Admin' });
+      }
       
-      // Use a `catch` block to handle potential permission errors gracefully
-      setDoc(userDocRef, userData).catch(error => {
-          const permissionError = new FirestorePermissionError({
-              path: userDocRef.path,
-              operation: 'create',
-              requestResourceData: userData
-          });
-          errorEmitter.emit('permission-error', permissionError);
-          // The global listener will throw, but we also show a toast
-           toast({
-                variant: "destructive",
-                title: "প্রোফাইল তৈরি ব্যর্থ হয়েছে",
-                description: "আপনার ব্যবহারকারী প্রোফাইল তৈরি করার অনুমতি নেই।",
-            });
-      });
+      await batch.commit();
 
       toast({
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",
@@ -109,13 +103,28 @@ export function RegisterForm() {
       router.push('/login');
 
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "নিবন্ধন ব্যর্থ হয়েছে",
-        description: error.code === 'auth/email-already-in-use' 
-            ? 'এই ইমেলটি ইতিমধ্যে নিবন্ধিত রয়েছে।'
-            : 'একটি অজানা ত্রুটি ঘটেছে।',
-      });
+      // Catch batch commit errors, which could be permission errors.
+      if (error.code === 'permission-denied') {
+        const permissionError = new FirestorePermissionError({
+            path: `users/${auth.currentUser?.uid}`,
+            operation: 'create',
+            requestResourceData: 'Multiple documents (user profile and maybe admin role)',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        toast({
+            variant: "destructive",
+            title: "নিবন্ধন ব্যর্থ হয়েছে",
+            description: "প্রোফাইল তৈরি করার অনুমতি নেই।",
+        });
+      } else {
+         toast({
+          variant: "destructive",
+          title: "নিবন্ধন ব্যর্থ হয়েছে",
+          description: error.code === 'auth/email-already-in-use' 
+              ? 'এই ইমেলটি ইতিমধ্যে নিবন্ধিত রয়েছে।'
+              : 'একটি অজানা ত্রুটি ঘটেছে।',
+        });
+      }
     }
   };
 
