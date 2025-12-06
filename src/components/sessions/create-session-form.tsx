@@ -77,31 +77,41 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       date: sessionDateTime.toISOString(),
     };
 
-    try {
-        await setDoc(sessionDocRef, sessionData);
-
-        await setDoc(countDocRef, { sessions_count: increment(1) }, { merge: true });
+    // Use a non-async approach with .catch to handle errors,
+    // which is compatible with the new error handling architecture.
+    setDoc(sessionDocRef, sessionData)
+      .then(() => {
+        // Increment session count, also non-blocking
+        setDoc(countDocRef, { sessions_count: increment(1) }, { merge: true }).catch((countError) => {
+            // Even if counting fails, the session was created. We can log this internally.
+            // For the user, the main action succeeded.
+            console.warn("Failed to increment session count, but session was created.", countError);
+        });
 
         toast({
           title: "সেশন তৈরি হয়েছে",
           description: `"${data.title}" সেশনটি সফলভাবে তৈরি করা হয়েছে।`,
         });
         onSessionCreated();
-
-    } catch (e: any) {
+      })
+      .catch((serverError) => {
+        // This is where the permission error will be caught.
         const permissionError = new FirestorePermissionError({
             path: sessionDocRef.path,
             operation: 'create',
             requestResourceData: sessionData,
         });
+
+        // Emit the detailed, contextual error.
         errorEmitter.emit('permission-error', permissionError);
-        
+
+        // Inform the user that something went wrong. The listener will show the detailed error.
         toast({
           variant: 'destructive',
           title: "সেশন তৈরিতে ব্যর্থ",
           description: "সেশন তৈরি করার সময় একটি ত্রুটি হয়েছে৷ আপনার অনুমতি আছে কিনা তা পরীক্ষা করুন।",
         });
-    }
+      });
   };
 
   return (
