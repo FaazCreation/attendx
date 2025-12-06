@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -53,14 +54,13 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         return;
     }
     
-    // Set the document ID to the user's UID for efficient existence checks
     const attendanceRecordRef = doc(firestore, `attendanceSessions/${session.id}/attendanceRecords`, user.uid);
 
     const recordData = {
         sessionId: session.id,
         userId: user.uid,
         timestamp: serverTimestamp(),
-        geolocation: '', // Geolocation can be added in the future
+        geolocation: '', 
     };
 
     setDoc(attendanceRecordRef, recordData)
@@ -79,7 +79,6 @@ export function AttendanceForm({ session, onAttendanceMarked }: AttendanceFormPr
         });
         errorEmitter.emit('permission-error', permissionError);
 
-        // Keep a user-friendly toast, but the developer overlay will have the details.
         toast({
             variant: "destructive",
             title: "অ্যাটেনডেন্স চিহ্নিত করতে ব্যর্থ",

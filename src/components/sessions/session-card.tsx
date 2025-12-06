@@ -131,7 +131,6 @@ export function SessionCard({ session, userRole }: SessionCardProps) {
     
     const isAttendanceOver = useMemo(() => {
         const now = new Date();
-        // Consider the session over 24 hours after its scheduled start time
         const sessionEndTime = new Date(sessionDate.getTime() + 24 * 60 * 60 * 1000);
         return now > sessionEndTime;
     }, [sessionDate]);

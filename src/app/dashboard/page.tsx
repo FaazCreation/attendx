@@ -13,13 +13,12 @@ import { CreateSessionForm } from '@/components/sessions/create-session-form';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const menuItems = [
-  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false },
-  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false },
-  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false },
-  { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true },
+const allMenuItems = [
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false, userOnly: false },
+  { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true, userOnly: false },
+  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: true },
+  { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
 ];
-
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -38,7 +37,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <Skeleton className="h-12 w-1/2" />
-                <Skeleton className="h-10 w-32" />
+                {isAdmin && <Skeleton className="h-10 w-32" />}
             </div>
             <Skeleton className="h-8 w-1/3" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -50,13 +49,12 @@ export default function DashboardPage() {
     );
   }
   
-  const visibleMenuItems = menuItems.filter(item => {
-    // Admins see everything
-    if (isAdmin) return true;
-    // Non-admins see non-admin-only items
+  const visibleMenuItems = allMenuItems.filter(item => {
+    if (isAdmin) {
+      return !item.userOnly;
+    }
     return !item.adminOnly;
   });
-
 
   return (
     <div className="flex flex-col flex-1 h-full">

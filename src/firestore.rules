@@ -38,7 +38,6 @@ service cloud.firestore {
     }
     
     match /{path=**}/attendanceRecords/{recordId} {
-       // Deny all cross-session list operations on subcollections for security
        allow list: if false; 
     }
 
@@ -46,22 +45,16 @@ service cloud.firestore {
       allow get, list: if isSignedIn();
       
       allow create, update: if isAdmin();
-      allow delete: if false; // Deleting sessions could lead to orphaned records
+      allow delete: if false; 
 
       match /attendanceRecords/{recordId} {
-        // Allow a user to get their own attendance record, and admins to get any.
         allow get: if isAdmin() || isOwner(recordId);
         
-        // Explicitly deny listing records of a session to non-admins.
-        // Admins can get all records via backend functions if needed (e.g., reports).
         allow list: if false;
         
-        // Allow a user to create their own attendance record if they are signed in,
-        // the record ID matches their UID, and the record doesn't already exist.
         allow create: if isOwner(recordId)
                       && request.resource.data.userId == request.auth.uid;
 
-        // Only admins can modify or delete an attendance record.
         allow update, delete: if isAdmin();
       }
     }
