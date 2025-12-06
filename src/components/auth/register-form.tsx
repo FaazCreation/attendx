@@ -88,6 +88,8 @@ export function RegisterForm() {
       const batch = writeBatch(firestore);
       batch.set(userDocRef, userData);
 
+      // This logic depends on a backend function to actually set custom claims.
+      // For the purpose of this UI, we assume this will trigger the claim.
       if (isAdmin) {
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
         batch.set(adminRoleRef, { role: 'Admin' });
@@ -99,6 +101,10 @@ export function RegisterForm() {
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",
         description: "আপনি সফলভাবে নিবন্ধিত হয়েছেন।",
       });
+      
+      // The custom claim might take a moment to propagate.
+      // For a better UX, we could force a token refresh before redirecting.
+      await user.getIdToken(true);
 
       router.push('/login');
 
@@ -306,5 +312,3 @@ export function RegisterForm() {
     </Card>
   );
 }
-
-    
