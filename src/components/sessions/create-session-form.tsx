@@ -74,42 +74,15 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       ...data,
       id: sessionId,
       attendanceCode,
-      date: sessionDateTime.toISOString(), 
-      time: data.time,
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: serverTimestamp(),
+      date: sessionDateTime.toISOString(),
     };
-    
-    delete (sessionData as any).date;
-    sessionData.date = sessionDateTime.toISOString();
 
     try {
-        // Use individual non-blocking writes instead of a transaction
-        
-        // 1. Create the session document
-        await setDoc(sessionDocRef, sessionData).catch(error => {
-            console.error("Error creating session document:", error);
-            const permissionError = new FirestorePermissionError({
-                path: sessionDocRef.path,
-                operation: 'create',
-                requestResourceData: sessionData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-            // Re-throw to be caught by the outer catch block
-            throw error;
-        });
+        await setDoc(sessionDocRef, sessionData);
 
-        // 2. Increment the session count
-        await setDoc(countDocRef, { sessions_count: increment(1) }, { merge: true }).catch(error => {
-            console.error("Error incrementing session count:", error);
-            // This error is less critical, maybe just log it or show a different toast
-             toast({
-              variant: 'destructive',
-              title: "সেশন গণনা আপডেট ব্যর্থ হয়েছে",
-              description: "সেশন তৈরি হয়েছে কিন্তু মোট গণনা আপডেট করা যায়নি।",
-            });
-             // Don't re-throw, as the main operation (session creation) succeeded.
-        });
+        await setDoc(countDocRef, { sessions_count: increment(1) }, { merge: true });
 
         toast({
           title: "সেশন তৈরি হয়েছে",
@@ -118,7 +91,13 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
         onSessionCreated();
 
     } catch (e: any) {
-        // This will now catch the re-thrown error from the session creation
+        const permissionError = new FirestorePermissionError({
+            path: sessionDocRef.path,
+            operation: 'create',
+            requestResourceData: sessionData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        
         toast({
           variant: 'destructive',
           title: "সেশন তৈরিতে ব্যর্থ",
