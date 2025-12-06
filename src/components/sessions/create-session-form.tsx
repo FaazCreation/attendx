@@ -75,8 +75,14 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       id: sessionId,
       attendanceCode,
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
-      createdAt: serverTimestamp(),
+      createdAt: serverTimestamp(), // Firestore understands this object type
       date: sessionDateTime.toISOString(),
+    };
+    
+    // Create a separate, serializable object for error reporting
+    const serializableSessionData = {
+        ...sessionData,
+        createdAt: new Date().toISOString(), // Use ISO string for serialization
     };
 
     try {
@@ -94,7 +100,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
         const permissionError = new FirestorePermissionError({
             path: sessionDocRef.path,
             operation: 'create',
-            requestResourceData: sessionData,
+            requestResourceData: serializableSessionData,
         });
         errorEmitter.emit('permission-error', permissionError);
         
