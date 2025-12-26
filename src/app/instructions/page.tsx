@@ -53,7 +53,7 @@ export default function InstructionsPage() {
                   <p className="font-semibold text-lg">ডেভেলপার পরিচিতি:</p>
                   <div className="text-muted-foreground mt-2">
                       <p className="font-medium text-foreground">ফরহাদ হোসেন</p>
-                      <p>ক্রিয়েটিভ এন্ড টেকনিক্যাল হেড</p>
+                      <p>হেড অফ ক্রিয়েটিভ এন্ড আইটি</p>
                       <p>তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
                   </div>
               </div>
