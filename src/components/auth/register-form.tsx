@@ -72,6 +72,8 @@ export function RegisterForm() {
       const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
       const userRole = isAdmin ? 'Admin' : 'General Member';
 
+      const batch = writeBatch(firestore);
+
       const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
         id: data.memberId,
@@ -84,13 +86,14 @@ export function RegisterForm() {
         photoURL: '',
         eventParticipationScore: 0
       };
+      batch.set(userDocRef, userData);
 
-      await setDoc(userDocRef, userData);
-      
-      // Note: Setting custom claims should be done from a secure backend environment
-      // (e.g., a Cloud Function triggered by user creation). 
-      // For this project, we assume this client-side logic will lead to a claim being set.
-      // The login logic will then verify this claim.
+      if (isAdmin) {
+          const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+          batch.set(adminRoleRef, { role: 'Admin' });
+      }
+
+      await batch.commit();
 
       toast({
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",
