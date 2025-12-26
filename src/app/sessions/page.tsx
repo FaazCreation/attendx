@@ -4,25 +4,13 @@
 import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { CreateSessionForm } from '@/components/sessions/create-session-form';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { SessionCard } from '@/components/sessions/session-card';
 import Head from 'next/head';
 
 export default function SessionsPage() {
   const firestore = useFirestore();
   const { user } = useUser();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const { data: sessions, isLoading: areSessionsLoading } = useCollection(
     () => {
@@ -42,10 +30,10 @@ export default function SessionsPage() {
 
   const isLoading = areSessionsLoading || isUserLoading;
 
-  const canCreateSession = useMemo(() => {
-    if (!userData) return false;
-    return userData.role === 'Admin';
-  }, [userData]);
+  const sortedSessions = useMemo(() => {
+    if (!sessions) return [];
+    return [...sessions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [sessions]);
 
 
   return (
@@ -58,25 +46,6 @@ export default function SessionsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             অ্যাটেনডেন্স সেশন
           </h1>
-          {canCreateSession && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  সেশন তৈরি করুন
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>নতুন সেশন তৈরি করুন</DialogTitle>
-                  <DialogDescription>
-                    নতুন অ্যাটেনডেন্স সেশনের জন্য বিবরণ পূরণ করুন।
-                  </DialogDescription>
-                </DialogHeader>
-                <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          )}
         </div>
         
         {isLoading && (
@@ -88,9 +57,9 @@ export default function SessionsPage() {
           </div>
         )}
 
-        {sessions && sessions.length > 0 && userData && (
+        {sortedSessions && sortedSessions.length > 0 && userData && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {sessions.map((session: any) => (
+            {sortedSessions.map((session: any) => (
               <SessionCard 
                 key={session.id} 
                 session={session} 
@@ -100,10 +69,10 @@ export default function SessionsPage() {
           </div>
         )}
         
-        {(!sessions || sessions.length === 0) && !isLoading && (
+        {(!sortedSessions || sortedSessions.length === 0) && !isLoading && (
             <div className="flex flex-col items-center justify-center text-center py-12">
                 <p className="text-lg text-muted-foreground">কোনো সেশন পাওয়া যায়নি।</p>
-                {canCreateSession && <p className="text-sm text-muted-foreground mt-2">একটি নতুন সেশন তৈরি করে শুরু করুন।</p>}
+                {userData?.role === 'Admin' && <p className="text-sm text-muted-foreground mt-2">অ্যাডমিন প্যানেল থেকে একটি নতুন সেশন তৈরি করুন।</p>}
           </div>
         )}
       </div>

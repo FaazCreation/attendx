@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { UserCheck, CalendarClock, FileText, BookUser, BarChart3, PlusCircle } from 'lucide-react';
+import { UserCheck, CalendarClock, FileText, BookUser, BarChart3, PlusCircle, CalendarCog } from 'lucide-react';
 import Link from 'next/link';
 import { AttendXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const allMenuItems = [
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false, userOnly: false },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true, userOnly: false },
+  { href: '/admin/sessions', label: 'সেশন পরিচালনা', icon: CalendarCog, description: "সেশন তৈরি ও পরিচালনা করুন", adminOnly: true, userOnly: false },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: true },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
 ];
