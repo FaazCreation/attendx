@@ -4,7 +4,7 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { doc, setDoc, increment } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -45,6 +45,7 @@ const generateAttendanceCode = () => {
 
 export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () => void }) {
   const firestore = useFirestore();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<SessionFormData>({
@@ -57,13 +58,19 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
   });
 
   const onSubmit: SubmitHandler<SessionFormData> = async (data) => {
-    if (!firestore) return;
+    if (!firestore || !user) {
+        toast({
+            variant: "destructive",
+            title: "ত্রুটি",
+            description: "ব্যবহারকারী লগইন করা নেই।",
+        });
+        return;
+    }
     
     const sessionId = uuidv4();
     const attendanceCode = generateAttendanceCode();
     const sessionDocRef = doc(firestore, 'attendanceSessions', sessionId);
-    const countDocRef = doc(firestore, 'counts', 'sessions');
-
+    
     const sessionDateTime = new Date(data.date);
     const [hours, minutes] = data.time.split(':');
     sessionDateTime.setHours(parseInt(hours), parseInt(minutes));
@@ -71,6 +78,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     const sessionData = {
       ...data,
       id: sessionId,
+      adminId: user.uid, // সেশন নির্মাতার আইডি সংরক্ষণ করা হচ্ছে
       attendanceCode,
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: new Date().toISOString(),
@@ -79,8 +87,6 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
 
     try {
       await setDoc(sessionDocRef, sessionData);
-
-      await setDoc(countDocRef, { sessions_count: increment(1) }, { merge: true });
 
       toast({
         title: "সেশন তৈরি হয়েছে",
