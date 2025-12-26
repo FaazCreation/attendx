@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -258,7 +257,6 @@ function AdminReportPage() {
 }
 
 
-// This is a protected route for admins only.
 export default function ReportsPage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();

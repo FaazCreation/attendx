@@ -12,7 +12,7 @@ service cloud.firestore {
     }
     
     // Admin check by reading the user's own role document.
-    // This is allowed because you can always read your own data.
+    // This is allowed because you can always read your own data, even in a write rule.
     function isUserAdmin() {
       return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
     }

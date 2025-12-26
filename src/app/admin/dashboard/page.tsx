@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -17,7 +16,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { CreateSessionForm } from '@/components/sessions/create-session-form';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   PlusCircle,
   Users,
@@ -25,19 +24,21 @@ import {
   BarChart,
   UserCheck,
 } from 'lucide-react';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
 import { collection, collectionGroup, doc, getCountFromServer } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { bn } from 'date-fns/locale';
+import { useRouter } from 'next/navigation';
+
 
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  avatarUrl?: string;
+  photoURL?: string;
 }
 
 interface Session {
@@ -178,7 +179,7 @@ function RecentActivity({ firestore } : { firestore: any }) {
 }
 
 
-export default function AdminDashboard() {
+function AdminDashboardPage() {
   const firestore = useFirestore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -217,8 +218,7 @@ export default function AdminDashboard() {
       <StatsCards firestore={firestore} />
       
       <div className="grid gap-4 lg:grid-cols-2">
-        <RecentActivity firestore={firestore} />
-        {/* Here you could add another component, e.g., a chart */}
+        {/* <RecentActivity firestore={firestore} /> */}
          <Card>
             <CardHeader>
                 <CardTitle>সিস্টেম স্ট্যাটাস</CardTitle>
@@ -234,4 +234,48 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
+}
+
+
+export default function ProtectedAdminDashboardPage() {
+    const { user, isUserLoading } = useUser();
+    const firestore = useFirestore();
+    const router = useRouter();
+
+    const { data: userData, isLoading: isUserRoleLoading } = useDoc(() => {
+        if (!user || !firestore) return null;
+        return doc(firestore, 'users', user.uid);
+    }, [user, firestore]);
+
+    useEffect(() => {
+        if (!isUserLoading && !user) {
+            router.push('/login');
+            return;
+        }
+        if (!isUserRoleLoading && user && userData?.role !== 'Admin') {
+            router.push('/dashboard');
+            return;
+        }
+    }, [isUserLoading, user, isUserRoleLoading, userData, router]);
+
+
+    if (isUserLoading || isUserRoleLoading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-[250px]" />
+                        <Skeleton className="h-4 w-[200px]" />
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (userData?.role === 'Admin') {
+        return <AdminDashboardPage />;
+    }
+
+    return null;
 }
