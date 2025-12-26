@@ -157,7 +157,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. Only the user themselves can read/write their own profile. Includes standard user profile information (name, email, department, batch, photoURL).",
+          "description": "Stores user profiles. Only the user themselves can read/write their own profile. Includes standard user profile information (name, email, department, batch, photoURL). The 'role' field is used for authorization.",
           "params": [
             {
               "name": "userId",
@@ -173,7 +173,7 @@
           "schema": {
             "$ref": "#/backend/entities/AttendanceSession"
           },
-          "description": "Stores attendance session details.  Accessible to all users for viewing, but only admins can create, update, or delete sessions.",
+          "description": "Stores attendance session details.  Accessible to all users for viewing, but only admins can create, update, or delete sessions. Admin status is checked via the user's role in their own user document.",
           "params": [
             {
               "name": "sessionId",
@@ -189,7 +189,7 @@
           "schema": {
             "$ref": "#/backend/entities/AttendanceRecord"
           },
-          "description": "Stores attendance records for a specific session. Includes denormalized 'userId' for authorization independence. This allows verifying the user exists (via `request.auth.uid`) without needing to read the user's profile document. Includes timestamp and geolocation for attendance tracking.",
+          "description": "Stores attendance records for a specific session. The recordId is the user's UID. Includes timestamp and geolocation for attendance tracking.",
           "params": [
             {
               "name": "sessionId",
@@ -197,12 +197,12 @@
             },
             {
               "name": "recordId",
-              "description": "The unique identifier of the attendance record."
+              "description": "The unique identifier of the user who attended."
             }
           ]
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the AttendX Attendance Management System. It prioritizes authorization independence, clarity, and scalability.  Users are stored in a top-level `users` collection. Admin status is handled via Firebase Custom Claims on the auth token, which is more secure and performant than a separate `roles_admin` collection. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session. \n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. The `isAdmin()` function now checks `request.auth.token.admin`, which is fast and secure. The `AttendanceRecord` documents denormalize the `userId`, which enables security rules to validate the user without reading the full `User` document.\n\nThe structure supports the required QAPs. Private data (user profiles) are stored under `/users/{userId}`, ensuring path-based ownership. Admin access is controlled via custom claims.  Attendance sessions are public read, but write access is restricted to admins."
+    "reasoning": "This Firestore structure is designed to support the AttendX Attendance Management System. It prioritizes authorization independence, clarity, and scalability. Users are stored in a top-level `users` collection. Admin status is determined by the `role` field within each user's document, which is a reliable method for checking permissions during writes. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session."
   }
 }

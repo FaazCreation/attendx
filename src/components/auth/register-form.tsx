@@ -17,7 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -72,8 +72,6 @@ export function RegisterForm() {
       const isAdmin = data.email.toLowerCase() === 'fh7614@gmail.com';
       const userRole = isAdmin ? 'Admin' : 'General Member';
 
-      const batch = writeBatch(firestore);
-
       const userDocRef = doc(firestore, 'users', user.uid);
       const userData = {
         id: data.memberId,
@@ -86,14 +84,8 @@ export function RegisterForm() {
         photoURL: '',
         eventParticipationScore: 0
       };
-      batch.set(userDocRef, userData);
-
-      if (isAdmin) {
-          const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-          batch.set(adminRoleRef, { role: 'Admin' });
-      }
-
-      await batch.commit();
+      
+      await setDoc(userDocRef, userData);
 
       toast({
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",

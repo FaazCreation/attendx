@@ -13,8 +13,9 @@ import { AttendXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useFirestore, useUser } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
@@ -30,6 +31,7 @@ type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 
 export function AdminLoginForm() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
@@ -46,26 +48,29 @@ export function AdminLoginForm() {
 
   useEffect(() => {
     const checkAdminAndRedirect = async () => {
-        if (!isUserLoading && user) {
-            const idTokenResult = await user.getIdTokenResult();
-            if (idTokenResult.claims.admin) {
+        if (!isUserLoading && user && firestore) {
+            const userDocRef = doc(firestore, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists() && userDoc.data().role === 'Admin') {
                 router.push('/admin/dashboard');
             }
         }
     };
     checkAdminAndRedirect();
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, firestore]);
 
 
   const onSubmit: SubmitHandler<AdminLoginFormData> = async (data) => {
-    if (!auth) return;
+    if (!auth || !firestore) return;
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       const loggedInUser = userCredential.user;
       
-      const idTokenResult = await loggedInUser.getIdTokenResult(true); // Force refresh
-      if (!idTokenResult.claims.admin) {
+      const userDocRef = doc(firestore, 'users', loggedInUser.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists() || userDoc.data().role !== 'Admin') {
         await auth.signOut();
         toast({
             variant: "destructive",
