@@ -13,16 +13,13 @@ import { AttendXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth, useUser, useFirestore } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Eye, EyeOff } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 const adminLoginSchema = z.object({
   email: z.string().email({ message: "অবৈধ ইমেইল ঠিকানা।" }),
@@ -33,7 +30,6 @@ type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 
 export function AdminLoginForm() {
   const auth = useAuth();
-  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
@@ -50,56 +46,31 @@ export function AdminLoginForm() {
 
   useEffect(() => {
     const checkAdminAndRedirect = async () => {
-        if (!isUserLoading && user && firestore) {
-            const userDocRef = doc(firestore, 'users', user.uid);
-            try {
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists() && userDoc.data().role === 'Admin') {
-                    router.push('/admin/dashboard');
-                }
-            } catch (e) {
-                // Ignore potential permission errors for non-admins, they'll be redirected by AppShell
+        if (!isUserLoading && user) {
+            const idTokenResult = await user.getIdTokenResult();
+            if (idTokenResult.claims.admin) {
+                router.push('/admin/dashboard');
             }
         }
     };
     checkAdminAndRedirect();
-  }, [user, isUserLoading, firestore, router]);
+  }, [user, isUserLoading, router]);
 
 
   const onSubmit: SubmitHandler<AdminLoginFormData> = async (data) => {
-    if (!auth || !firestore) return;
-    
-    // Hardcoded check for admin credentials
-    if (data.email.toLowerCase() !== 'fh7614@gmail.com' || data.password !== 'Forhad@2020') {
-      toast({
-        variant: "destructive",
-        title: "সাইন ইন ব্যর্থ হয়েছে",
-        description: "আপনার ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।",
-      });
-      return;
-    }
+    if (!auth) return;
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       const loggedInUser = userCredential.user;
       
-      const adminRoleRef = doc(firestore, 'roles_admin', loggedInUser.uid);
-      
-      try {
-        const adminDoc = await getDoc(adminRoleRef);
-        if (!adminDoc.exists()) {
-            throw new Error("User is not an admin.");
-        }
-      } catch (error) {
-         const permissionError = new FirestorePermissionError({
-            path: adminRoleRef.path,
-            operation: 'get',
-        });
-        errorEmitter.emit('permission-error', permissionError);
+      const idTokenResult = await loggedInUser.getIdTokenResult(true); // Force refresh
+      if (!idTokenResult.claims.admin) {
+        await auth.signOut();
         toast({
             variant: "destructive",
-            title: "অনুমতি যাচাই ব্যর্থ",
-            description: "অ্যাডমিন হিসেবে আপনার ভূমিকা যাচাই করা যায়নি।",
+            title: "অনুমতি নেই",
+            description: "আপনার অ্যাডমিন অ্যাক্সেস নেই।",
         });
         return;
       }

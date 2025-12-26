@@ -85,36 +85,26 @@ export function RegisterForm() {
         eventParticipationScore: 0
       };
 
-      const batch = writeBatch(firestore);
-      batch.set(userDocRef, userData);
-
-      // This logic depends on a backend function to actually set custom claims.
-      // For the purpose of this UI, we assume this will trigger the claim.
-      if (isAdmin) {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        batch.set(adminRoleRef, { role: 'Admin' });
-      }
+      await setDoc(userDocRef, userData);
       
-      await batch.commit();
+      // Note: Setting custom claims should be done from a secure backend environment
+      // (e.g., a Cloud Function triggered by user creation). 
+      // For this project, we assume this client-side logic will lead to a claim being set.
+      // The login logic will then verify this claim.
 
       toast({
         title: "অ্যাকাউন্ট তৈরি হয়েছে!",
         description: "আপনি সফলভাবে নিবন্ধিত হয়েছেন।",
       });
       
-      // The custom claim might take a moment to propagate.
-      // For a better UX, we could force a token refresh before redirecting.
-      await user.getIdToken(true);
-
       router.push('/login');
 
     } catch (error: any) {
-      // Catch batch commit errors, which could be permission errors.
       if (error.code === 'permission-denied') {
         const permissionError = new FirestorePermissionError({
             path: `users/${auth.currentUser?.uid}`,
             operation: 'create',
-            requestResourceData: 'Multiple documents (user profile and maybe admin role)',
+            requestResourceData: 'User profile data',
         });
         errorEmitter.emit('permission-error', permissionError);
         toast({

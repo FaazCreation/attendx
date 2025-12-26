@@ -1,10 +1,11 @@
+
 {
   "entities": {
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user of the TCPC Connect system.",
+      "description": "Represents a user of the AttendX system.",
       "properties": {
         "id": {
           "type": "string",
@@ -166,22 +167,6 @@
         }
       },
       {
-        "path": "/roles_admin/{userId}",
-        "definition": {
-          "entityName": "roles_admin",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Documents in this collection indicate admin status. The existence of a document for a user ID grants admin privileges.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the admin user."
-            }
-          ]
-        }
-      },
-      {
         "path": "/attendanceSessions/{sessionId}",
         "definition": {
           "entityName": "AttendanceSession",
@@ -218,6 +203,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the TCPC Connect Attendance Management System. It prioritizes authorization independence, clarity, and scalability.  Users are stored in a top-level `users` collection.  Admins are managed via a dedicated `roles_admin` collection. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session. \n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. The `AttendanceRecord` documents within the `attendanceSessions/{sessionId}/attendanceRecords/{recordId}` subcollection denormalize the `userId` from the `User` document. This enables security rules to validate the existence of a user without needing to read the `User` document itself.  Since only authenticated users can record attendance, the existence of a user id on the `request.auth.uid` is enough to confirm the user has permission to create attendance records.\n\nThe structure supports the required QAPs. Private data (user profiles) are stored under `/users/{userId}`, ensuring path-based ownership and read/write access only to the owning user. Admin access is controlled via the `roles_admin` collection, allowing secure listing of users for admins.  Attendance sessions are public read, write only by admins, achieved by separate collections with distinct security rules.\n"
+    "reasoning": "This Firestore structure is designed to support the AttendX Attendance Management System. It prioritizes authorization independence, clarity, and scalability.  Users are stored in a top-level `users` collection. Admin status is handled via Firebase Custom Claims on the auth token, which is more secure and performant than a separate `roles_admin` collection. Attendance sessions are stored in a top-level `attendanceSessions` collection. Attendance records are stored in a subcollection of `attendanceSessions`, enabling efficient querying of attendance for a given session. \n\nAuthorization Independence is achieved by avoiding `get()` calls in security rules. The `isAdmin()` function now checks `request.auth.token.admin`, which is fast and secure. The `AttendanceRecord` documents denormalize the `userId`, which enables security rules to validate the user without reading the full `User` document.\n\nThe structure supports the required QAPs. Private data (user profiles) are stored under `/users/{userId}`, ensuring path-based ownership. Admin access is controlled via custom claims.  Attendance sessions are public read, but write access is restricted to admins."
   }
 }
