@@ -37,7 +37,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <Skeleton className="h-12 w-1/2" />
-                {isAdmin && <Skeleton className="h-10 w-32" />}
+                <Skeleton className="h-10 w-44" />
             </div>
             <Skeleton className="h-8 w-1/3" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
