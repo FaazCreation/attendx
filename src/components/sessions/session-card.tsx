@@ -81,6 +81,7 @@ const getSessionTypeInBangla = (type: string) => {
     case 'Event': return 'ইভেন্ট';
     case 'Workshop': return 'কর্মশালা';
     case 'Photowalk': return 'ফটোওয়াক';
+    case 'General': return 'সেশন';
     default: return type;
   }
 }

@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '../ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { CalendarIcon } from 'lucide-react';
@@ -28,7 +27,6 @@ const sessionSchema = z.object({
     required_error: "একটি তারিখ আবশ্যক।",
   }),
   time: z.string().min(1, { message: "সময় আবশ্যক।" }),
-  type: z.enum(["General Meeting", "AGM", "Event", "Workshop", "Photowalk"]),
 });
 
 type SessionFormData = z.infer<typeof sessionSchema>;
@@ -82,6 +80,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: new Date().toISOString(),
       date: sessionDateTime.toISOString(),
+      type: "General", // Default type
     };
 
     setDoc(sessionDocRef, sessionData)
@@ -187,30 +186,6 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ধরন</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="একটি সেশনের ধরন নির্বাচন করুন" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                    <SelectItem value="General Meeting">সাধারণ সভা</SelectItem>
-                    <SelectItem value="AGM">এজিএম</SelectItem>
-                    <SelectItem value="Event">ইভেন্ট</SelectItem>
-                    <SelectItem value="Workshop">কর্মশালা</SelectItem>
-                    <SelectItem value="Photowalk">ফটোওয়াক</SelectItem>
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

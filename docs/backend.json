@@ -83,10 +83,6 @@
           "type": "string",
           "description": "The time of the attendance session."
         },
-        "type": {
-          "type": "string",
-          "description": "The type of attendance session (General Meeting, AGM, Event, Workshop)."
-        },
         "attendanceCode": {
           "type": "string",
           "description": "The unique attendance code for the session."
@@ -102,7 +98,6 @@
         "title",
         "date",
         "time",
-        "type",
         "attendanceCode"
       ]
     },
