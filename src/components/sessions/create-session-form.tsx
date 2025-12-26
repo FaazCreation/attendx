@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, setDoc, increment } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -56,7 +56,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     }
   });
 
-  const onSubmit: SubmitHandler<SessionFormData> = async (data) => {
+  const onSubmit: SubmitHandler<SessionFormData> = (data) => {
     if (!firestore || !user) {
         toast({
             variant: "destructive",
@@ -77,35 +77,35 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     const sessionData = {
       ...data,
       id: sessionId,
-      adminId: user.uid, // সেশন নির্মাতার আইডি সংরক্ষণ করা হচ্ছে
+      adminId: user.uid,
       attendanceCode,
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: new Date().toISOString(),
       date: sessionDateTime.toISOString(),
     };
 
-    try {
-      await setDoc(sessionDocRef, sessionData);
+    setDoc(sessionDocRef, sessionData)
+      .then(() => {
+        toast({
+          title: "সেশন তৈরি হয়েছে",
+          description: `"${data.title}" সেশনটি সফলভাবে তৈরি করা হয়েছে।`,
+        });
+        onSessionCreated();
+      })
+      .catch((e: any) => {
+        const permissionError = new FirestorePermissionError({
+          path: sessionDocRef.path,
+          operation: 'create',
+          requestResourceData: sessionData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
 
-      toast({
-        title: "সেশন তৈরি হয়েছে",
-        description: `"${data.title}" সেশনটি সফলভাবে তৈরি করা হয়েছে।`,
+        toast({
+          variant: 'destructive',
+          title: "সেশন তৈরিতে ব্যর্থ",
+          description: "সেশন তৈরি করার সময় একটি ত্রুটি হয়েছে৷ আপনার অনুমতি আছে কিনা তা পরীক্ষা করুন।",
+        });
       });
-      onSessionCreated();
-    } catch (e: any) {
-      const permissionError = new FirestorePermissionError({
-        path: sessionDocRef.path,
-        operation: 'create',
-        requestResourceData: sessionData,
-      });
-      errorEmitter.emit('permission-error', permissionError);
-
-      toast({
-        variant: 'destructive',
-        title: "সেশন তৈরিতে ব্যর্থ",
-        description: "সেশন তৈরি করার সময় একটি ত্রুটি হয়েছে৷ আপনার অনুমতি আছে কিনা তা পরীক্ষা করুন।",
-      });
-    }
   };
 
   return (
