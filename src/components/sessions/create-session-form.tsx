@@ -128,7 +128,6 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>বিবরণ</FormLabel>
               <FormControl>
                 <Textarea placeholder="সেশনের একটি সংক্ষিপ্ত বিবরণ" {...field} />
               </FormControl>
@@ -141,7 +140,6 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>তারিখ</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
