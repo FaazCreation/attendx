@@ -9,9 +9,9 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const allMenuItems = [
-  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "অ্যাটেনডেন্স সেশন দেখুন এবং যোগ দিন", adminOnly: false, userOnly: false },
+  { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "সেশন এবং আপনার উপস্থিতি দেখুন", adminOnly: false, userOnly: false },
+  { href: '/admin/sessions', label: 'সেশন পরিচালনা', icon: CalendarCog, description: "সেশন তৈরি এবং উপস্থিতি ম্যানেজ করুন", adminOnly: true, userOnly: false },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true, userOnly: false },
-  { href: '/admin/sessions', label: 'সেশন পরিচালনা', icon: CalendarCog, description: "সেশন তৈরি ও পরিচালনা করুন", adminOnly: true, userOnly: false },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
 ];
@@ -93,7 +93,6 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
-
     </div>
   );
 }

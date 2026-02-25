@@ -19,7 +19,6 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { v4 as uuidv4 } from 'uuid';
 
-
 const sessionSchema = z.object({
   title: z.string().min(1, { message: "শিরোনাম আবশ্যক।" }),
   description: z.string().optional(),
@@ -73,14 +72,15 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
     sessionDateTime.setHours(parseInt(hours), parseInt(minutes));
 
     const sessionData = {
-      ...data,
+      title: data.title,
+      description: data.description || '',
       id: sessionId,
       adminId: user.uid,
       attendanceCode,
       qrCodeURL: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${attendanceCode}`,
       createdAt: new Date().toISOString(),
       date: sessionDateTime.toISOString(),
-      type: "General", // Default type
+      time: data.time
     };
 
     setDoc(sessionDocRef, sessionData)
@@ -89,6 +89,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           title: "সেশন তৈরি হয়েছে",
           description: `"${data.title}" সেশনটি সফলভাবে তৈরি করা হয়েছে।`,
         });
+        form.reset();
         onSessionCreated();
       })
       .catch((e: any) => {
@@ -129,7 +130,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Textarea placeholder="সেশনের একটি সংক্ষিপ্ত বিবরণ" {...field} />
+                <Textarea placeholder="সেশনের বিবরণ (ঐচ্ছিক)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
