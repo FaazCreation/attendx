@@ -8,7 +8,7 @@ export function LoadingSplashScreen() {
     <div className="flex h-screen w-screen items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-6">
         <div className="relative">
-          <DocXIcon className="h-20 w-20 text-primary animate-bounce" />
+          <DocXIcon className="h-20 w-20 text-primary" />
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-primary/20 rounded-full blur-sm animate-pulse" />
         </div>
         <div className="flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
