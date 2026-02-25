@@ -12,13 +12,13 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#15803d',
     icons: [
       {
-        src: '/Blue Tech Modern Cloud Technology Logo_20260226_031424_0000.svg',
+        src: '/logo.svg',
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'maskable'
       },
       {
-        src: '/Blue Tech Modern Cloud Technology Logo_20260226_031424_0000.svg',
+        src: '/logo.svg',
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any'

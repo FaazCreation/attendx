@@ -32,8 +32,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         
         {/* Favicon & App Icons */}
-        <link rel="icon" href="/Blue Tech Modern Cloud Technology Logo_20260226_031424_0000.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/Blue Tech Modern Cloud Technology Logo_20260226_031424_0000.svg" />
+        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/logo.svg" />
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#15803d" />
       </head>
