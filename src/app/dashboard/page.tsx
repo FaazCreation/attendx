@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ChatBot } from '@/components/dashboard/chat-bot';
 
 const allMenuItems = [
   { href: '/history', label: 'আমাদের ইতিহাস', icon: History, description: "ক্লাবের পথচলা এবং সাফল্যের গল্প", adminOnly: false, userOnly: false },
@@ -45,7 +46,7 @@ export default function DashboardPage() {
   }
   
   return (
-    <div className="flex flex-col flex-1 h-full">
+    <div className="flex flex-col flex-1 h-full relative">
       <div className="flex-grow space-y-6">
         <div className="text-center sm:text-left">
           <p className="text-xl md:text-2xl font-bold text-primary font-sans tracking-tight">
@@ -76,6 +77,9 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Floating ChatBot */}
+      <ChatBot />
     </div>
   );
 }
