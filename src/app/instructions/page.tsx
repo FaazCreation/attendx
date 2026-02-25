@@ -1,17 +1,23 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, ShieldCheck, UserCog, Info, Mail, Facebook, Youtube, Globe, Phone } from "lucide-react";
+import { BookOpen, ShieldCheck, UserCog, Info, Mail, Phone } from "lucide-react";
+import { FaFacebook, FaYoutube, FaGlobe } from 'react-icons/fa';
 import Head from "next/head";
+import Link from "next/link";
 
 export default function InstructionsPage() {
-  const contactInfo = [
-    { label: "অফিসিয়াল ইমেইল", value: "tcd.photographyclub@gmail.com", icon: Mail, type: "email" },
-    { label: "টেকনিক্যাল ও প্রমোশনাল", value: "creative.tcpc@gmail.com", icon: Phone, type: "email" },
-    { label: "ফেসবুক", value: "@tcd.photographyclub", icon: Facebook, type: "link" },
-    { label: "ইউটিউব", value: "@TejgaonCollegePhotographyClub", icon: Youtube, type: "link" },
-    { label: "ওয়েবসাইট", value: "tcpccreative.com", icon: Globe, type: "link" },
+  const emailContacts = [
+    { label: "অফিসিয়াল ইমেইল", value: "tcd.photographyclub@gmail.com", icon: Mail, href: "mailto:tcd.photographyclub@gmail.com" },
+    { label: "টেকনিক্যাল ও প্রমোショナル", value: "creative.tcpc@gmail.com", icon: Phone, href: "mailto:creative.tcpc@gmail.com" },
+  ];
+
+  const socialLinks = [
+    { href: "https://facebook.com/tcd.photographyclub", icon: FaFacebook, label: "Facebook", color: "hover:text-[#1877F2]" },
+    { href: "https://youtube.com/@TejgaonCollegePhotographyClub", icon: FaYoutube, label: "YouTube", color: "hover:text-[#FF0000]" },
+    { href: "https://tcpccreative.com", icon: FaGlobe, label: "Website", color: "hover:text-primary" },
   ];
 
   return (
@@ -87,26 +93,45 @@ export default function InstructionsPage() {
         </Card>
 
         {/* Contact Section */}
-        <section className="space-y-4">
+        <section className="space-y-6">
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold tracking-tight">যোগাযোগ</h2>
             <Separator className="flex-1" />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {contactInfo.map((info, idx) => (
-              <Card key={idx} className="hover:shadow-md transition-all border-primary/5">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="bg-primary/10 p-2 rounded-lg">
-                    <info.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="space-y-0.5 overflow-hidden">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase">{info.label}</p>
-                    <p className="text-sm font-medium truncate text-primary">{info.value}</p>
-                  </div>
-                </CardContent>
-              </Card>
+          
+          <div className="grid gap-4 sm:grid-cols-2">
+            {emailContacts.map((info, idx) => (
+              <Link href={info.href} key={idx} className="block group">
+                <Card className="transition-all border-primary/5 group-hover:border-primary/20 group-hover:shadow-md h-full">
+                  <CardContent className="p-4 flex items-center gap-4 h-full">
+                    <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-colors">
+                      <info.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="space-y-0.5 overflow-hidden">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase">{info.label}</p>
+                      <p className="text-sm font-medium truncate text-primary">{info.value}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
+
+          <div className="flex justify-center items-center gap-12 py-6">
+            {socialLinks.map((social, idx) => (
+              <Link 
+                href={social.href} 
+                key={idx} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`transition-all transform hover:scale-125 text-muted-foreground/40 ${social.color}`}
+                title={social.label}
+              >
+                <social.icon className="h-10 w-10 sm:h-12 sm:w-12" />
+              </Link>
+            ))}
+          </div>
+
           <Card className="bg-muted/10 border-dashed">
             <CardContent className="p-6 text-center">
               <p className="text-sm text-muted-foreground">যেকোনো প্রয়োজনে আমাদের অফিসিয়াল প্ল্যাটফর্মগুলোতে যোগাযোগ করুন। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করবো।</p>
