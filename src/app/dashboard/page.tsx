@@ -1,8 +1,7 @@
-
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { FileText, BookUser, UsersRound, History, HelpCircle } from 'lucide-react';
+import { FileText, BookUser, UsersRound, History, HelpCircle, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -10,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChatBot } from '@/components/dashboard/chat-bot';
 
 const allMenuItems = [
+  { href: '/achievements', label: 'আমাদের সাফল্য', icon: Trophy, description: "ক্লাবের গৌরবময় মাইলফলক ও অর্জনসমূহ", adminOnly: false, userOnly: false },
   { href: '/history', label: 'আমাদের ইতিহাস', icon: History, description: "ক্লাবের পথচলা এবং সাফল্যের গল্প", adminOnly: false, userOnly: false },
   { href: '/committee', label: 'পরিচালনা কমিটি', icon: UsersRound, description: "ক্লাবের বর্তমান কার্যনির্বাহী কমিটি দেখুন", adminOnly: false, userOnly: false },
   { href: '/faq', label: 'জিজ্ঞাসা ও উত্তর', icon: HelpCircle, description: "ক্লাব এবং সিস্টেম সম্পর্কে সাধারণ প্রশ্নের উত্তর", adminOnly: false, userOnly: false },
