@@ -13,7 +13,6 @@ const allMenuItems = [
   { href: '/activities', label: 'আমাদের কার্যক্রম', icon: Camera, description: "ক্লাবের নিয়মিত ইভেন্ট ও কার্যক্রম সম্পর্কে জানুন", adminOnly: false, userOnly: false },
   { href: '/committee', label: 'পরিচালনা কমিটি', icon: UsersRound, description: "ক্লাবের বর্তমান কার্যনির্বাহী কমিটি দেখুন", adminOnly: false, userOnly: false },
   { href: '/faq', label: 'জিজ্ঞাসা ও উত্তর', icon: HelpCircle, description: "ক্লাব এবং সিস্টেম সম্পর্কে সাধারণ প্রশ্নের উত্তর", adminOnly: false, userOnly: false },
-  { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
 ];
 
@@ -46,7 +45,7 @@ export default function DashboardPage() {
   }
   
   return (
-    <div className="flex flex-col flex-1 h-full relative">
+    <div className="flex flex-col flex-1 h-full relative pb-12">
       <div className="flex-grow space-y-6">
         <div className="text-center sm:text-left">
           <p className="text-xl md:text-2xl font-bold text-primary font-sans tracking-tight">
@@ -75,6 +74,14 @@ export default function DashboardPage() {
               </Card>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* Scrolling Announcement Bar */}
+      <div className="absolute bottom-1 left-0 right-0 overflow-hidden bg-primary/5 border-y border-primary/10 py-2">
+        <div className="whitespace-nowrap animate-marquee inline-block text-sm font-medium text-primary">
+          আসসালামু আলাইকুম। তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের একটি আধুনিক ও সমন্বিত ডেটা সিস্টেমে স্বাগতম। যেকোনো প্রয়োজনে আমাদের অফিসিয়াল প্ল্যাটফর্মগুলোতে যোগাযোগ করুন। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করবো। &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          আসসালামু আলাইকুম। তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের একটি আধুনিক ও সমন্বিত ডেটা সিস্টেমে স্বাগতম। যেকোনো প্রয়োজনে আমাদের অফিসিয়াল প্ল্যাটফর্মগুলোতে যোগাযোগ করুন। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করবো।
         </div>
       </div>
 
