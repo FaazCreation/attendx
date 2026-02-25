@@ -7,6 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Head from "next/head";
 
+const advisors = [
+  { id: 'adv-1', name: "শামীমা ইয়াসমিন", role: "প্রধান উপদেষ্টা", department: "তেজগাঁও কলেজ", batch: "প্রযোজ্য নয়", bio: "অধ্যক্ষ (ভারপ্রাপ্ত), তেজগাঁও কলেজ" },
+  { id: 'adv-2', name: "সৈয়দ মুহাম্মদ জুবায়ের", role: "উপদেষ্টা", department: "থিয়েটার এন্ড মিডিয়া স্টাডিস", batch: "প্রযোজ্য নয়", bio: "সহকারী প্রভাষক" },
+  { id: 'adv-3', name: "আতিকুল ইসলাম", role: "উপদেষ্টা", department: "থিয়েটার এন্ড মিডিয়া স্টাডিস", batch: "প্রযোজ্য নয়", bio: "সহকারী প্রভাষক" },
+];
+
 const committeeMembers = [
   { id: 1, name: "মোকাদ্দেসুর রহমান সান", role: "সভাপতি", department: "টিএমএস", batch: "২০২০-২১", bio: "ফটোগ্রাফি এবং উদ্ভাবনের প্রতি একাগ্রতা নিয়ে ক্লাবকে নেতৃত্ব দিচ্ছেন।" },
   { id: 2, name: "আরেফিন তানভীর", role: "সাধারণ সম্পাদক", department: "মার্কেটিং", batch: "২০২০-২১", bio: "সবকিছু সুশৃঙ্খল রাখতে ইভেন্ট আয়োজন এবং ক্লাবের কার্যক্রম পরিচালনা করছেন।"},
@@ -17,7 +23,7 @@ const committeeMembers = [
   { id: 7, name: "শূন্যপদ", role: "জনসংযোগ কর্মকর্তা", department: "প্রযোজ্য নয়", batch: "প্রযোজ্য নয়", bio: "মিডিয়া এবং বাইরের অংশীদারদের সাথে সুসম্পর্ক বজায় রাখেন।" },
   { id: 8, name: "সাইফুল্লাহ আল রাতুল", role: "ইভেন্ট কোঅর্ডিনেটর", department: "মার্কেটিং", batch: "২০২০-২১", bio: "নিষ্ঠার সাথে ক্লাবের সকল ইভেন্টের পরিকল্পনা ও বাস্তবায়ন করেন।" },
   { id: 9, name: "ইমতিয়াজ হোসেন তমাল", role: "আলোকচিত্রী", department: "বিবিএ", batch: "২০২১-২২", bio: "প্রকৃতি এবং পোর্ট্রেট ফটোগ্রাফির প্রতি বিশেষভাবে অনুরাগী।"},
-  { id: 10, name: "মাসুম বিল্লাহ", role: "ভিডিওগ্রাফার", department: "রাষ্ট্রবিজ্ঞান", batch: "২০২২-২৩", bio: "ভিডিও এডিটিং এবং সিনেমাটিক গল্প বলার ক্ষেত্রে দক্ষ।" },
+  { id: 10, name: "মাসুম বিল্লাহ", role: "ভিডিওগ্রাফার", department: "রাষ্ট্রবিজ্ঞান", batch: "২০২২-২৩", bio: "ভিডিও এডিটিং and সিনেমাটিক গল্প বলার ক্ষেত্রে দক্ষ।" },
   { id: 11, name: "শূন্যপদ", role: "কন্টেন্ট ক্রিয়েটর", department: "প্রযোজ্য নয়", batch: "প্রযোজ্য নয়", bio: "সৃজনশীল ক্যাপশন লেখা এবং সোশ্যাল মিডিয়া কন্টেন্ট পরিচালনা করেন।" },
   { id: 12, name: "মাইদুল ভূঁইয়া", role: "গ্রাফিক ডিজাইনার", department: "মার্কেটিং", batch: "২০২৩-২৪", bio: "ইভেন্টের জন্য পোস্টার, ব্যানার এবং সৃজনশীল গ্রাফিক্স ডিজাইন করেন।" },
 ];
@@ -28,48 +34,90 @@ export default function CommitteePage() {
       <Head>
         <title>পরিচালনা কমিটি | DocX</title>
       </Head>
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 space-y-10 pb-10">
         <div className="flex items-center justify-between space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold tracking-tight text-primary">
             পরিচালনা কমিটি
           </h1>
         </div>
+
+        {/* Advisor Section */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">উপদেষ্টা প্যানেল</h2>
+            <Separator className="flex-1" />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {advisors.map((advisor) => (
+              <Card key={advisor.id} className="overflow-hidden border-t-4 border-t-yellow-500 shadow-sm">
+                <CardHeader className="flex flex-col items-center text-center pb-2">
+                  <Avatar className="h-24 w-24 mb-3 border-4 border-yellow-500/20">
+                    <AvatarFallback className="text-2xl bg-yellow-50 text-yellow-700">
+                      {advisor.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl font-bold">{advisor.name}</CardTitle>
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 font-bold">
+                      {advisor.role}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="text-center space-y-3">
+                  <div className="text-sm text-muted-foreground font-medium">
+                    {advisor.department}
+                  </div>
+                  <Separator className="my-2" />
+                  <p className="text-sm italic leading-relaxed text-foreground/80">
+                    "{advisor.bio}"
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
         
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {committeeMembers.map((member) => (
-            <Card key={member.id} className={`overflow-hidden border-t-4 ${member.name === 'শূন্যপদ' ? 'border-t-muted opacity-80' : 'border-t-primary'}`}>
-              <CardHeader className="flex flex-col items-center text-center pb-2">
-                <Avatar className="h-20 w-20 mb-3 border-2 border-primary/20">
-                   <AvatarFallback className="text-xl bg-primary/5 text-primary">
-                    {member.name === 'শূন্যপদ' ? '?' : member.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-1">
-                  <CardTitle className="text-lg font-bold">{member.name}</CardTitle>
-                  <Badge variant={member.name === 'শূন্যপদ' ? "outline" : "default"} className="font-medium">
-                    {member.role}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="text-center space-y-3">
-                <div className="text-xs text-muted-foreground space-y-1">
-                    {member.department !== 'প্রযোজ্য নয়' && (
-                        <p><span className="font-semibold">বিভাগ:</span> {member.department}</p>
-                    )}
-                    {member.batch !== 'প্রযোজ্য নয়' && (
-                        <p><span className="font-semibold">সেশন:</span> {member.batch}</p>
-                    )}
-                </div>
-                <Separator className="my-2" />
-                <p className="text-xs italic leading-relaxed text-muted-foreground">
-                  "{member.bio}"
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Executive Committee Section */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">কার্যনির্বাহী কমিটি</h2>
+            <Separator className="flex-1" />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {committeeMembers.map((member) => (
+              <Card key={member.id} className={`overflow-hidden border-t-4 transition-all hover:shadow-md ${member.name === 'শূন্যপদ' ? 'border-t-muted opacity-80' : 'border-t-primary'}`}>
+                <CardHeader className="flex flex-col items-center text-center pb-2">
+                  <Avatar className="h-20 w-20 mb-3 border-2 border-primary/20">
+                    <AvatarFallback className="text-xl bg-primary/5 text-primary">
+                      {member.name === 'শূন্যপদ' ? '?' : member.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg font-bold">{member.name}</CardTitle>
+                    <Badge variant={member.name === 'শূন্যপদ' ? "outline" : "default"} className="font-medium">
+                      {member.role}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="text-center space-y-3">
+                  <div className="text-xs text-muted-foreground space-y-1">
+                      {member.department !== 'প্রযোজ্য নয়' && (
+                          <p><span className="font-semibold">বিভাগ:</span> {member.department}</p>
+                      )}
+                      {member.batch !== 'প্রযোজ্য নয়' && (
+                          <p><span className="font-semibold">সেশন:</span> {member.batch}</p>
+                      )}
+                  </div>
+                  <Separator className="my-2" />
+                  <p className="text-xs italic leading-relaxed text-muted-foreground">
+                    "{member.bio}"
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
       </div>
     </>
   );
 }
-
