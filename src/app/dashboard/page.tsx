@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CalendarClock, FileText, BookUser, LayoutDashboard, UsersRound } from 'lucide-react';
+import { CalendarClock, FileText, BookUser, LayoutDashboard, UsersRound, History } from 'lucide-react';
 import Link from 'next/link';
 import { DocXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const allMenuItems = [
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "সেশন এবং আপনার উপস্থিতি দেখুন", adminOnly: false, userOnly: false },
   { href: '/admin/dashboard', label: 'অ্যাডমিন ড্যাশবোর্ড', icon: LayoutDashboard, description: "সিস্টেমের পরিসংখ্যান এবং সেশন তৈরি করুন", adminOnly: true, userOnly: false },
+  { href: '/history', label: 'আমাদের ইতিহাস', icon: History, description: "TCPC এর পথচলা এবং সাফল্যের গল্প", adminOnly: false, userOnly: false },
   { href: '/committee', label: 'পরিচালনা কমিটি', icon: UsersRound, description: "ক্লাবের বর্তমান কার্যনির্বাহী কমিটি দেখুন", adminOnly: false, userOnly: false },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
