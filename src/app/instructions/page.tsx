@@ -25,12 +25,12 @@ export default function InstructionsPage() {
               <span className="font-headline">DocX</span> সম্পর্কে কিছু কথা
             </CardTitle>
             <CardDescription>
-              তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের জন্য একটি আধুনিক ডেটা ম্যানেজমেন্ট সিস্টেম।
+              তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের জন্য একটি আধুনিক ডেটা সিস্টেম।
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
               <p>
-                  <span className="font-headline font-semibold">DocX</span> হলো তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সদস্যদের তথ্য ও কার্যক্রম ব্যবস্থাপনার জন্য একটি ডিজিটাল সমাধান। এই সিস্টেমের মাধ্যমে ক্লাবের সকল মিটিং, কর্মশালা এবং ইভেন্টের রেকর্ড সহজে এবং নির্ভুলভাবে সংরক্ষণ করা যায়।
+                  <span className="font-headline font-semibold">DocX</span> (Data Simplified) হলো তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সদস্যদের তথ্য ও কার্যক্রম ব্যবস্থাপনার জন্য একটি ডিজিটাল সমাধান। এই সিস্টেমের মাধ্যমে ক্লাবের সকল মিটিং, কর্মশালা এবং ইভেন্টের রেকর্ড সহজে এবং নির্ভুলভাবে সংরক্ষণ করা যায়।
               </p>
               
               <div>

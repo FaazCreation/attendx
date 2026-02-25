@@ -63,8 +63,8 @@ export default function DashboardPage() {
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
                     DocX
                 </h1>
-                <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight mt-1">
-                    Data Management Simplified.
+                <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight mt-0.5">
+                    Data Simplified.
                 </p>
                 </div>
             </div>
