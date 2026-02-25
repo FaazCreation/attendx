@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CalendarClock, FileText, BookUser, BarChart3, CalendarCog } from 'lucide-react';
+import { CalendarClock, FileText, BookUser, BarChart3, CalendarCog, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { DocXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const allMenuItems = [
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "সেশন এবং আপনার উপস্থিতি দেখুন", adminOnly: false, userOnly: false },
   { href: '/admin/sessions', label: 'সেশন পরিচালনা', icon: CalendarCog, description: "সেশন তৈরি এবং উপস্থিতি ম্যানেজ করুন", adminOnly: true, userOnly: false },
+  { href: '/committee', label: 'পরিচালনা কমিটি', icon: UsersRound, description: "ক্লাবের বর্তমান কার্যনির্বাহী কমিটি দেখুন", adminOnly: false, userOnly: false },
   { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ রিপোর্ট দেখুন", adminOnly: true, userOnly: false },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
@@ -63,8 +64,8 @@ export default function DashboardPage() {
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
                     DocX
                 </h1>
-                <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight mt-0.5">
-                    Data Simplified.
+                <p className="text-[10px] sm:text-xs text-muted-foreground font-sans font-medium tracking-tight leading-tight mt-0.5">
+                    Data Simplified
                 </p>
                 </div>
             </div>
