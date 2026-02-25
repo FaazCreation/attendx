@@ -154,7 +154,7 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>একটি তারিখ বাছাই করুন</span>
+                        <span>তারিখ নির্বাচন করুন</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>

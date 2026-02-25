@@ -2,49 +2,59 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // helper functions
+    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'fh7614@gmail.com';
     }
-    
-    // অ্যাডমিন যাচাই করার জন্য একটি শক্তিশালী ফাংশন। 
-    // ইমেইল চেক করা সবচেয়ে দ্রুত এবং নির্ভরযোগ্য কারণ এটি অন্য কোনো ডকুমেন্ট রিড করে না।
-    function isUserAdmin() {
+
+    // Check if user is admin via their role in the user document
+    function isRoleAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'fh7614@gmail.com' ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin')
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin'
       );
     }
 
-    // ব্যবহারকারী প্রোফাইল
-    match /users/{userId} {
-      allow read: if isSignedIn();
-      allow write: if isOwner(userId) || isUserAdmin();
+    function isUserAdmin() {
+      return isSuperAdmin() || isRoleAdmin();
     }
     
-    // সেশন রুলস
-    match /attendanceSessions/{sessionId} {
+    // User Profiles
+    match /users/{userId} {
       allow read: if isSignedIn();
-      // যে কেউ সেশন তৈরি করতে পারে যদি তারা সাইন-ইন থাকে (অথবা শুধু অ্যাডমিন করতে চাইলে isUserAdmin() দিন)
-      allow create: if isSignedIn(); 
-      // শুধুমাত্র সেশনের অ্যাডমিন অথবা সুপার অ্যাডমিন আপডেট/ডিলিট করতে পারবে
-      allow update, delete: if isSignedIn() && (resource.data.adminId == request.auth.uid || isUserAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
+    }
+    
+    // Attendance Sessions
+    match /attendanceSessions/{sessionId} {
+      // Anyone signed in can view sessions
+      allow read: if isSignedIn();
+      
+      // Only admins can create sessions
+      allow create: if isUserAdmin();
+      
+      // Admin who created the session or super admin can update/delete
+      allow update, delete: if isSignedIn() && (
+        (resource.data.adminId == request.auth.uid) || isSuperAdmin()
+      );
 
-      // সেশন ভিত্তিক অ্যাটেনডেন্স রেকর্ড
+      // Attendance Records sub-collection
       match /attendanceRecords/{recordId} {
-        // সবাই দেখতে পারবে (রিপোর্ট এবং মেম্বার ভিউ এর জন্য)
+        // Members need to read their own status, and admins need to read all
         allow read: if isSignedIn();
-        // শুধুমাত্র অ্যাডমিন উপস্থিতি দিতে পারবে
-        allow write: if isUserAdmin() || (isSignedIn() && get(/databases/$(database)/documents/attendanceSessions/$(sessionId)).data.adminId == request.auth.uid);
+        
+        // Admins can write attendance records
+        allow write: if isUserAdmin() || (
+          isSignedIn() && get(/databases/$(database)/documents/attendanceSessions/$(sessionId)).data.adminId == request.auth.uid
+        );
       }
     }
     
-    // কালেকশন গ্রুপ কুয়েরি সাপোর্ট
+    // Support for collection group queries (Reports etc)
     match /{path=**}/attendanceRecords/{recordId} {
       allow read: if isSignedIn();
     }
