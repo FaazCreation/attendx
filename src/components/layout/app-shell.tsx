@@ -5,9 +5,8 @@ import Header from '@/components/layout/header';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { doc } from 'firebase/firestore';
-import { DocXIcon } from '../icons';
+import { LoadingSplashScreen } from './loading-splash-screen';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -44,14 +43,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [user, isUserLoading, userData, isUserRoleLoading, router, pathname, isAdminPath]);
 
   if (isUserLoading || (user && isUserRoleLoading)) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4 animate-pulse">
-            <DocXIcon className="h-12 w-12 text-primary" />
-            <p className="text-muted-foreground">লোড হচ্ছে...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSplashScreen />;
   }
 
   return (
