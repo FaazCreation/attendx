@@ -7,41 +7,30 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // সরাসরি সুপার অ্যাডমিন চেক - এটি দ্রুত এবং নির্ভরযোগ্য
-    function isSuperAdmin() {
+    function isAdmin() {
       return isSignedIn() && request.auth.token.email == 'fh7614@gmail.com';
     }
 
-    // মালিকানা চেক
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
     
-    // ইউজার প্রোফাইল রুলস
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if isOwner(userId) || isSuperAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
     
-    // সেশন রুলস
     match /attendanceSessions/{sessionId} {
       allow read: if isSignedIn();
-      
-      // শুধুমাত্র সুপার অ্যাডমিন সেশন তৈরি, আপডেট বা ডিলিট করতে পারবেন
-      allow create, update, delete: if isSuperAdmin();
+      allow create, update, delete: if isAdmin();
 
-      // অ্যাটেনডেন্স রেকর্ড রুলস
       match /attendanceRecords/{recordId} {
         allow read: if isSignedIn();
-        
-        // অ্যাডমিন যেকোনো রেকর্ড পরিবর্তন করতে পারেন
-        // মেম্বাররা নিজেদের রেকর্ড জমা দিতে পারেন
-        allow create: if isSuperAdmin() || isOwner(recordId);
-        allow update, delete: if isSuperAdmin() || isOwner(recordId);
+        allow create: if isAdmin() || isOwner(recordId);
+        allow update, delete: if isAdmin() || isOwner(recordId);
       }
     }
 
-    // কালেকশন গ্রুপ কুয়েরি (যেমন ড্যাশবোর্ড বা রিপোর্ট) এর জন্য অনুমতি
     match /{path=**}/attendanceRecords/{recordId} {
       allow read: if isSignedIn();
     }

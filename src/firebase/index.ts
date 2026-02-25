@@ -7,28 +7,30 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore'
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 
-// Cache service instances to prevent internal SDK assertion errors
+// Singleton instances to prevent Internal SDK Assertion Errors
 let cachedApp: FirebaseApp | null = null;
 let cachedAuth: Auth | null = null;
 let cachedFirestore: Firestore | null = null;
 let cachedStorage: FirebaseStorage | null = null;
 
 export function initializeFirebase() {
-  if (!cachedApp) {
-    if (!getApps().length) {
-      try {
-        cachedApp = initializeApp(firebaseConfig);
-      } catch (e) {
-        console.warn('Manual initialization fallback triggered.', e);
-        cachedApp = initializeApp(firebaseConfig);
-      }
-    } else {
-      cachedApp = getApp();
+  if (typeof window !== 'undefined') {
+    if (!cachedApp) {
+      const apps = getApps();
+      cachedApp = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig);
+      cachedAuth = getAuth(cachedApp);
+      cachedFirestore = getFirestore(cachedApp);
+      cachedStorage = getStorage(cachedApp);
     }
-    
-    cachedAuth = getAuth(cachedApp);
-    cachedFirestore = getFirestore(cachedApp);
-    cachedStorage = getStorage(cachedApp);
+  } else {
+    // Basic fallback for server-side during build
+    if (!cachedApp) {
+      const apps = getApps();
+      cachedApp = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig);
+      cachedAuth = getAuth(cachedApp);
+      cachedFirestore = getFirestore(cachedApp);
+      cachedStorage = getStorage(cachedApp);
+    }
   }
 
   return {
