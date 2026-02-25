@@ -45,13 +45,6 @@ export default function DashboardPage() {
     );
   }
   
-  const visibleMenuItems = allMenuItems.filter(item => {
-    if (isAdmin) {
-      return !item.userOnly;
-    }
-    return !item.adminOnly;
-  });
-
   return (
     <div className="flex flex-col flex-1 h-full">
       <div className="flex-grow space-y-6">
@@ -62,7 +55,7 @@ export default function DashboardPage() {
                   <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
                       DocX
                   </h1>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground font-sans font-medium tracking-tight leading-none mt-[-3px]">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-sans font-medium tracking-tight leading-none mt-[-5px]">
                       Data Simplified
                   </p>
                 </div>

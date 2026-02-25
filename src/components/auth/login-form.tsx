@@ -50,17 +50,7 @@ export function LoginForm() {
   useEffect(() => {
     const checkUserRoleAndRedirect = async () => {
       if (!isUserLoading && user && firestore) {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        try {
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists() && userDoc.data().role === 'Admin') {
-            router.push('/admin/dashboard');
-          } else {
-            router.push('/dashboard');
-          }
-        } catch (error) {
-          router.push('/dashboard');
-        }
+        router.push('/dashboard');
       }
     };
     checkUserRoleAndRedirect();
@@ -87,9 +77,9 @@ export function LoginForm() {
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
         <DocXIcon className="mx-auto h-12 w-12 text-primary" />
-        <div className="font-headline">
-          <CardTitle className="text-2xl font-bold">DocX</CardTitle>
-          <CardDescription className="font-sans">
+        <div className="font-headline flex flex-col items-center">
+          <CardTitle className="text-2xl font-bold leading-none">DocX</CardTitle>
+          <CardDescription className="font-sans text-xs mt-[-4px]">
             Data Simplified
           </CardDescription>
         </div>
