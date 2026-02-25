@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -59,12 +60,12 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 text-center sm:text-left">
                 <DocXIcon className="h-8 w-8 text-primary" />
                 <div className="text-left font-headline flex flex-col">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
-                    DocX
-                </h1>
-                <p className="text-[10px] sm:text-xs text-muted-foreground font-sans font-medium tracking-tight leading-tight mt-0.5">
-                    Data Simplified
-                </p>
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
+                      DocX
+                  </h1>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-sans font-medium tracking-tight leading-none mt-[-3px]">
+                      Data Simplified
+                  </p>
                 </div>
             </div>
         </div>
@@ -72,7 +73,7 @@ export default function DashboardPage() {
         <p className="text-lg md:text-xl text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
         
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleMenuItems.map((item) => (
+          {allMenuItems.map((item) => (
             <Link href={item.href} key={item.href}>
               <Card className="hover:bg-muted/50 hover:border-primary/50 transition-all transform hover:-translate-y-1 h-full flex flex-col">
                 <CardHeader className="flex-1 p-4">

@@ -7,30 +7,36 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // সুপার অ্যাডমিন চেক - সরাসরি ইমেইল ভিত্তিক
     function isAdmin() {
       return isSignedIn() && request.auth.token.email == 'fh7614@gmail.com';
     }
 
+    // মালিকানা চেক
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
     
+    // ইউজার প্রোফাইল রুলস
     match /users/{userId} {
       allow read: if isSignedIn();
       allow write: if isOwner(userId) || isAdmin();
     }
     
+    // সেশন রুলস
     match /attendanceSessions/{sessionId} {
       allow read: if isSignedIn();
       allow create, update, delete: if isAdmin();
 
+      // অ্যাটেনডেন্স রেকর্ড রুলস (সাব-কালেকশন)
       match /attendanceRecords/{recordId} {
         allow read: if isSignedIn();
-        allow create: if isAdmin() || isOwner(recordId);
-        allow update, delete: if isAdmin() || isOwner(recordId);
+        // অ্যাডমিন বা রেকর্ড মালিকের জন্য অনুমতি
+        allow create, update, delete: if isAdmin() || isOwner(recordId);
       }
     }
 
+    // কালেকশন গ্রুপ কুয়েরি
     match /{path=**}/attendanceRecords/{recordId} {
       allow read: if isSignedIn();
     }
