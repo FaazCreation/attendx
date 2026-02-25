@@ -1,18 +1,25 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, ShieldCheck, UserCog, Info } from "lucide-react";
+import { BookOpen, ShieldCheck, UserCog, Info, Mail, Facebook, Youtube, Globe, Phone } from "lucide-react";
 import Head from "next/head";
 
 export default function InstructionsPage() {
+  const contactInfo = [
+    { label: "অফিসিয়াল ইমেইল", value: "tcd.photographyclub@gmail.com", icon: Mail, type: "email" },
+    { label: "টেকনিক্যাল ও প্রমোশনাল", value: "creative.tcpc@gmail.com", icon: Phone, type: "email" },
+    { label: "ফেসবুক", value: "@tcd.photographyclub", icon: Facebook, type: "link" },
+    { label: "ইউটিউব", value: "@TejgaonCollegePhotographyClub", icon: Youtube, type: "link" },
+    { label: "ওয়েবসাইট", value: "tcpccreative.com", icon: Globe, type: "link" },
+  ];
+
   return (
     <>
       <Head>
         <title>নির্দেশনাবলি | DocX</title>
       </Head>
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 space-y-6 pb-10">
         <div className="flex items-center gap-3">
           <div className="bg-primary/10 p-2 rounded-full">
             <Info className="h-6 w-6 text-primary" />
@@ -78,6 +85,34 @@ export default function InstructionsPage() {
               </div>
           </CardContent>
         </Card>
+
+        {/* Contact Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">যোগাযোগ</h2>
+            <Separator className="flex-1" />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {contactInfo.map((info, idx) => (
+              <Card key={idx} className="hover:shadow-md transition-all border-primary/5">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="bg-primary/10 p-2 rounded-lg">
+                    <info.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="space-y-0.5 overflow-hidden">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">{info.label}</p>
+                    <p className="text-sm font-medium truncate text-primary">{info.value}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Card className="bg-muted/10 border-dashed">
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-muted-foreground">যেকোনো প্রয়োজনে আমাদের অফিসিয়াল প্ল্যাটফর্মগুলোতে যোগাযোগ করুন। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করবো।</p>
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </>
   );
