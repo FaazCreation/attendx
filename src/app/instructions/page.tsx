@@ -3,7 +3,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { Metadata } from 'next';
 import Head from "next/head";
 
 export default function InstructionsPage() {
@@ -30,14 +29,14 @@ export default function InstructionsPage() {
           </CardHeader>
           <CardContent className="space-y-6">
               <p>
-                  <span className="font-headline font-semibold">DocX</span> (Data Simplified) হলো তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সদস্যদের তথ্য ও কার্যক্রম ব্যবস্থাপনার জন্য একটি ডিজিটাল সমাধান। এই সিস্টেমের মাধ্যমে ক্লাবের সকল মিটিং, কর্মশালা এবং ইভেন্টের রেকর্ড সহজে এবং নির্ভুলভাবে সংরক্ষণ করা যায়।
+                  <span className="font-headline font-semibold">DocX</span> (Data Simplified) হলো তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের সদস্যদের তথ্য ও কার্যক্রম ব্যবস্থাপনার জন্য একটি ডিজিটাল সমাধান। এই সিস্টেমের মাধ্যমে ক্লাবের সকল তথ্য সহজে এবং নির্ভুলভাবে সংরক্ষণ করা যায়।
               </p>
               
               <div>
                   <h3 className="font-semibold text-lg mb-2">সাধারণ সদস্যদের জন্য নির্দেশনাবলী:</h3>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                       <li>নিয়মিত আপনার প্রোফাইল চেক করুন এবং তথ্য সঠিক রাখুন।</li>
-                      <li>প্রতিটি সেশনে আপনার উপস্থিতি অ্যাডমিন দ্বারা নিশ্চিত করুন।</li>
+                      <li>ক্লাবের বিভিন্ন তথ্য ও ইতিহাস জানতে ড্যাশবোর্ডের মেনুগুলো ব্যবহার করুন।</li>
                       <li>যেকোনো ধরনের টেকনিক্যাল সমস্যার জন্য এক্সিকিউটিভ সদস্যদের সাথে যোগাযোগ করুন।</li>
                   </ul>
               </div>
