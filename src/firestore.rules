@@ -11,66 +11,37 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
     
-    // Admin check using custom claims on the auth token.
-    // This is the most reliable way for write operations.
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     function isUserAdmin() {
-      return request.auth.token.admin == true;
+      return isSignedIn() && getUserData().role == 'Admin';
     }
 
     match /users/{userId} {
-      // Admins can get any user doc, users can only get their own.
-      allow get: if isUserAdmin() || isOwner(userId);
-      // Only admins can list users.
+      allow get: if isSignedIn();
       allow list: if isUserAdmin();
-      
-      // A user can create their own document.
-      allow create: if isOwner(userId)
-                    && request.resource.data.uid == userId;
-
-      // An admin can update any user. A user can update their own doc,
-      // but they are not allowed to change their own role.
-      allow update: if isUserAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
-
-      // Only admins can delete users.
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isUserAdmin();
       allow delete: if isUserAdmin();
     }
     
-    match /counts/sessions {
-        // Any signed-in user can read the count.
-        allow get: if isSignedIn();
-        // Only admins can create/update the count.
-        allow write: if isUserAdmin();
-    }
-
-    match /{path=**}/attendanceRecords/{recordId} {
-       // Deny all list operations on subcollections for security
-       allow list: if false; 
-    }
-
     match /attendanceSessions/{sessionId} {
-      // Any signed in user can view sessions.
       allow get, list: if isSignedIn();
-      
-      // Only admins can create or update sessions.
-      allow create, update: if isUserAdmin();
-      // Deleting sessions is not allowed for anyone to prevent data loss.
-      allow delete: if false; 
+      allow create, update, delete: if isUserAdmin();
 
       match /attendanceRecords/{recordId} {
-        // An admin can get any record. A user can get their own.
-        allow get: if isUserAdmin() || isOwner(recordId);
-        
-        // Deny all list operations by default.
-        allow list: if false;
-        
-        // A user can create their own attendance record if they are signed in,
-        // the record ID matches their UID.
-        allow create: if isOwner(recordId)
-                      && request.resource.data.userId == request.auth.uid;
-
-        // Only admins can update or delete attendance records.
-        allow update, delete: if isUserAdmin();
+        // recordId is the userId
+        allow get: if isSignedIn() && (isOwner(recordId) || isUserAdmin());
+        allow list: if isSignedIn() && (isOwner(recordId) || isUserAdmin());
+        allow create, update, delete: if isUserAdmin();
       }
+    }
+    
+    // Allow collection group queries for attendance records for admins
+    match /{path=**}/attendanceRecords/{recordId} {
+      allow read: if isUserAdmin() || isOwner(recordId);
     }
   }
 }

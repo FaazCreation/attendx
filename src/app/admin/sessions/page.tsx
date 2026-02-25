@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarCog } from 'lucide-react';
+import { PlusCircle, CalendarCog, Users } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -55,7 +56,7 @@ function AdminSessionsPage() {
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                         সেশন পরিচালনা
                     </h1>
-                    <p className="text-muted-foreground">নতুন সেশন তৈরি করুন এবং সকল সেশন দেখুন।</p>
+                    <p className="text-muted-foreground">নতুন সেশন তৈরি করুন এবং উপস্থিতি ম্যানেজ করুন।</p>
                 </div>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
