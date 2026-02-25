@@ -1,15 +1,11 @@
 'use client';
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { UserCheck, CalendarClock, FileText, BookUser, BarChart3, PlusCircle, CalendarCog } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CalendarClock, FileText, BookUser, BarChart3, CalendarCog } from 'lucide-react';
 import Link from 'next/link';
 import { AttendXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CreateSessionForm } from '@/components/sessions/create-session-form';
-import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const allMenuItems = [
@@ -23,7 +19,6 @@ const allMenuItems = [
 export default function DashboardPage() {
   const { user, isUserLoading: isAuthLoading } = useUser();
   const firestore = useFirestore();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: userData, isLoading: isUserRoleLoading } = useDoc(() => {
     if (!user || !firestore) return null;
@@ -72,25 +67,6 @@ export default function DashboardPage() {
                 </p>
                 </div>
             </div>
-            {isAdmin && (
-                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        সেশন তৈরি করুন
-                    </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>নতুন সেশন তৈরি করুন</DialogTitle>
-                        <DialogDescription>
-                        নতুন অ্যাটেনডেন্স সেশনের জন্য বিবরণ পূরণ করুন।
-                        </DialogDescription>
-                    </DialogHeader>
-                    <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
-                    </DialogContent>
-                </Dialog>
-            )}
         </div>
 
         <p className="text-lg md:text-xl text-muted-foreground text-center sm:text-left">তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব</p>
