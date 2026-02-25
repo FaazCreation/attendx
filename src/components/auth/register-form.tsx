@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -24,8 +23,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 const registerSchema = z.object({
   memberId: z.string().min(1, { message: "সদস্য আইডি আবশ্যক।" }),
@@ -110,9 +107,9 @@ export function RegisterForm() {
       <CardHeader className="space-y-1 text-center">
         <DocXIcon className="mx-auto h-12 w-12 text-primary" />
         <div className='font-headline'>
-          <CardTitle className="text-2xl font-bold">একটি অ্যাকাউন্ট তৈরি করুন</CardTitle>
+          <CardTitle className="text-2xl font-bold">DocX</CardTitle>
           <CardDescription>
-            আপনার ডেটা পরিচালনা করতে <span className="font-headline">DocX</span>-এ যোগ দিন
+            Data Simplified
           </CardDescription>
         </div>
       </CardHeader>

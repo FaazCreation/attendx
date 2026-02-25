@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -91,7 +90,7 @@ export function LoginForm() {
         <div className="font-headline">
           <CardTitle className="text-2xl font-bold">DocX</CardTitle>
           <CardDescription className="font-sans">
-            ডেটা এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
+            Data Simplified
           </CardDescription>
         </div>
       </CardHeader>
