@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { AttendXIcon } from '@/components/icons';
+import { DocXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -60,15 +60,12 @@ export function LoginForm() {
             router.push('/dashboard');
           }
         } catch (error) {
-          console.error("Error checking user role:", error);
-          // Default to general dashboard on error
           router.push('/dashboard');
         }
       }
     };
     checkUserRoleAndRedirect();
   }, [user, isUserLoading, firestore, router]);
-
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
@@ -78,7 +75,6 @@ export function LoginForm() {
         title: "লগইন সফল হয়েছে",
         description: "আপনাকে স্বাগতম!",
       });
-      // Redirection is handled by the useEffect hook
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -91,11 +87,11 @@ export function LoginForm() {
   return (
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
-        <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
+        <DocXIcon className="mx-auto h-12 w-12 text-primary" />
         <div className="font-headline">
-          <CardTitle className="text-2xl font-bold">AttendX</CardTitle>
+          <CardTitle className="text-2xl font-bold">DocX</CardTitle>
           <CardDescription className="font-sans">
-            অ্যাটেনডেন্স এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
+            ডেটা এবং ক্লাব কার্যক্রম পরিচালনা করতে সাইন ইন করুন
           </CardDescription>
         </div>
       </CardHeader>
@@ -142,7 +138,6 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
-        
         <div className="mt-4 text-center text-sm">
           আপনার কি অ্যাকাউন্ট নেই?{' '}
           <Link href="/register" className="underline hover:text-primary">

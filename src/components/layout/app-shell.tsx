@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { doc } from 'firebase/firestore';
-import { AttendXIcon } from '../icons';
+import { DocXIcon } from '../icons';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -23,10 +23,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isAdminPath = pathname.startsWith('/admin');
 
   useEffect(() => {
-    // 1. If auth is still loading, wait.
     if (isUserLoading) return;
     
-    // 2. If no user is logged in, redirect to login page.
     if (!user) {
       if (pathname !== '/login' && pathname !== '/register') {
         router.push('/login');
@@ -34,13 +32,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // 3. User is logged in, but role is not determined yet. Wait.
     if (isUserRoleLoading) return;
 
-    // 4. User and role are loaded. Check role permissions.
     const isAdmin = userData?.role === 'Admin';
     
-    // If user is on an admin path but is not an admin, redirect to general dashboard.
     if (isAdminPath && !isAdmin) {
       router.push('/dashboard');
       return;
@@ -48,13 +43,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   }, [user, isUserLoading, userData, isUserRoleLoading, router, pathname, isAdminPath]);
 
-
-  // Show loading skeleton until auth and role are resolved.
   if (isUserLoading || (user && isUserRoleLoading)) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 animate-pulse">
-            <AttendXIcon className="h-12 w-12 text-primary" />
+            <DocXIcon className="h-12 w-12 text-primary" />
             <p className="text-muted-foreground">লোড হচ্ছে...</p>
         </div>
       </div>
@@ -74,5 +67,3 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
   );
 }
-
-    

@@ -46,7 +46,7 @@ function AdminSessionsPage() {
   return (
     <>
       <Head>
-        <title>সেশন পরিচালনা | AttendX</title>
+        <title>সেশন পরিচালনা | DocX</title>
       </Head>
       <div className="flex-1 space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -70,7 +70,7 @@ function AdminSessionsPage() {
                 <DialogHeader>
                   <DialogTitle>নতুন সেশন তৈরি করুন</DialogTitle>
                   <DialogDescription>
-                    নতুন অ্যাটেনডেন্স সেশনের জন্য বিবরণ পূরণ করুন।
+                    নতুন সেশনের জন্য বিবরণ পূরণ করুন।
                   </DialogDescription>
                 </DialogHeader>
                 <CreateSessionForm onSessionCreated={() => setIsDialogOpen(false)} />
@@ -110,7 +110,6 @@ function AdminSessionsPage() {
   );
 }
 
-
 export default function ProtectedAdminSessionsPage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
@@ -136,13 +135,7 @@ export default function ProtectedAdminSessionsPage() {
     if (isUserLoading || isUserRoleLoading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-[250px]" />
-                        <Skeleton className="h-4 w-[200px]" />
-                    </div>
-                </div>
+                <Skeleton className="h-32 w-full" />
             </div>
         )
     }

@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { AttendXIcon } from '@/components/icons';
+import { DocXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -95,39 +95,24 @@ export function RegisterForm() {
       router.push('/login');
 
     } catch (error: any) {
-      if (error.code === 'permission-denied') {
-        const permissionError = new FirestorePermissionError({
-            path: `users/${auth.currentUser?.uid}`,
-            operation: 'create',
-            requestResourceData: 'User profile data',
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({
-            variant: "destructive",
-            title: "নিবন্ধন ব্যর্থ হয়েছে",
-            description: "প্রোফাইল তৈরি করার অনুমতি নেই।",
-        });
-      } else {
-         toast({
-          variant: "destructive",
-          title: "নিবন্ধন ব্যর্থ হয়েছে",
-          description: error.code === 'auth/email-already-in-use' 
-              ? 'এই ইমেলটি ইতিমধ্যে নিবন্ধিত রয়েছে।'
-              : 'একটি অজানা ত্রুটি ঘটেছে।',
-        });
-      }
+      toast({
+        variant: "destructive",
+        title: "নিবন্ধন ব্যর্থ হয়েছে",
+        description: error.code === 'auth/email-already-in-use' 
+            ? 'এই ইমেলটি ইতিমধ্যে নিবন্ধিত রয়েছে।'
+            : 'একটি অজানা ত্রুটি ঘটেছে।',
+      });
     }
   };
-
 
   return (
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
-        <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
+        <DocXIcon className="mx-auto h-12 w-12 text-primary" />
         <div className='font-headline'>
           <CardTitle className="text-2xl font-bold">একটি অ্যাকাউন্ট তৈরি করুন</CardTitle>
           <CardDescription>
-            আপনার অ্যাটেনডেন্স পরিচালনা করতে <span className="font-headline">AttendX</span>-এ যোগ দিন
+            আপনার ডেটা পরিচালনা করতে <span className="font-headline">DocX</span>-এ যোগ দিন
           </CardDescription>
         </div>
       </CardHeader>
@@ -281,7 +266,6 @@ export function RegisterForm() {
                     </FormItem>
                 )}
             />
-
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? 'অ্যাকাউন্ট তৈরি করা হচ্ছে...' : 'অ্যাকাউন্ট তৈরি করুন'}
             </Button>

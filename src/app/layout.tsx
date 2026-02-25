@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Poppins } from 'next/font/google';
@@ -25,8 +26,8 @@ export default function RootLayout({
      <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>AttendX</title>
-        <meta name="description" content="তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব অ্যাটেনডেন্স ম্যানেজমেন্ট সিস্টেম" />
+        <title>DocX</title>
+        <meta name="description" content="তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব ডেটা ম্যানেজমেন্ট সিস্টেম" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       </head>

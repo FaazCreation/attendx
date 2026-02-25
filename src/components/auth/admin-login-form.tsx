@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { AttendXIcon } from '@/components/icons';
+import { DocXIcon } from '@/components/icons';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -59,7 +60,6 @@ export function AdminLoginForm() {
     checkAdminAndRedirect();
   }, [user, isUserLoading, router, firestore]);
 
-
   const onSubmit: SubmitHandler<AdminLoginFormData> = async (data) => {
     if (!auth || !firestore) return;
 
@@ -98,11 +98,11 @@ export function AdminLoginForm() {
   return (
     <Card className="mx-auto max-w-sm w-full">
       <CardHeader className="space-y-1 text-center">
-        <AttendXIcon className="mx-auto h-12 w-12 text-primary" />
+        <DocXIcon className="mx-auto h-12 w-12 text-primary" />
         <div className="font-headline">
           <CardTitle className="text-2xl font-bold">অ্যাডমিন প্যানেল</CardTitle>
           <CardDescription>
-            অ্যাডমিন হিসেবে লগইন করুন
+            DocX অ্যাডমিন হিসেবে লগইন করুন
           </CardDescription>
         </div>
       </CardHeader>

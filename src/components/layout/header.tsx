@@ -1,6 +1,7 @@
+
 "use client";
 import Link from "next/link";
-import { AttendXIcon } from "@/components/icons";
+import { DocXIcon } from "@/components/icons";
 import { UserNav } from "@/components/layout/user-nav";
 
 export default function Header() {
@@ -11,9 +12,9 @@ export default function Header() {
       </div>
       <div className="hidden sm:flex items-center gap-3">
         <Link href="/dashboard" className="flex items-center gap-2">
-            <AttendXIcon className="h-7 w-7 text-primary" />
+            <DocXIcon className="h-7 w-7 text-primary" />
             <span className="text-lg font-semibold text-foreground font-headline">
-              AttendX
+              DocX
             </span>
         </Link>
       </div>

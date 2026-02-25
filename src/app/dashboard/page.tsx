@@ -1,9 +1,10 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { CalendarClock, FileText, BookUser, BarChart3, CalendarCog } from 'lucide-react';
 import Link from 'next/link';
-import { AttendXIcon } from '@/components/icons';
+import { DocXIcon } from '@/components/icons';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const allMenuItems = [
   { href: '/sessions', label: 'সেশন', icon: CalendarClock, description: "সেশন এবং আপনার উপস্থিতি দেখুন", adminOnly: false, userOnly: false },
   { href: '/admin/sessions', label: 'সেশন পরিচালনা', icon: CalendarCog, description: "সেশন তৈরি এবং উপস্থিতি ম্যানেজ করুন", adminOnly: true, userOnly: false },
-  { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ অ্যাটেনডেন্স রিপোর্ট দেখুন", adminOnly: true, userOnly: false },
+  { href: '/reports', label: 'রিপোর্ট দেখুন', icon: BarChart3, description: "সম্পূর্ণ রিপোর্ট দেখুন", adminOnly: true, userOnly: false },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: false },
   { href: '/constitution', label: 'ক্লাব গঠনতন্ত্র', icon: FileText, description: "ক্লাবের গঠনতন্ত্র ও নিয়মাবলী সম্পর্কে জানুন", adminOnly: false, userOnly: false },
 ];
@@ -57,13 +58,13 @@ export default function DashboardPage() {
       <div className="flex-grow space-y-6">
         <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3 text-center sm:text-left">
-                <AttendXIcon className="h-8 w-8 text-primary" />
+                <DocXIcon className="h-8 w-8 text-primary" />
                 <div className="text-left font-headline flex flex-col">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">
-                    AttendX
+                    DocX
                 </h1>
-                <p className="text-[6px] sm:text-xs text-muted-foreground leading-tight">
-                    Attendance Management, Simplified.
+                <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight mt-1">
+                    Data Management Simplified.
                 </p>
                 </div>
             </div>
