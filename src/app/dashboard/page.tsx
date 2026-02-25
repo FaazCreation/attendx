@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const allMenuItems = [
-  { href: '/history', label: 'আমাদের ইতিহাস', icon: History, description: "TCPC এর পথচলা এবং সাফল্যের গল্প", adminOnly: false, userOnly: false },
+  { href: '/history', label: 'আমাদের ইতিহাস', icon: History, description: "ক্লাবের পথচলা এবং সাফল্যের গল্প", adminOnly: false, userOnly: false },
   { href: '/committee', label: 'পরিচালনা কমিটি', icon: UsersRound, description: "ক্লাবের বর্তমান কার্যনির্বাহী কমিটি দেখুন", adminOnly: false, userOnly: false },
   { href: '/faq', label: 'জিজ্ঞাসা ও উত্তর', icon: HelpCircle, description: "ক্লাব এবং সিস্টেম সম্পর্কে সাধারণ প্রশ্নের উত্তর", adminOnly: false, userOnly: false },
   { href: '/instructions', label: 'নির্দেশনাবলি', icon: BookUser, description: "সিস্টেম এবং ব্যবহারবিধি সম্পর্কে জানুন", adminOnly: false, userOnly: false },
