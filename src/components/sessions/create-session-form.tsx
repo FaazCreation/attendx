@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -6,7 +7,7 @@ import { z } from 'zod';
 import { useUser, useFirestore } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '../ui/textarea';
@@ -116,9 +117,8 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>শিরোনাম</FormLabel>
               <FormControl>
-                <Input placeholder="যেমনঃ মাসিক সভা" {...field} />
+                <Input placeholder="সেশনের শিরোনাম (যেমনঃ মাসিক সভা)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -181,7 +181,6 @@ export function CreateSessionForm({ onSessionCreated }: { onSessionCreated: () =
           name="time"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>সময়</FormLabel>
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>

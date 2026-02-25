@@ -17,11 +17,9 @@ export function initializeFirebase() {
   if (!cachedApp) {
     if (!getApps().length) {
       try {
-        cachedApp = initializeApp();
+        cachedApp = initializeApp(firebaseConfig);
       } catch (e) {
-        if (process.env.NODE_ENV === "production") {
-          console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
-        }
+        console.warn('Manual initialization fallback triggered.', e);
         cachedApp = initializeApp(firebaseConfig);
       }
     } else {
@@ -38,16 +36,6 @@ export function initializeFirebase() {
     auth: cachedAuth!,
     firestore: cachedFirestore!,
     storage: cachedStorage!
-  };
-}
-
-// Keep original function signature for compatibility if needed
-export function getSdks(firebaseApp: FirebaseApp) {
-  return {
-    firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp),
-    storage: getStorage(firebaseApp)
   };
 }
 
