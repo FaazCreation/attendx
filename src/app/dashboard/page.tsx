@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -47,7 +48,7 @@ export default function DashboardPage() {
     <div className="flex flex-col flex-1 h-full">
       <div className="flex-grow space-y-6">
         <div className="text-center sm:text-left">
-          <p className="text-xl md:text-2xl font-bold text-primary font-headline tracking-tight">
+          <p className="text-xl md:text-2xl font-bold text-primary font-sans tracking-tight">
             তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব
           </p>
           <p className="text-sm text-muted-foreground mt-1">স্বাগতম, {userData?.name || 'সদস্য'}!</p>
