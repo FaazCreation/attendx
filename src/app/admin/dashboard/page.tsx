@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -23,14 +24,13 @@ import {
   Calendar,
   BarChart,
   UserCheck,
+  ListFilter,
 } from 'lucide-react';
 import { useFirestore, useCollection, useUser, useDoc } from '@/firebase';
-import { collection, collectionGroup, doc, getCountFromServer } from 'firebase/firestore';
+import { collection, collectionGroup, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatDistanceToNow } from 'date-fns';
-import { bn } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 
 interface User {
@@ -38,24 +38,7 @@ interface User {
   name: string;
   email: string;
   role: string;
-  photoURL?: string;
 }
-
-interface Session {
-    id: string;
-    title: string;
-    date: string;
-}
-
-interface AttendanceRecord {
-  sessionId: string;
-  userId: string;
-  timestamp: any;
-  userName: string;
-  userAvatar?: string;
-  sessionTitle: string;
-}
-
 
 function StatsCards({ firestore } : { firestore: any }) {
     const { data: users, isLoading: usersLoading } = useCollection<User>(() => firestore ? collection(firestore, 'users') : null, [firestore]);
@@ -69,7 +52,7 @@ function StatsCards({ firestore } : { firestore: any }) {
         if (!sessions || !attendanceRecords || sessions.length === 0) return 0;
         const totalAttendance = attendanceRecords.length;
         return Math.round(totalAttendance / totalSessions);
-    }, [sessions, attendanceRecords]);
+    }, [sessions, attendanceRecords, totalSessions]);
 
 
     const isLoading = usersLoading || sessionsLoading || attendanceLoading;
@@ -120,64 +103,6 @@ function StatsCards({ firestore } : { firestore: any }) {
   );
 }
 
-function RecentActivity({ firestore } : { firestore: any }) {
-
-  const { data: attendanceData, isLoading } = useCollection<AttendanceRecord>(() => {
-    if (!firestore) return null;
-    const recordsQuery = collectionGroup(firestore, 'attendanceRecords');
-    return recordsQuery;
-  }, [firestore]);
-
-  const enrichedData = useMemo(() => {
-    // This part would be more complex if we needed to fetch related docs
-    // For now, let's assume we can pre-process this or it's simple enough
-    return attendanceData
-      ?.sort((a,b) => b.timestamp.seconds - a.timestamp.seconds)
-      .slice(0, 5) ?? [];
-  }, [attendanceData]);
-
-
-  if (isLoading) {
-      return (
-          <div className="space-y-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-          </div>
-      );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>সাম্প্রতিক কার্যকলাপ</CardTitle>
-        <CardDescription>সদস্যদের সর্বশেষ অ্যাটেনডেন্স।</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {enrichedData.length > 0 ? enrichedData.map((activity, index) => (
-          <div className="flex items-center" key={index}>
-            <Avatar className="h-9 w-9 border">
-               <AvatarImage src={activity.userAvatar} alt="Avatar" />
-               <AvatarFallback>{activity.userName?.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="ml-4 space-y-1">
-              <p className="text-sm font-medium leading-none">{activity.userName}</p>
-              <p className="text-sm text-muted-foreground">
-                "{activity.sessionTitle}" সেশনে যোগ দিয়েছেন
-              </p>
-            </div>
-            <div className="ml-auto font-medium text-sm text-muted-foreground">
-                {formatDistanceToNow(new Date(activity.timestamp.seconds * 1000), { addSuffix: true, locale: bn })}
-            </div>
-          </div>
-        )) : (
-            <p className="text-sm text-muted-foreground text-center">কোনো সাম্প্রতিক কার্যকলাপ নেই।</p>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
 
 function AdminDashboardPage() {
   const firestore = useFirestore();
@@ -194,40 +119,48 @@ function AdminDashboardPage() {
             সিস্টেম পরিচালনা এবং নিরীক্ষণ করুন।
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle />
-              নতুন সেশন তৈরি করুন
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>নতুন সেশন তৈরি করুন</DialogTitle>
-              <DialogDescription>
-                নতুন অ্যাটেনডেন্স সেশনের জন্য বিবরণ পূরণ করুন।
-              </DialogDescription>
-            </DialogHeader>
-            <CreateSessionForm
-              onSessionCreated={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+            <Link href="/sessions">
+                <Button variant="outline">
+                    <ListFilter className="mr-2 h-4 w-4" />
+                    সেশন তালিকা
+                </Button>
+            </Link>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                নতুন সেশন তৈরি করুন
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                <DialogTitle>নতুন সেশন তৈরি করুন</DialogTitle>
+                <DialogDescription>
+                    নতুন অ্যাটেনডেন্স সেশনের জন্য বিবরণ পূরণ করুন।
+                </DialogDescription>
+                </DialogHeader>
+                <CreateSessionForm
+                onSessionCreated={() => setIsDialogOpen(false)}
+                />
+            </DialogContent>
+            </Dialog>
+        </div>
       </div>
 
       <StatsCards firestore={firestore} />
       
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* <RecentActivity firestore={firestore} /> */}
          <Card>
             <CardHeader>
                 <CardTitle>সিস্টেম স্ট্যাটাস</CardTitle>
                 <CardDescription>আপনার অ্যাপ্লিকেশনের সার্বিক অবস্থা।</CardDescription>
             </CardHeader>
-            <CardContent className="flex items-center justify-center h-full">
+            <CardContent className="flex flex-col items-center justify-center py-10">
                 <div className="text-center text-muted-foreground">
-                    <UserCheck className="mx-auto h-12 w-12" />
+                    <UserCheck className="mx-auto h-12 w-12 text-primary/50" />
                     <p className="mt-4">সিস্টেম সম্পূর্ণরূপে কার্যকর।</p>
+                    <p className="text-sm">সেশন ম্যানেজ করতে "সেশন তালিকা" বাটনে ক্লিক করুন।</p>
                 </div>
             </CardContent>
         </Card>
