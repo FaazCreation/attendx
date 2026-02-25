@@ -59,13 +59,11 @@ export default function DashboardPage() {
     );
   }
 
-  // Pagination logic for mobile
+  const totalPages = Math.ceil(allMenuItems.length / itemsPerPageMobile);
   const displayedItems = isMobile 
     ? allMenuItems.slice(currentPage * itemsPerPageMobile, (currentPage + 1) * itemsPerPageMobile)
     : allMenuItems;
 
-  const totalPages = Math.ceil(allMenuItems.length / itemsPerPageMobile);
-  
   return (
     <div className="flex flex-col flex-1 h-full relative pb-12">
       <div className="flex-grow space-y-6">
@@ -86,8 +84,8 @@ export default function DashboardPage() {
                       <item.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <CardTitle className="text-xl md:text-2xl font-semibold">{item.label}</CardTitle>
-                      <CardDescription className="text-xs md:text-sm mt-1">
+                      <CardTitle className="text-xl md:text-2xl font-semibold leading-tight">{item.label}</CardTitle>
+                      <CardDescription className="text-xs md:text-sm mt-[3px] sm:mt-1">
                         {item.description}
                       </CardDescription>
                     </div>
@@ -98,7 +96,6 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Mobile Pagination Controls */}
         {isMobile && allMenuItems.length > itemsPerPageMobile && (
           <div className="flex items-center justify-center gap-4 mt-4">
             <Button
@@ -131,7 +128,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Scrolling Announcement Bar */}
       <div className="absolute bottom-1 left-0 right-0 overflow-hidden bg-primary/5 border-y border-primary/10 py-2">
         <div className="whitespace-nowrap animate-marquee inline-block text-sm font-medium text-primary">
           আসসালামু আলাইকুম। তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের একটি আধুনিক ও সমন্বিত ডেটা সিস্টেমে স্বাগতম। যেকোনো প্রয়োজনে আমাদের অফিসিয়াল প্ল্যাটফর্মগুলোতে যোগাযোগ করুন। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করবো। &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
@@ -139,7 +135,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Floating ChatBot */}
       <ChatBot />
     </div>
   );
