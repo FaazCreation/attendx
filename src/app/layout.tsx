@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
      <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>DocX | Data Simplified</title>
         <meta name="description" content="তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব ডেটা সিস্টেম" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,7 +35,13 @@ export default function RootLayout({
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/logo.svg" />
         <link rel="manifest" href="/manifest.webmanifest" />
+        
+        {/* PWA / Splash Screen Handling */}
         <meta name="theme-color" content="#15803d" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="DocX" />
       </head>
       <body className={`font-sans antialiased ${poppins.variable}`}>
         <FirebaseClientProvider>

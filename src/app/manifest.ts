@@ -5,11 +5,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'DocX | Tejgaon College Photography Club',
     short_name: 'DocX',
-    description: 'তেজগাঁও কলেজ ফটোগ্রাফি ক্লাব ডেটা সিস্টেম',
+    description: 'তেজগাঁও কলেজ ফটোগ্রাফি ক্লাবের একটি আধুনিক ও সমন্বিত ডেটা সিস্টেম',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f5f5f5',
-    theme_color: '#15803d',
+    background_color: '#F5F5F5', // Matches the CSS background variable
+    theme_color: '#15803d',      // Matches the primary green color
     icons: [
       {
         src: '/logo.svg',
